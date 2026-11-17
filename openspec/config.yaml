@@ -1,0 +1,39 @@
+schema: spec-driven
+
+context: |
+  Producto OdontoAgenda (repo turnotardeutn). Escribí todos los artefactos en español rioplatense (voseo).
+  Antes de proponer, leé AGENTS.md (reglas duras), CHANGES.md (scope y "Leer antes" del change) y knowledge-base/.
+  Demo funcional en localhost el 2026-11-25; la mantenibilidad manda sobre el alcance: se recortan historias S/C, nunca tests.
+  Entorno: Windows, Java 25, Node 24, PostgreSQL 18 local (servicio postgresql-x64-18, psql fuera del PATH), sin Docker.
+  Changes [UI]: política system-and-mockups; registrar "## UI Mockups" en design.md y crear el mockup en mockups/ antes del apply.
+
+# Project context (optional)
+# Add only constraints that should guide OpenSpec artifacts and workflows.
+# Include constraints an agent cannot infer by reading the code.
+# Keep general project documentation and discoverable codebase facts out.
+# Example:
+#   context: |
+#     Designs and tasks must cover Windows, macOS, and Linux
+#     Write all artifacts in Spanish
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always state what is out of scope
+#     tasks:
+#       - Break tasks into chunks of max 2 hours
+
+# Per-operation guidance (optional)
+# Add advisory guidance for how apply and archive work should be conducted.
+# This is separate from artifact rules above.
+# Example:
+#   operations:
+#     apply:
+#       guidance:
+#         - Keep test summaries concise
+#     archive:
+#       guidance:
+#         - Summarize the archive outcome before finishing

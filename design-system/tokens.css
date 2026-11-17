@@ -1,0 +1,110 @@
+/* turnotardeutn — design tokens (Revision 1)
+   Tono: clínico y calmo. Sin fuentes remotas: se usa la pila de fuentes del sistema.
+   Cambiar un valor acá actualiza todas las pantallas y mockups que importan este archivo. */
+
+:root {
+  /* Color — marca */
+  --color-primary-50:  #effaf8;
+  --color-primary-100: #d4f1ec;
+  --color-primary-200: #a8e2d9;
+  --color-primary-500: #14897c;
+  --color-primary-600: #0f766e;  /* acción principal — 5.5:1 sobre blanco */
+  --color-primary-700: #0b5d57;  /* hover / pressed */
+
+  /* Color — neutros (gris levemente frío) */
+  --color-bg:          #f6f8f9;
+  --color-surface:     #ffffff;
+  --color-surface-alt: #eef2f4;
+  --color-border:      #d9e1e5;
+  --color-border-strong:#b7c3c9;
+  --color-text:        #17262c;  /* 15:1 */
+  --color-text-muted:  #52656d;  /* 6.1:1 */
+  --color-text-subtle: #6b7d85;  /* 4.6:1, solo texto secundario */
+  --color-text-inverse:#ffffff;
+
+  /* Color — estados */
+  --color-success-50:  #ecf8f0;
+  --color-success-600: #1f7a45;
+  --color-warning-50:  #fdf6e7;
+  --color-warning-600: #8a5a00;
+  --color-danger-50:   #fdeeee;
+  --color-danger-600:  #b42323;
+  --color-danger-700:  #8f1c1c;
+  --color-info-50:     #ebf3fb;
+  --color-info-600:    #1d5fa3;
+
+  /* Color — estados de turno (agenda) */
+  --turno-reservado-bg:  var(--color-primary-50);
+  --turno-reservado-bar: var(--color-primary-600);
+  --turno-atendido-bg:   var(--color-success-50);
+  --turno-atendido-bar:  var(--color-success-600);
+  --turno-ausente-bg:    var(--color-warning-50);
+  --turno-ausente-bar:   var(--color-warning-600);
+  --turno-cancelado-bg:  var(--color-surface-alt);
+  --turno-cancelado-bar: var(--color-border-strong);
+  --bloqueo-bg: repeating-linear-gradient(135deg, #eef2f4 0 8px, #e3e9ec 8px 16px);
+
+  /* Tipografía */
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --text-xs:   0.75rem;   /* 12 */
+  --text-sm:   0.875rem;  /* 14 */
+  --text-base: 1rem;      /* 16 — mínimo para inputs (evita zoom en iOS) */
+  --text-lg:   1.125rem;  /* 18 */
+  --text-xl:   1.375rem;  /* 22 */
+  --text-2xl:  1.75rem;   /* 28 */
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* Espaciado (base 4px) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+
+  /* Radios */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-pill: 999px;
+
+  /* Sombras (suaves, clínicas) */
+  --shadow-sm: 0 1px 2px rgba(23, 38, 44, 0.06);
+  --shadow-md: 0 2px 8px rgba(23, 38, 44, 0.08), 0 1px 2px rgba(23, 38, 44, 0.04);
+  --shadow-lg: 0 12px 32px rgba(23, 38, 44, 0.14);
+
+  /* Foco — visible siempre al navegar con teclado */
+  --focus-ring: 0 0 0 3px #ffffff, 0 0 0 5px var(--color-primary-600);
+
+  /* Tamaños */
+  --control-height: 44px;   /* objetivo táctil mínimo */
+  --container-max: 1200px;
+  --container-narrow: 560px;
+
+  /* Movimiento */
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-base: 0ms;
+  }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

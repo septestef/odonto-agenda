@@ -1,0 +1,32 @@
+# Secretos
+.env
+!.env.example
+
+# Backend
+backend/build/
+backend/.gradle/
+backend/src/main/resources/static/
+backend/bin/
+backend/out/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/coverage/
+
+# IDE
+.idea/
+*.iml
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# Logs y sistema
+*.log
+logs/
+.DS_Store
+Thumbs.db
+
+# Herramientas locales (no se versionan)
+.atl/
+.playwright-mcp/
