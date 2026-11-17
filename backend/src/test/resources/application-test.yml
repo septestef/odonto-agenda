@@ -1,0 +1,7 @@
+# Perfil de los tests de integración: PostgreSQL local, base turnotarde_test (nunca H2).
+# La contraseña sale de TEST_DB_PASSWORD o, si no está, de DB_PASSWORD (variable de entorno o .env).
+spring:
+  datasource:
+    url: ${TEST_DB_URL:jdbc:postgresql://localhost:5432/turnotarde_test}
+    username: ${TEST_DB_USER:${DB_USER:turnotarde}}
+    password: ${TEST_DB_PASSWORD:${DB_PASSWORD:}}

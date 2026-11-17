@@ -1,0 +1,35 @@
+spring:
+  application:
+    name: turnotarde
+  config:
+    # El .env (secretos locales, fuera de git) se busca en el directorio actual y en el padre,
+    # para cubrir correr desde backend/ (Gradle) o desde la raíz. Las variables de entorno reales tienen precedencia.
+    import: "optional:file:.env[.properties],optional:file:../.env[.properties]"
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/turnotarde}
+    username: ${DB_USER:turnotarde}
+    password: ${DB_PASSWORD}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  web:
+    resources:
+      add-mappings: false
+  mvc:
+    problemdetails:
+      enabled: false
+
+app:
+  timezone: ${APP_TIMEZONE:America/Argentina/Buenos_Aires}
+  base-url: ${APP_BASE_URL:http://localhost:8080}
+  reserva-max-dias: ${APP_RESERVA_MAX_DIAS:60}
+  frontend:
+    ubicacion: classpath:/static/

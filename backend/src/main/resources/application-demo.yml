@@ -1,0 +1,7 @@
+# Perfil de demostración. Por ahora solo ajusta el logging;
+# C-02 agrega acá el seed de datos de demo (la contraseña viene de DEMO_PASSWORD).
+logging:
+  pattern:
+    console: "%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n"
+  level:
+    ar.turnotarde: INFO
