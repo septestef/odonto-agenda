@@ -1,5 +1,11 @@
-# Perfil de demostración. Por ahora solo ajusta el logging;
-# C-02 agrega acá el seed de datos de demo (la contraseña viene de DEMO_PASSWORD).
+# Perfil de demostración: agrega el seed de datos de demo (db/demo, versiones 900+) y exige DEMO_PASSWORD.
+# La contraseña NUNCA se versiona: sale de la variable de entorno o del .env.
+spring:
+  flyway:
+    locations: classpath:db/migration,classpath:db/demo
+app:
+  demo:
+    password: ${DEMO_PASSWORD:}
 logging:
   pattern:
     console: "%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n"
