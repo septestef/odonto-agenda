@@ -11,10 +11,10 @@ Estado que deja C-02 (archivado el 2026-11-21, ver su `design.md`):
 | Stack | Spring Boot 4.1.2, Java 25, Gradle 9.9.1. Hibernate 7 (`ddl-auto=validate`), Flyway 12, **Jackson 3** (`tools.jackson.databind.ObjectMapper`; las anotaciones siguen en `com.fasterxml.jackson.annotation`). |
 | Seguridad | Solo `org.springframework.security:spring-security-crypto` (7.1.2): hay `BCryptPasswordEncoder` pero **no** hay `SecurityFilterChain`, ni starter, ni ningún filtro. Todo `/api/**` es hoy público. |
 | `odontologo` | `UNIQUE(email)` **sensible a mayúsculas**, `password_hash varchar(100) NOT NULL` con BCrypt "pelado" sin prefijo `{bcrypt}` (contrato D6 de C-02), `activo boolean NOT NULL DEFAULT true`, `slug UNIQUE`. |
-| Repositorio | `OdontologoRepository` solo tiene `findBySlug`. |
+| Repositorio | `OdontologoRepository` tiene `findBySlug` y `findBySlugAndActivoTrue` (agregado por C-07, ya mergeado). |
 | Errores | `shared/error/ManejadorErrores` (`@RestControllerAdvice`) traduce excepciones de MVC a `ErrorApi {codigo, mensaje, detalles?}`; `CodigosError` tiene los códigos técnicos. Los filtros de seguridad **no** pasan por el advice. |
 | Tiempo | Bean `Clock` UTC en `shared/tiempo`; `SinHoraDelSistemaTest` (ArchUnit) rompe la build si el código llama a `now()` sin reloj. |
-| Tests | `*Test` unitarios sin base; `*IT` contra `turnotarde_test` (nunca H2) con `soporte.IntegracionTest`, `LimpiezaBase`, `FixturesJdbc` y `RelojDePrueba`. `EntregaSpaIT` usa `@AutoConfigureMockMvc` con filtros activos. |
+| Tests | `*Test` unitarios sin base; `*IT` contra `turnotarde_test` (nunca H2) con `soporte.IntegracionTest`, `LimpiezaBase`, `FixturesJdbc` y `RelojDePrueba`. `EntregaSpaIT` usa `@AutoConfigureMockMvc` con filtros activos. C-07 ya dejó ITs que piden `/api/public/**` sin sesión ni CSRF (`ReservaOnlineIT`, `DisponibilidadPublicaIT`, `PerfilPublicoIT`, `ReservasConcurrentesApiIT`) y casos nuevos en `ManejadorErroresTest`: no se pisan. |
 | Demo | `ContrasenaDemoInicializador` (`@Profile("demo")`) guarda el hash de `DEMO_PASSWORD` con una instancia propia de `BCryptPasswordEncoder`. |
 
 Governance **CRITICO**: este documento se revisa y se aprueba antes del apply. Alcance acotado a CHANGES §C-03.
@@ -54,7 +54,7 @@ Governance **CRITICO**: este documento se revisa y se aprueba antes del apply. A
 | `GET /api/auth/me` | sí | no aplica | — | 200 `OdontologoDto`; 401 `NO_AUTENTICADO` |
 
 - **DTOs** (`record` + Bean Validation, en `auth/dto`):
-  - `PeticionLogin(@NotBlank @Email @Size(max = 255) String email, @NotBlank @Size(min = 1, max = 72) String password)`. El máximo de 72 es el límite de BCrypt: más allá de eso la contraseña se trunca o se rechaza, así que el contrato lo hace explícito.
+  - `PeticionLogin(@NotBlank @Email @Size(max = 255) String email, @NotBlank @Size(min = 1, max = 72) @MaximoBytesUtf8(72) String password)`. El límite de BCrypt es de **72 bytes UTF-8, no de 72 caracteres**: una contraseña de 72 caracteres con `ñ` o tildes ocupa 73 o más bytes, `BCryptPasswordEncoder` lanza `IllegalArgumentException` y el login terminaría en 500. `@Size(max = 72)` acota caracteres y `@MaximoBytesUtf8(72)` valida `password.getBytes(StandardCharsets.UTF_8).length <= 72`. Si se supera, Bean Validation responde 400 `VALIDACION` con `detalles[].campo = "password"`, sin evaluar credenciales ni consumir intentos del bloqueo (D12).
   - `OdontologoDto(Long id, String nombre, String apellido, String email, String slug)`. Sin `passwordHash`, `telefono` ni `direccionConsultorio`: lo mínimo que necesita C-04 para el guard y el encabezado. Es aditivo si un change posterior necesita más.
   - `DetalleBloqueo(long reintentarEnSegundos, Instant bloqueadoHasta)` para `detalles` del 429.
 - **Login responde el mismo DTO que `/me`**: evita un round trip y le da al frontend el nombre para pintar el encabezado de inmediato. `/me` sigue siendo la fuente de verdad al recargar (Flujo 1), así que no hay dos contratos.
@@ -78,7 +78,7 @@ Governance **CRITICO**: este documento se revisa y se aprueba antes del apply. A
   El contenedor renueva el vencimiento en cada pedido: es expiración por inactividad, no absoluta. `Secure` queda en `false` para la demo en `http://localhost`; C-20 lo activa en producción (deuda anotada).
 - **Creación de la sesión en el controlador**: como el login no pasa por un filtro de autenticación de Spring, el servicio hace explícito lo que haría el filtro:
   1. `sessionAuthenticationStrategy.onAuthentication(auth, request, response)` con un bean `SessionAuthenticationStrategy` = `ChangeSessionIdAuthenticationStrategy` (protección contra fijación de sesión).
-  2. `SecurityContextHolder.getContext().setAuthentication(auth)` y `securityContextRepository.saveContext(context, request, response)` con un `HttpSessionSecurityContextRepository`.
+  2. Crear un contexto **nuevo** con `SecurityContextHolder.createEmptyContext()`, hacer `contexto.setAuthentication(auth)` y `SecurityContextHolder.setContext(contexto)`; recién después `securityContextRepository.saveContext(contexto, request, response)` con un `HttpSessionSecurityContextRepository`. **No se reutiliza `SecurityContextHolder.getContext()`**: el login es el único punto donde se pasa de anónimo a autenticado y arrancar de un contexto vacío evita arrastrar autenticaciones o atributos de una sesión previa (contexto de seguridad limpio).
   Sin el paso 2 el pedido siguiente no ve la sesión, porque `SecurityContextHolderFilter` no guarda el contexto automáticamente.
 - **Por qué no un `AbstractAuthenticationProcessingFilter` propio**: habría que resolver Bean Validation, el 429 con tiempo restante y el contador con `Clock` dentro de un filtro, donde no hay advice ni binding de DTOs; y el filtro tampoco puede responder 429 sin abandonar el flujo de autenticación. Se reutiliza lo valioso del framework (`AuthenticationManager`, `SessionAuthenticationStrategy`, `SecurityContextRepository`) y se deja la traducción HTTP en el controlador, como pide la arquitectura del proyecto.
 - **Non-goal explícito**: `maximumSessions`, `rememberMe` y sesión distribuida.
@@ -153,6 +153,7 @@ Governance **CRITICO**: este documento se revisa y se aprueba antes del apply. A
 | `auth` | `ControlIntentosLogin` | Contador en memoria con `Clock` (D7). |
 | `auth` | `OdontologoServicioDetalles` | `UserDetailsService`: busca por email (insensible a mayúsculas) y arma `OdontologoAutenticado`. |
 | `auth/dto` | `PeticionLogin`, `OdontologoDto`, `DetalleBloqueo` | Contrato de la API. |
+| `auth/dto` | `MaximoBytesUtf8`, `MaximoBytesUtf8Validator` | Restricción de Bean Validation que mide bytes UTF-8 del password (D2). |
 | `shared/seguridad` | `OdontologoAutenticado`, `OdontologoActual`, `AislamientoOdontologo` | Contrato de aislamiento (D9). |
 | `shared/seguridad` | `ErrorApiAuthenticationEntryPoint`, `ErrorApiAccessDeniedHandler`, `EscritorErrorJson` | 401/403 uniformes (D6). |
 
@@ -169,13 +170,14 @@ Governance **CRITICO**: este documento se revisa y se aprueba antes del apply. A
 | `AislamientoOdontologoTest` | `Optional.empty()` → 404 `NO_ENCONTRADO`; presente → el recurso. |
 | `EscritorErrorJsonTest` | 401 y 403 con `Content-Type` JSON, cuerpo `{codigo, mensaje}`, sin `detalles` vacío y sin HTML. |
 | `CodificacionContrasenaTest` | El bean es BCrypt con prefijo `$2` y **sin** `{bcrypt}`; un hash generado verifica la contraseña original. |
+| `MaximoBytesUtf8Test` | 72 bytes ASCII pasan; 72 caracteres con una `ñ` (73 bytes) y 73 ASCII se rechazan; `null` y vacío pasan (los cubre `@NotBlank`). |
 | `SesionPropiedadesTest` | La configuración efectiva de `application.yml` da 8 h de expiración, `tracking-modes: cookie`, cookie `HttpOnly` y `SameSite=Lax`. |
 
 **Integración (`./gradlew integrationTest -PskipFrontend`, PostgreSQL `turnotarde_test`, MockMvc con filtros activos):**
 
 | Clase | Cubre |
 |---|---|
-| `LoginIT` | Login válido (200 + cookie + `/me` con la misma sesión); email inexistente, contraseña incorrecta y cuenta inactiva con el **mismo** cuerpo 401; email con mayúsculas y espacios funciona; 400 por email mal formado y por contraseña vacía; la respuesta no trae el hash; un hash `!PENDIENTE…` no autentica. |
+| `LoginIT` | Login válido (200 + cookie + `/me` con la misma sesión); email inexistente, contraseña incorrecta y cuenta inactiva con el **mismo** cuerpo 401; email con mayúsculas y espacios funciona; 400 por email mal formado y por contraseña vacía; contraseña de **72 caracteres con una `ñ`** (73 bytes UTF-8) → 400 `VALIDACION` con `campo` `password` y sin consumir intentos; la respuesta no trae el hash; un hash `!PENDIENTE…` no autentica. |
 | `BloqueoLoginIT` | Los escenarios de `RN-AU-03` con `RelojDePrueba`: 4.º 401, 5.º 429 con `reintentarEnSegundos` ≈ 900, credenciales correctas bloqueadas, fin del bloqueo a los 15 min, éxito que reinicia el contador, emails independientes, email inexistente también bloqueado. |
 | `SesionIT` | `/me` sin sesión → 401 `NO_AUTENTICADO`; logout 204 y después `/me` 401; logout sin sesión → 401; el identificador de sesión cambia después del login; `/me` con la cuenta desactivada → 401. |
 | `CsrfIT` | Logout sin `X-XSRF-TOKEN` → 403 `ACCESO_DENEGADO` y la sesión sigue viva; con el token de la cookie → 204; login sin token → 200; `POST` a un controlador de prueba bajo `/api/public/**` sin token → no es 403; `GET` sin token → no es 403. |
@@ -183,6 +185,8 @@ Governance **CRITICO**: este documento se revisa y se aprueba antes del apply. A
 | `AislamientoOdontologoIT` | El odontólogo A pide un recurso de B → 404 con el mismo cuerpo que un id inexistente; su propio recurso → 200; un `odontologoId` en la query no cambia el dueño. |
 | `EmailUnicoIT` | Insertar `Demo@Example.com` cuando existe `demo@example.com` viola `odontologo_email_sin_mayusculas_uq`. |
 | `SesionCookieIT` | Con Tomcat real (`webEnvironment = RANDOM_PORT`): `Set-Cookie` del login con `JSESSIONID`, `HttpOnly` y `SameSite=Lax`; `XSRF-TOKEN` presente y **sin** `HttpOnly`; la fábrica de servlet reporta 8 h de expiración. |
+
+**Regresión C-07 (no negociable)**: `ReservaOnlineIT`, `DisponibilidadPublicaIT`, `PerfilPublicoIT` y `ReservasConcurrentesApiIT` piden `/api/public/**` sin sesión ni `X-XSRF-TOKEN`. La `SecurityFilterChain` nueva los deja pasar en D5; la verificación final corre esos ITs sin modificarlos y deben quedar en verde. Tampoco se pisan `OdontologoRepository.findBySlugAndActivoTrue` (C-07) ni los casos de `ManejadorErroresTest` que C-07 sumó (`solapamiento` e `integridad`).
 
 **Soporte nuevo en `src/test`**: overload de `FixturesJdbc.odontologo(...)` con `password_hash` y `activo`; `soporte/AutenticacionDePrueba` (crea odontólogos con BCrypt de fuerza 4 y devuelve sesión + token CSRF ya listos para MockMvc, para reutilizar en C-05/C-12); `ConfiguracionRelojDePrueba` se reutiliza para el bloqueo. Los controladores de prueba viven en `ar.turnotarde.soporte.prueba` y se importan con `@Import`, nunca por component scan.
 
@@ -198,9 +202,9 @@ Governance **CRITICO**: este documento se revisa y se aprueba antes del apply. A
 | `backend/build.gradle.kts` | `spring-security-crypto` → `spring-boot-starter-security` | C-03 es dueño. |
 | `backend/src/main/resources/application.yml` | bloque `server.servlet.session` | — |
 | `shared/error/CodigosError.java` | `NO_AUTENTICADO`, `ACCESO_DENEGADO` | — |
-| `odontologo/OdontologoRepository.java` | `findByEmailIgnoreCase` | C-05/C-12 agregan las suyas. |
+| `odontologo/OdontologoRepository.java` | `findByEmailIgnoreCase`, conservando `findBySlug` y `findBySlugAndActivoTrue` de C-07 | C-05/C-12 agregan las suyas. |
 | `odontologo/demo/ContrasenaDemoInicializador.java` | inyecta el bean `PasswordEncoder` | Cierra el pendiente D6 de C-02. |
-| `shared/error/ManejadorErroresTest`, `shared/web/EntregaSpaIT` | ver D12 | — |
+| `shared/error/ManejadorErroresTest`, `shared/web/EntregaSpaIT` | ver D12; se conservan los casos que C-07 agregó al primero | — |
 | `README.md` | códigos `NO_AUTENTICADO`/`ACCESO_DENEGADO`, endpoints de sesión, límites del contador en memoria | — |
 
 **Contratos que quedan para otros changes**: C-04 consume `POST /api/auth/login` sin CSRF, `GET /api/auth/me` como guard y `X-XSRF-TOKEN` desde la cookie; C-05/C-12/C-17 usan `OdontologoActual.id()` + `AislamientoOdontologo.exigir(...)` y no aceptan ids de odontólogo del request.
@@ -227,6 +231,7 @@ Governance **CRITICO**: este documento se revisa y se aprueba antes del apply. A
 - **R9** [Jackson 3: el `ObjectMapper` de Boot es `tools.jackson.databind.ObjectMapper`] → se inyecta ese tipo en `EscritorErrorJson`; `EscritorErrorJsonTest` lo detecta en la primera corrida.
 - **R10** [Eximir `/api/public/**` de CSRF deja la reserva pública sin esa protección] → ya está decidido en la KB (03 §Rutas públicas); no hay sesión que secuestrar y RN-PA-03/RN-TU-03 acotan el abuso.
 - **R11** [El 5.º intento devuelve 429 y no 401] → decisión de D7, registrada en la spec; C-04 tiene que renderizar el aviso de bloqueo en ese mismo intento.
+- **R12** [Bloqueo por email = negación de servicio dirigida] → como el contador de D7 se indexa por email, cualquiera que conozca la dirección de un odontólogo (por ejemplo `demo@example.com`, publicada en la demo) puede enviar 5 contraseñas incorrectas y dejarlo **15 minutos afuera**, aunque después use la contraseña correcta. Es el precio de no revelar qué cuentas existen (D8) y de no contar con rate limiting por IP en la v0.1. **Aceptado para la demo** (una sola instancia, un solo odontólogo, el contador se pierde al reiniciar); antes de producción C-20 debe combinarlo con límite por IP y/o backoff progresivo.
 
 ## Migration Plan
 
@@ -241,3 +246,11 @@ Governance **CRITICO**: este documento se revisa y se aprueba antes del apply. A
 - ¿`/me` tiene que devolver `telefono` y `direccionConsultorio`? C-14 los necesita para el mensaje de WhatsApp y C-06 para la configuración. Es aditivo y no cambia ninguna spec: se resuelve en el change que los consuma.
 - ¿C-04 muestra el tiempo restante del bloqueo con cuenta regresiva o solo el aviso? El contrato ya expone `reintentarEnSegundos` y `bloqueadoHasta`; la decisión es de UI.
 - ¿Hace falta `maximumSessions(1)` (una sola sesión por odontólogo)? Queda para después de la demo; no afecta las specs de C-03.
+
+## Desvíos del apply
+
+- **D10 se adelantó**: `findByEmailIgnoreCase` se agregó en la tarea 4.2 (lo necesitaba `OdontologoServicioDetalles`) y no en la 5.2. El índice `V3` y su IT se hicieron igual en el grupo 5.
+- **MockMvc no emite `Set-Cookie`**: `LoginIT` comprueba la sesión en el request, no la cookie `JSESSIONID`. Las cookies reales (`HttpOnly`, `SameSite=Lax`, `XSRF-TOKEN`) se verifican con Tomcat en `SesionCookieIT` (`RANDOM_PORT`). Para que la rotación de id sea observable en MockMvc, `SesionIT` marca la sesión entrante como válida (`setRequestedSessionId`/`setRequestedSessionIdValid`); en Tomcat lo hace el contenedor.
+- **`DetalleBloqueo` lleva `bloqueadoHasta`**: la spec solo pedía el tiempo restante; se agregó el instante para que C-04 pueda mostrar la cuenta regresiva sin calcularla en el cliente. Es aditivo y no cambia el contrato de error.
+- **Tuning del perfil de test**: `application-test.yml` limita el pool de Hikari a 4 conexiones con `minimum-idle: 0`. Sin eso, los ~26 contextos de `@SpringBootTest` en caché agotaban `max_connections` de PostgreSQL en la corrida completa; no afecta producción ni el test de concurrencia (usa 2 hilos).
+- **`CodificacionContrasenaTest`**: se agregó como verificación explícita del prefijo `$2` sin `{bcrypt}`, además de lo que ya cubrían `DatosDemoIT` y `ContrasenaDemoInicializadorTest`.

@@ -9,4 +9,7 @@ public interface OdontologoRepository extends JpaRepository<Odontologo, Long> {
 
     /** Resolución pública por slug: un odontólogo inactivo es indistinguible de uno inexistente. */
     Optional<Odontologo> findBySlugAndActivoTrue(String slug);
+
+    /** Login: la identidad no depende de las mayúsculas del email (D10). */
+    Optional<Odontologo> findByEmailIgnoreCase(String email);
 }

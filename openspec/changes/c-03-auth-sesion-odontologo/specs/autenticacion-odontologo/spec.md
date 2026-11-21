@@ -60,7 +60,7 @@ El sistema MUST validar la contraseña contra el hash BCrypt guardado, sin prefi
 
 ### Requirement: Validación de entrada del login
 
-Un login con email mal formado, email vacío o contraseña vacía MUST responder 400 con `codigo` `VALIDACION` y `detalles` con el campo y el mensaje del error, sin evaluar credenciales ni consumir intentos del bloqueo.
+Un login con email mal formado, email vacío, contraseña vacía o contraseña que supere los **72 bytes UTF-8** MUST responder 400 con `codigo` `VALIDACION` y `detalles` con el campo y el mensaje del error, sin evaluar credenciales ni consumir intentos del bloqueo. El límite es de bytes y no de caracteres: una contraseña de 72 caracteres con `ñ` o tildes ocupa más de 72 bytes y MUST rechazarse antes de llegar a BCrypt, que no admite entradas mayores a 72 bytes.
 
 #### Scenario: Email mal formado
 
@@ -71,6 +71,16 @@ Un login con email mal formado, email vacío o contraseña vacía MUST responder
 
 - **WHEN** se envía `{email: "demo@example.com", password: ""}`
 - **THEN** la respuesta es 400 con `codigo` `VALIDACION` y un detalle con `campo` `password`
+
+#### Scenario: Contraseña de 72 caracteres con ñ
+
+- **WHEN** se envía una contraseña de 72 caracteres que incluye una `ñ` y por lo tanto ocupa 73 bytes en UTF-8
+- **THEN** la respuesta es 400 con `codigo` `VALIDACION` y un detalle con `campo` `password`, sin evaluar credenciales ni consumir intentos del bloqueo
+
+#### Scenario: Contraseña de 72 bytes exactos
+
+- **WHEN** se envía una contraseña de 72 bytes UTF-8 exactos (por ejemplo 72 caracteres ASCII)
+- **THEN** la validación la acepta y el login evalúa las credenciales normalmente
 
 ### Requirement: Bloqueo del login tras intentos fallidos
 

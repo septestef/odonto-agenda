@@ -94,10 +94,35 @@ Todo error bajo `/api/**` es JSON con la forma `{ "codigo", "mensaje", "detalles
 |---|---|---|
 | `VALIDACION` | 400 | Campos inválidos; `detalles` lista `{ campo, mensaje }` |
 | `SOLICITUD_INVALIDA` | 400 / 415 | Cuerpo ilegible, parámetro faltante o de tipo incorrecto, formato no soportado |
+| `NO_AUTENTICADO` | 401 | Sin sesión de odontólogo (o sesión expirada); también en `/api/**` inexistente para un anónimo |
+| `ACCESO_DENEGADO` | 403 | Falta el token CSRF en una escritura protegida, o el rol no alcanza |
 | `NO_ENCONTRADO` | 404 | Ruta o recurso inexistente |
 | `METODO_NO_PERMITIDO` | 405 | Método HTTP no soportado en la ruta |
 | `ERROR_INTERNO` | 500 | Error inesperado; mensaje genérico, el detalle queda solo en el log |
 | `ERROR_DESCONOCIDO` | — | Solo en el frontend: cuerpo de error que no cumple el formato |
+
+Los rechazos 401/403 los escribe la cadena de filtros de Spring Security con este mismo formato (no pasan por el `@RestControllerAdvice`). No hay redirects ni formularios de login.
+
+## Sesión y autenticación
+
+El odontólogo inicia sesión con `POST /api/auth/login` (`{ "email", "password" }`); la respuesta es el DTO del odontólogo (`id`, `nombre`, `apellido`, `email`, `slug`) y deja una cookie de sesión `JSESSIONID`:
+
+| Propiedad | Valor |
+|---|---|
+| Tipo | Sesión HTTP de servidor (sin JWT) |
+| Caducidad | 8 horas de **inactividad** (se renueva en cada pedido) |
+| Cookie | `JSESSIONID`, `HttpOnly`, `SameSite=Lax`, solo por cookie (nunca en la URL) |
+| Rotación | El id de sesión cambia al autenticar (protección contra fijación) |
+
+Los tres endpoints de sesión son `POST /api/auth/login` (público, sin CSRF), `POST /api/auth/logout` (204, exige sesión y CSRF) y `GET /api/auth/me` (devuelve el DTO, exige sesión). Todo `/api/**` salvo `/api/public/**` y el login exige la sesión; las rutas públicas de reserva no la necesitan.
+
+**CSRF**: la respuesta de un `GET` protegido incluye la cookie `XSRF-TOKEN` (legible por JavaScript, sin `HttpOnly`). El frontend reenvía ese valor en la cabecera `X-XSRF-TOKEN` en cada `POST`/`PUT`/`PATCH`/`DELETE` protegido. La cookie de sesión, que sí es la credencial, sigue siendo `HttpOnly`.
+
+El email se compara sin distinguir mayúsculas y se ignoran los espacios sobrantes. La contraseña se valida hasta **72 bytes UTF-8** (límite real de BCrypt): 72 caracteres con una `ñ` son 73 bytes y dan 400 `VALIDACION` con `campo = "password"`; esa validación no consume intentos del contador.
+
+El login se bloquea transitoriamente tras 5 intentos fallidos por email (429 `RN-AU-03`, con `reintentarEnSegundos` y `bloqueadoHasta` en `detalles`). Un login correcto reinicia el contador. El contador vive **en memoria, por nodo, y se pierde al reiniciar**: alcanza para la demo (una sola instancia), pero no es un rate limiting distribuido; C-20 lo resuelve.
+
+> **Riesgo R12 (aceptado para la demo)**: como el contador es por email y no distingue quién intenta entrar, 5 intentos fallidos contra `demo@example.com` dejan afuera 15 minutos también al odontólogo legítimo. En la demo basta esperar o reiniciar la app; no se mitigó porque no hay segundo factor ni rate limiting distribuido en el alcance actual.
 
 ## Tiempo
 

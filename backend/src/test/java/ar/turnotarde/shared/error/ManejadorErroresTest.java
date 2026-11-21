@@ -13,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
@@ -21,6 +22,8 @@ import org.springframework.test.web.servlet.ResultActions;
 
 @WebMvcTest(controllers = ControladorDePrueba.class)
 @Import(ManejadorErrores.class)
+// C-03: este test prueba el advice, no la seguridad; con el starter los filtros darían 401.
+@AutoConfigureMockMvc(addFilters = false)
 @ExtendWith(OutputCaptureExtension.class)
 class ManejadorErroresTest {
 

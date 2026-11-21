@@ -30,6 +30,17 @@ spring:
     problemdetails:
       enabled: false
 
+# C-03: sesión HTTP de servidor, sin JWT (DD-04) y con expiración por inactividad (RN-AU-04).
+server:
+  servlet:
+    session:
+      timeout: 8h
+      tracking-modes: cookie
+      cookie:
+        name: JSESSIONID
+        http-only: true
+        same-site: lax
+
 app:
   timezone: ${APP_TIMEZONE:America/Argentina/Buenos_Aires}
   base-url: ${APP_BASE_URL:http://localhost:8080}
