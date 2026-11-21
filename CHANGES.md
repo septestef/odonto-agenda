@@ -70,7 +70,7 @@ GATE 1: C-02 ✓ (cumplido 2026-11-21)    ← FORK
   → C-07 disponibilidad-y-reserva-api   [Agente B]
   → C-04 (continúa)                     [Agente C]
 
-GATE 2: C-03 ✓ y C-07 ✓                 ← FORK
+GATE 2: C-03 ✓ y C-07 ✓ (C-07 cumplido 2026-11-21) ← FORK
   → C-05 configuracion-agenda-api       [Agente A]
   → C-08 notificaciones-email           [Agente B]
   → C-10 reserva-publica-ui             [Agente C — si C-04 ✓]
@@ -247,7 +247,7 @@ Camino crítico post-demo: `C-16 → C-17 → C-18` (C-20 cierra el camino hacia
 > C-07 abre el fork principal. C-08 y C-10 corren en paralelo, luego C-09/C-12 y C-06 en paralelo.
 
 ### [C-07] `disponibilidad-y-reserva-api`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado (archivado 2026-11-21 como `2026-11-21-c-07-disponibilidad-y-reserva-api`; 131 tests unitarios y 166 de integración). Contratos JSON de los 3 endpoints, payload de eventos y tabla de errores en `openspec/changes/archive/2026-11-21-c-07-disponibilidad-y-reserva-api/design.md` (D3, D4, D9).
 - **Scope**:
   - `DisponibilidadService` como función pura con `Clock`: inicios cada 15 min por franja, turno completo dentro de la franja, `t >= ahora + 24h`, `t <= hoy + APP_RESERVA_MAX_DIAS` (60), sin cruce con bloqueos ni turnos (RN-AG-05, RN-TU-03, RN-TU-11).
   - `GET /api/public/{slug}` (perfil y prestaciones activas) y `GET /api/public/{slug}/disponibilidad?prestacionId=&fecha=`; las respuestas no exponen datos de otros pacientes (RN-SE-03).
@@ -266,6 +266,7 @@ Camino crítico post-demo: `C-16 → C-17 → C-18` (C-20 cierra el camino hacia
 ### [C-08] `notificaciones-email`
 - **Estado**: `[ ]` pendiente
 - **Scope**:
+  - Contrato heredado de C-07: `TurnoReservado(ResumenTurno, origen, token)` se publica dentro de la transacción; el token en claro viaja **solo en memoria** dentro del evento (su `toString` lo oculta). Consumir con `@TransactionalEventListener(AFTER_COMMIT)` y nunca loguear el token ni el link. `ReservaEventosIT` tiene un listener de ejemplo. Si el proceso cae entre el commit y el envío, el paciente no recibe el link (aceptado para la demo).
   - `NotificacionService` con listeners `@TransactionalEventListener(AFTER_COMMIT)` sobre `TurnoReservado`, `TurnoCancelado`, `TurnoReprogramado` (DD-09); emails vía Gmail SMTP (`MAIL_*`, DD-06) con `JavaMailSender`.
   - Plantillas HTML en `resources/templates/mail/`: confirmación (fecha, hora, prestación, dirección del consultorio, link `{APP_BASE_URL}/turno/{token}`), cancelación y reprogramación (RN-NO-01, RN-NO-02). El token en claro llega solo por email.
   - Registro en `notificacion` con estado `ENVIADO|ERROR` y mensaje de error; una falla del SMTP no revierte el turno (RN-NO-04).

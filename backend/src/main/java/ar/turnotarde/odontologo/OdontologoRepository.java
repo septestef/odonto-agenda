@@ -6,4 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface OdontologoRepository extends JpaRepository<Odontologo, Long> {
 
     Optional<Odontologo> findBySlug(String slug);
+
+    /** Resolución pública por slug: un odontólogo inactivo es indistinguible de uno inexistente. */
+    Optional<Odontologo> findBySlugAndActivoTrue(String slug);
 }

@@ -1,9 +1,11 @@
 package ar.turnotarde.shared.error;
 
+import ar.turnotarde.turno.ReglasTurno;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -91,6 +93,20 @@ public class ManejadorErrores {
     ResponseEntity<ErrorApi> metodoNoPermitido(HttpRequestMethodNotSupportedException e) {
         return responder(HttpStatus.METHOD_NOT_ALLOWED,
                 new ErrorApi(CodigosError.METODO_NO_PERMITIDO, "Esa operación no está permitida en este recurso."));
+    }
+
+    /**
+     * Red de seguridad (D8): una violación de {@code turno_sin_solapamiento} que se escape de la guardia es
+     * {@code RN-TU-01}; cualquier otro fallo de base es un error interno genérico. Los deadlocks de otras tablas
+     * no se traducen acá a propósito.
+     */
+    @ExceptionHandler(DataAccessException.class)
+    ResponseEntity<ErrorApi> errorDeBase(DataAccessException e) {
+        if (ConflictoTurnos.esSolapamiento(e)) {
+            ReglaNegocioException regla = ReglasTurno.horarioTomado();
+            return responder(regla.estado(), new ErrorApi(regla.codigo(), regla.getMessage()));
+        }
+        return inesperado(e);
     }
 
     @ExceptionHandler(Exception.class)

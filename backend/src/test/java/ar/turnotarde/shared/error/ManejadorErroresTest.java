@@ -114,4 +114,30 @@ class ManejadorErroresTest {
                 .doesNotContain("trace");
         assertThat(salida.getAll()).contains("secreto interno").contains("IllegalStateException");
     }
+
+    @Test
+    void violacionDeSolapamientoDeTurnosDevuelve409RnTu01SinFiltrarLaBase() throws Exception {
+        String cuerpo = esJson(mvc.perform(post("/api/prueba/solapamiento")))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.codigo").value("RN-TU-01"))
+                .andExpect(jsonPath("$.mensaje").value("Ese horario acaba de ser tomado, elegí otro"))
+                .andExpect(jsonPath("$.detalles").doesNotExist())
+                .andReturn().getResponse().getContentAsString();
+
+        assertThat(cuerpo)
+                .doesNotContain("turno_sin_solapamiento")
+                .doesNotContain("exclusion")
+                .doesNotContain("SELECT")
+                .doesNotContain("23P01");
+    }
+
+    @Test
+    void otraViolacionDeIntegridadDevuelve500ErrorInternoGenerico() throws Exception {
+        String cuerpo = esJson(mvc.perform(post("/api/prueba/integridad")))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.codigo").value("ERROR_INTERNO"))
+                .andReturn().getResponse().getContentAsString();
+
+        assertThat(cuerpo).doesNotContain("paciente_x").doesNotContain("duplicate").doesNotContain("RN-TU-01");
+    }
 }

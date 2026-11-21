@@ -46,4 +46,18 @@ class ControladorDePrueba {
     String explota() {
         throw new IllegalStateException("secreto interno: SELECT * FROM tabla_privada");
     }
+
+    @PostMapping("/api/prueba/solapamiento")
+    void solapamiento() {
+        throw new org.springframework.dao.DataIntegrityViolationException("could not execute statement [SELECT secreto]",
+                new java.sql.SQLException(
+                        "ERROR: conflicting key value violates exclusion constraint \"turno_sin_solapamiento\"",
+                        "23P01"));
+    }
+
+    @PostMapping("/api/prueba/integridad")
+    void integridad() {
+        throw new org.springframework.dao.DataIntegrityViolationException("could not execute statement [INSERT x]",
+                new java.sql.SQLException("duplicate key value violates unique constraint \"paciente_x\"", "23505"));
+    }
 }
