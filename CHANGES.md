@@ -65,7 +65,7 @@ GATE 0: C-01 ✓ (cumplido 2026-11-17)
   → C-02 schema-y-seed-base             [Agente A]
   → C-04 shell-frontend-y-login         [Agente C]
 
-GATE 1: C-02 ✓                          ← FORK
+GATE 1: C-02 ✓ (cumplido 2026-11-21)    ← FORK
   → C-03 auth-sesion-odontologo         [Agente A]
   → C-07 disponibilidad-y-reserva-api   [Agente B]
   → C-04 (continúa)                     [Agente C]
@@ -150,9 +150,9 @@ Camino crítico post-demo: `C-16 → C-17 → C-18` (C-20 cierra el camino hacia
   - `knowledge-base/05_reglas_de_negocio.md` §Excepciones globales
 
 ### [C-02] `schema-y-seed-base`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado (archivado 2026-11-21 como `2026-11-21-c-02-schema-y-seed-base`; 27 tests unitarios y 96 de integración)
 - **Scope**:
-  - Migración `V1`: extensión `btree_gist` y tablas `odontologo`, `horario_atencion`, `bloqueo`, `prestacion`, `paciente`, `turno`, `notificacion` con CHECKs, UNIQUEs e índices del modelo (convención: PK `bigint identity`, `timestamptz` en UTC, `creado_en`/`actualizado_en`).
+  - Migración `V2__esquema_base.sql` (convención de una versión por change, ver abajo): extensión `btree_gist` y tablas `odontologo`, `horario_atencion`, `bloqueo`, `prestacion`, `paciente`, `turno`, `notificacion` con CHECKs, UNIQUEs e índices del modelo (convención: PK `bigint identity`, `timestamptz` en UTC, `creado_en`/`actualizado_en`).
   - Constraint `turno_sin_solapamiento` (EXCLUDE USING gist, `tstzrange(inicio, fin, '[)')`, filtrando `RESERVADO|ATENDIDO|AUSENTE`) — pieza central (DD-03, RN-TU-01).
   - Entidades JPA/Hibernate y repositorios Spring Data de todas las tablas; mixin de auditoría `creado_en`/`actualizado_en`. Las entidades nunca salen por la API.
   - Migración `V900__seed_demo.sql` (perfil `demo`): odontólogo `demo` (slug `demo`, contraseña desde `DEMO_PASSWORD` con hash BCrypt generado al arranque, nunca hardcodeada), horario lun-vie 9-13 y 16-20, 4 prestaciones (30/45/60/45 min) y turnos de ejemplo la semana de la demo.
@@ -165,6 +165,8 @@ Camino crítico post-demo: `C-16 → C-17 → C-18` (C-20 cierra el camino hacia
   - `knowledge-base/09_decisiones_y_supuestos.md` §DD-01, §DD-03, §DD-07, §SU-05
 
 ---
+
+> **Convención de migraciones (vigente desde C-02, obligatoria para todo el equipo):** cada change usa su propio número de versión de Flyway: C-03 → `V3__`, C-05 → `V5__`, C-07 → `V7__`, etc. Si un change necesita varias, `V<NN>_<k>__` (ej. `V7_1__`, `V7_2__`). `spring.flyway.out-of-order: true` está activo, así que el orden de merge no importa. Las versiones 900+ son solo datos de demo (`classpath:db/demo`, perfil `demo`). Nunca se edita una migración ya mergeada: se agrega una nueva. Detalle en `README.md` §Migraciones.
 
 ## FASE 1 — Acceso del odontólogo y shell del frontend
 
@@ -249,7 +251,7 @@ Camino crítico post-demo: `C-16 → C-17 → C-18` (C-20 cierra el camino hacia
 - **Scope**:
   - `DisponibilidadService` como función pura con `Clock`: inicios cada 15 min por franja, turno completo dentro de la franja, `t >= ahora + 24h`, `t <= hoy + APP_RESERVA_MAX_DIAS` (60), sin cruce con bloqueos ni turnos (RN-AG-05, RN-TU-03, RN-TU-11).
   - `GET /api/public/{slug}` (perfil y prestaciones activas) y `GET /api/public/{slug}/disponibilidad?prestacionId=&fecha=`; las respuestas no exponen datos de otros pacientes (RN-SE-03).
-  - `POST /api/public/{slug}/turnos`: validación Bean Validation (RN-PA-04), upsert de paciente por (`odontologo_id`, `dni`) (RN-PA-02), límite de 2 turnos futuros (RN-PA-03), token de 32 bytes `SecureRandom` base64url con guardado solo del SHA-256 (RN-SE-02), `INSERT turno` `RESERVADO/ONLINE`; violación de la constraint → 409 con código `RN-TU-01` (RN-GL-01). El token en claro no viaja en la respuesta (201 sin token).
+  - `POST /api/public/{slug}/turnos`: validación Bean Validation (RN-PA-04), upsert de paciente por (`odontologo_id`, `dni`) (RN-PA-02), límite de 2 turnos futuros (RN-PA-03), token de 32 bytes `SecureRandom` base64url con guardado solo del SHA-256 (RN-SE-02), `INSERT turno` `RESERVADO/ONLINE`; violación de la constraint → 409 con código `RN-TU-01` (RN-GL-01). Contrato heredado de C-02: la violación llega como SQLState `23P01` con nombre `turno_sin_solapamiento`; además, mapear defensivamente `40P01` / `CannotAcquireLockException` también a 409 `RN-TU-01`. Migraciones propias de C-07: `V7__`. El token en claro no viaja en la respuesta (201 sin token).
   - Publicación de eventos de dominio `TurnoReservado`, `TurnoCancelado`, `TurnoReprogramado` (sin consumidores todavía).
   - Tests: unitarios de disponibilidad con bordes de franja, 24 h y 60 días con `Clock` fijo; **test de integración obligatorio con dos reservas concurrentes del mismo horario: exactamente una tiene éxito**; límite de 2 turnos; DNI repetido actualiza contacto; validaciones de formato.
 - **Dependencias**: `C-02`
@@ -285,6 +287,7 @@ Camino crítico post-demo: `C-16 → C-17 → C-18` (C-20 cierra el camino hacia
   - Cancelación en cualquier momento antes del inicio (RN-TU-05, IN-01); no se cancela ni reprograma un turno pasado → 409 `RN-TU-07`; token inexistente → 404.
   - Reprogramar en **una transacción**: cancela el original, inserta el nuevo con `reprogramado_desde_id` y token nuevo, cumple la regla de 24 h para el turno nuevo (RN-TU-06); si el insert viola la constraint, rollback completo y el original sigue `RESERVADO`.
   - Disparo de los eventos `TurnoCancelado` / `TurnoReprogramado` para los emails de C-08.
+  - Nota heredada de C-02: el trigger `turno_serializar_por_odontologo` también actúa en UPDATE (reactivar/mover); agregar un test de dos reprogramaciones simultáneas del mismo horario (hoy solo se prueba INSERT concurrente) y mapear `40P01` a 409 `RN-TU-01`.
   - Tests: cancelar libera el horario de inmediato, reprogramación atómica con conflicto concurrente, turno pasado, token inválido, regla de 24 h en el turno nuevo.
 - **Dependencias**: `C-07`, `C-08`
 - **Governance**: ALTO (el token es la única credencial del paciente)

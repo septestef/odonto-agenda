@@ -32,7 +32,7 @@ Al arrancar, la aplicación MUST aplicar las migraciones versionadas pendientes 
 
 #### Scenario: Base vacía
 - **WHEN** la aplicación arranca contra una base vacía
-- **THEN** registra el historial de migraciones y arranca sin crear tablas de negocio
+- **THEN** registra el historial de migraciones, crea las tablas de negocio a partir de las migraciones versionadas y arranca con el mapeo de entidades validado contra ellas
 
 #### Scenario: Mapeo que no coincide
 - **WHEN** una entidad mapeada no tiene su tabla en el esquema migrado

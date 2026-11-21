@@ -64,6 +64,28 @@ Desde `backend/`:
 
 Desde `frontend/`: `npm run lint` (ESLint, `no-explicit-any` en error), `npm test` (Vitest) y `npm run build` (`tsc --noEmit` + Vite).
 
+## Migraciones
+
+El esquema se gestiona con Flyway (`backend/src/main/resources/db/migration`). Con seis personas trabajando en paralelo rige esta convención:
+
+- **Un número por change**: cada change usa el suyo como versión (`V2__esquema_base.sql` para C-02, `V7__...` para C-07). Si necesita más de una migración, `V<NN>_1__`, `V<NN>_2__` (Flyway lee `V7_1` como 7.1). Flyway admite huecos: no existe `V1`.
+- **900+ solo para datos de demo**: viven en `db/demo` y solo se aplican con el perfil `demo` (`V900__seed_demo.sql`).
+- **`out-of-order` activado** (`spring.flyway.out-of-order: true` en `application.yml`): si tu base local ya aplicó `V7` y se integra un `V5`, Flyway lo aplica igual en vez de rechazarlo. Un futuro perfil de producción debe ponerlo en `false` y consolidar el esquema con un baseline.
+- **Nunca edites una migración ya mergeada**: se corrige con otra migración (Flyway rechaza el cambio de checksum).
+- **Columnas `NOT NULL` nuevas** en tablas que tienen datos de demo tienen que traer `DEFAULT` (o completar los datos), porque el seed `V900` puede haberse aplicado antes.
+- **Reiniciar una base local** (no hay `undo` en Flyway Community; no hay datos reales que preservar antes de la demo): como dueño de la base, `DROP SCHEMA public CASCADE; CREATE SCHEMA public;` y volver a arrancar.
+
+### Demo con datos de ejemplo
+
+Definí `DEMO_PASSWORD` en el `.env` (la contraseña del odontólogo `demo`; sin ella la app no arranca con ese perfil) y levantá con el perfil `demo`:
+
+```
+cd backend
+SPRING_PROFILES_ACTIVE=demo ./gradlew bootRun -PskipFrontend
+```
+
+Flyway aplica `V2` y `V900` (odontólogo `demo`, horario, prestaciones y turnos del 23 al 27/11/2026); al arrancar, la app guarda el hash BCrypt de `DEMO_PASSWORD`. La contraseña nunca se versiona.
+
 ## Formato de error de la API
 
 Todo error bajo `/api/**` es JSON con la forma `{ "codigo", "mensaje", "detalles"? }` (`detalles` solo aparece si aporta información). No se usa `application/problem+json`. Además de los códigos de reglas de negocio `RN-XX-NN` (ver `knowledge-base/05_reglas_de_negocio.md`), hay códigos técnicos:

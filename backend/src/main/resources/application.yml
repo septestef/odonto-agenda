@@ -20,6 +20,9 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
+    # Un número de versión por change y trabajo en paralelo: una migración con versión menor
+    # que la última aplicada igual se aplica (ver README, "Migraciones"). Desactivar en un perfil de producción.
+    out-of-order: true
   web:
     resources:
       add-mappings: false
