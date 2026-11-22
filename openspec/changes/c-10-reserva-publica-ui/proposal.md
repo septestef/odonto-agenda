@@ -7,7 +7,7 @@ La API de reserva pública de C-07 ya permite consultar disponibilidad y crear t
 ## What Changes
 
 - Nueva página pública `/reservar/{slug}` que carga el perfil del odontólogo, permite elegir prestación, fecha y horario libre, y completa los datos del paciente.
-- Flujo en una sola columna, pensado primero para celular de 360 px: prestación → día y horario → datos y confirmación → éxito.
+- Flujo en una sola columna, pensado primero para celular de 360 px: 4 pasos (prestación → día → horario → tus datos) y la pantalla de éxito.
 - Validación en cliente de los mismos campos que exige la API (DNI de 7 u 8 dígitos, teléfono E.164, email, nombre y apellido obligatorios) con mensajes en español rioplatense, sin reemplazar la validación del servidor.
 - Manejo explícito de los errores del backend: 409 `RN-TU-01` con refresco de la disponibilidad, 409 `RN-PA-03` por el límite de dos turnos futuros, 422 `RN-TU-03`/`RN-TU-11`/`RN-AG-05` por ventana y agenda, 400 `VALIDACION` con detalle por campo y 404 `NO_ENCONTRADO` por slug o prestación inexistente.
 - Pantalla de éxito que confirma fecha, hora, prestación, consultorio y el email al que se enviará el link de gestión (el token nunca se muestra en la UI).

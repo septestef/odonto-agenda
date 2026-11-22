@@ -23,7 +23,7 @@ if (diasEl) {
   const saltoEl = document.getElementById('salto-fecha')
 
   let inicioSemana = HOY
-  let seleccionada = '2026-11-26'
+  let seleccionada = diasEl.dataset.seleccionada ?? '2026-11-26'
 
   const aFecha = (iso) => {
     const [anio, mes, dia] = iso.split('-').map(Number)

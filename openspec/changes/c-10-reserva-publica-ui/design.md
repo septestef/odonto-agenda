@@ -102,6 +102,12 @@ Se testean en `node` con Vitest: validadores (casos válidos e inválidos por ca
 
 ## UI Mockups
 
+- Design system revision: 2
+- Decision: yes (2026-11-22)
+- Mockups: `openspec/changes/c-10-reserva-publica-ui/mockups/`
+- Approval: pending
+- Preview: rendered (2026-11-22, `mockups/previews/`)
+
 Política `system-and-mockups`, revisión 2. Antes del apply hay que crear y aprobar:
 
 - **Ubicación**: `openspec/changes/c-10-reserva-publica-ui/mockups/`.
@@ -116,7 +122,6 @@ Política `system-and-mockups`, revisión 2. Antes del apply hay que crear y apr
 ## Risks / Trade-offs
 
 - **Contrato de C-04 ya implementado** (router, `api-client`, fechas y componentes base archivados) → cambios futuros en sus firmas impactan C-10. Mitigación: consumir la superficie pública existente y adaptar el wiring sin duplicar el shell.
-- **Contrato de C-04 incierto** (nombres de `api-client`, router y helpers de fecha) → acoplamiento. Mitigación: la feature depende de una superficie mínima (fetch tipado, navegación y formato de fecha) y las tareas incluyen adaptar el wiring sin cambiar la spec.
 - **Duplicar validación backend/frontend** → deriva si cambian las reglas. Mitigación: la UI muestra siempre los `detalles` del servidor y la validación local es solo feedback temprano.
 - **Ventana de 60 días en la tira de días** → demasiados nodos. Mitigación: paginación de 7 días + `input type="date"`; nunca se renderizan los 60 de una.
 - **Datos del paciente conservados tras conflicto** → riesgo de asociarlos a un horario que ya no está. Mitigación: al refrescar se limpia solo el horario seleccionado y se exige elegir uno nuevo antes de confirmar.
