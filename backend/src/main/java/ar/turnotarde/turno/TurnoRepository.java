@@ -10,10 +10,23 @@ import org.springframework.data.repository.query.Param;
 
 public interface TurnoRepository extends JpaRepository<Turno, Long> {
 
+    @Query("""
+            select new ar.turnotarde.turno.TurnoAgendaProyeccion(t.id, t.inicio, t.fin, t.estado, t.origen,
+                    p.id, p.dni, p.nombre, p.apellido, p.telefono, p.email,
+                    pr.id, pr.nombre, t.canceladoPor, t.canceladoEn)
+            from Turno t join t.paciente p join t.prestacion pr
+            where t.odontologoId = :odontologoId and t.inicio < :hasta and t.fin > :desde
+            order by t.inicio, t.id""")
+    List<TurnoAgendaProyeccion> agenda(@Param("odontologoId") Long odontologoId,
+            @Param("desde") Instant desde, @Param("hasta") Instant hasta);
+
     Optional<Turno> findByTokenHash(String tokenHash);
 
     @Query(value = "SELECT * FROM turno WHERE token_hash = :hash FOR UPDATE", nativeQuery = true)
     Optional<Turno> bloquearPorHash(@Param("hash") String hash);
+
+    @Query(value = "SELECT * FROM turno WHERE id = :id AND odontologo_id = :dueno FOR UPDATE", nativeQuery = true)
+    Optional<Turno> bloquearPropio(@Param("id") Long id, @Param("dueno") Long dueno);
 
     /**
      * Turnos que ocupan lugar ({@code RESERVADO}, {@code ATENDIDO}, {@code AUSENTE}) y cruzan {@code [desde, hasta)},

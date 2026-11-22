@@ -149,6 +149,12 @@ public class Turno extends EntidadAuditada {
         canceladoEn = ahora;
     }
 
+    void cancelarPorOdontologo(Instant ahora) {
+        estado = EstadoTurno.CANCELADO;
+        canceladoPor = CanceladoPor.ODONTOLOGO;
+        canceladoEn = ahora;
+    }
+
     Turno sucesor(Instant nuevoInicio, Instant nuevoFin, String nuevoHash) {
         var nuevo = new Turno(odontologoId, paciente, prestacion, nuevoInicio, nuevoFin, OrigenTurno.ONLINE,
                 nuevoHash, emailGestion);
