@@ -335,7 +335,7 @@ Camino crítico post-demo: `C-16 → C-17 → C-18` (C-20 cierra el camino hacia
 ## FASE 4 — Agenda del odontólogo
 
 ### [C-12] `agenda-odontologo-api`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado (archivado 2026-11-22 como `2026-11-22-c-12-agenda-odontologo-api`; 299 tests unitarios y 416 de integración en `main`). Contratos JSON y decisiones P1–P9 en `openspec/changes/archive/2026-11-22-c-12-agenda-odontologo-api/design.md`. Specs vigentes nuevas: `agenda-odontologo`, `pacientes-odontologo` y `cancelacion-odontologo`.
 - **Scope**:
   - US-010 backend: `GET /api/turnos?desde=&hasta=` para vista diaria y semanal con paciente, prestación, horario, estado y origen, filtrado por `odontologo_id` de la sesión (RN-SE-01); `GET /api/pacientes` (lectura de sus pacientes).
   - US-012: `POST /api/turnos/{id}/cancelar` (cancela cualquier turno futuro, `cancelado_por = ODONTOLOGO`, evento para el email de aviso; RN-TU-09, RN-NO-02).
@@ -352,6 +352,8 @@ Camino crítico post-demo: `C-16 → C-17 → C-18` (C-20 cierra el camino hacia
 - **Scope**:
   - `features/agenda`: vistas diaria y semanal con navegación anterior/siguiente y botón "hoy"; cada turno muestra paciente, prestación, horario, estado y origen; se ven los bloqueos y el horario de atención (consume C-05 y C-12).
   - Acción de cancelar turno con confirmación (US-012) y listado de turnos afectados por un bloqueo.
+  - Contrato de C-12 para la agenda: `GET /api/turnos?desde=&hasta=` con fechas locales `YYYY-MM-DD` y rango semiabierto `[desde, hasta)` de 1 a 31 días (vista diaria: `hasta = desde + 1`; semanal: 7 días). Devuelve un array ordenado por inicio e id con todos los estados, incluidos los cancelados, con fechas en offset de Buenos Aires. Errores: 400 `SOLICITUD_INVALIDA` (fecha ausente o inválida) y 400 `VALIDACION` (orden o rango de más de 31 días).
+  - Contrato de C-12 para cancelar: `POST /api/turnos/{id}/cancelar` sin cuerpo y con CSRF (cookie `XSRF-TOKEN` y header `X-XSRF-TOKEN`). Responde 204 sin cuerpo, también si el turno ya estaba cancelado; después, volver a pedir la agenda. Errores: 404 `NO_ENCONTRADO`, 409 `RN-TU-07` (el turno ya empezó), 409 `RN-TU-01` (conflicto de lock: reintentar) y 500 `ERROR_INTERNO`.
   - Tests Vitest de la grilla horaria y de la navegación de fechas.
   - **Mockup aprobado requerido antes de apply** (vista diaria, semanal, detalle de turno; móvil y escritorio).
 - **Dependencias**: `C-04`, `C-05`, `C-12`
