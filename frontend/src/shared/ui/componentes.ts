@@ -1,11 +1,13 @@
 export type Etiqueta =
   | 'a'
+  | 'article'
   | 'button'
   | 'dialog'
   | 'div'
   | 'form'
   | 'h1'
   | 'h2'
+  | 'h3'
   | 'header'
   | 'img'
   | 'input'
