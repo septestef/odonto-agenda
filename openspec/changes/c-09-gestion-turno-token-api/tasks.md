@@ -1,0 +1,37 @@
+# Tareas: C-09 - Gestión del turno por token
+
+> **Governance ALTO:** no empieces Apply hasta que Estefi apruebe explícitamente las decisiones de `design.md`, se aclare el gate C-05 y haya autorización separada para implementar. **Strict TDD:** en cada corte de comportamiento registrá un rojo real, implementá lo mínimo para el verde y refactorizá con tests en verde. No omitas ni reemplaces tests; PostgreSQL real `turnotarde_test`, reloj inyectado y SMTP falso sin red.
+
+## 1. Gate de revisión y línea de base
+
+- [ ] 1.1 Registrá la aprobación explícita de Estefi para D1–D6 y V9/legados, la aclaración de GATE 3 y la autorización separada de Apply. Si cambia alguna recomendación, reconciliá propuesta, deltas, diseño y tareas y validá el change antes de tocar código.
+- [ ] 1.2 Cargá `java-springboot`, `springboot-patterns`, `java-junit` y `springboot-security`. Ya con Apply autorizado, verificá ambiente de PostgreSQL y línea de base desde `backend/` con `.\gradlew.bat test integrationTest -PskipFrontend --console=plain`; registrá bloqueos reales sin omitir tests ni arrancar servicios de correo reales.
+
+## 2. Snapshot del destinatario
+
+- [ ] 2.1 Con ITs de Flyway/JPA en rojo, agregá V9 aditiva según D4 y `modelo-datos`: base vacía y base con filas previas, sin backfill aun si existe contacto o auditoría; preservá hash, estados y vínculos. Verificá validación del esquema y legados nulos con PostgreSQL real.
+- [ ] 2.2 Con regresión roja de dos reservas con mismo DNI y distinto correo, capturá el `email_gestion` original en `ReservaService` sin alterar el 201, la validación de C-07 ni su upsert. Verificá snapshots distintos e inmutables, contacto actualizado normalmente y que una reserva rechazada no deja snapshot o mutación del contacto.
+- [ ] 2.3 Con pruebas primero, compartí el predicado puro de admisibilidad de C-08 sin cambiar los conjuntos de entrada de C-07/C-08. Cubrí ausente, buzón simple válido, longitud 254/255 con forma al alcance de C-07 y sintaxis que acepta C-07 pero no C-08; verificá la regresión de notificaciones y ausencia de normalización/fallback.
+
+## 3. API de lectura y confidencialidad
+
+- [ ] 3.1 Escribí un IT de consulta en rojo para GET por SHA-256, token mal formado/desconocido/hash, dos turnos en consultorios distintos, estado reservado, histórico, cancelado, atendido y ausente, instante exacto de inicio, inactivos y legados. Implementá el DTO mínimo de D1; verificá el JSON exacto, flags, offsets y ausencia de PII e ids internos.
+- [ ] 3.2 Probá primero el cruce de rutas con un odontólogo cuyo slug es `turnos`: perfil y disponibilidad válida, disponibilidad sin parámetros y gestión con token bien/mal formado. Implementá matcher disjunto según D1 sin reservar slug ni modificar C-07; verificá 200/400 de C-07, 200/404 de C-09 y que el enrutamiento no depende del orden de controladores.
+- [ ] 3.3 Con tests centinela primero, protegé respuestas de API y documento `/turno/{token}` con `no-store` y `no-referrer`, y acotá la sanitización de URI, logs y errores a rutas sensibles. Verificá en un servidor real respuestas de éxito, errores del advice, fallas inesperadas y logs activos de entrada y aplicación; completá los casos de POST en sus cortes. Confirmá que sigue funcionando sin sesión ni CSRF y que las rutas privadas mantienen los controles de C-03.
+
+## 4. Cancelación y notificación
+
+- [ ] 4.1 Con unitarios e IT primero, implementá cancelación según D2/D3: bloqueo de la fila, revalidación con reloj después del lock, 204 con marcas en UTC, 409 para original iniciado/no reservado, sin cambios en error. Verificá segundos previos, borde exacto, inactivos y liberación confirmada con otra conexión (y por C-07 si los filtros permiten ofrecer el horario).
+- [ ] 4.2 Con un IT del emisor real y SMTP falso en rojo, publicá un `TurnoCancelado` en la transacción. Verificá visibilidad tras commit, snapshot estable aun si cambió el contacto, ningún link y FK al original, 204 sin esperar al correo y que legados o snapshots no admisibles cancelan sin SMTP ni intento de auditoría. Verificá que repetir la acción no genera un segundo aviso.
+
+## 5. Reprogramación, atomicidad y avisos
+
+- [ ] 5.1 Con unitarios/IT de contrato primero, agregá el DTO y revalidación de D2: MIME/offset/campos extra, precedencias frente a token desconocido y original leído, 404 de inactivos, 409 de snapshot ausente/no admisible, exacto 24 h, horizonte local, franja/paso/cierre, bloqueo, misma prestación y duración vigente, mismo instante con otro offset, cruce propio y contigüidad. Verificá que rechazos no mutan ni notifican.
+- [ ] 5.2 Escribí el IT rojo del reemplazo con dos reservas futuras y de la falla de INSERT después del UPDATE real. Antes de implementar el reemplazo, escribí y observá también el rojo de las carreras de 5.3. Implementá locks `paciente → advisory → original`, relectura bajo lock, flush de cancelación antes de `IDENTITY`, sucesor vinculado, snapshot copiado y hash nuevo, sin upsert ni aumento de cupo. Verificá con otra conexión 204 sin token/`Location`, original solo lectura, sucesor asociado; forzá por separado `23P01` de la constraint real tras ejecutar el UPDATE y comprobá rollback sin sucesor, evento consumido ni fila de aviso.
+- [ ] 5.3 Antes de implementar 5.2, probá en rojo: dos reprogramaciones del mismo turno a destinos válidos y cancelación vs reprogramación (un 204, un 409 `TURNO_SOLO_LECTURA`, como máximo un sucesor), y cruce del inicio mientras se espera un lock. Probá dos originales al mismo destino y reprogramación vs reserva C-07 (un ganador, 409 `RN-TU-01`, un solo activo en el destino y original perdedor intacto). Incluí mismo paciente y un caso separado en el límite de cupo. Usá HTTP real, barreras y conexiones independientes, sin `sleep` ni fixtures dentro de la transacción del test; verificá verde con 5.2 y un solo evento/aviso ganador al conectar 5.5.
+- [ ] 5.4 Con pruebas primero, integrá la guardia para locks, flush y cierre de transacción. Verificá 409 `RN-TU-01` para `23P01` de la constraint nombrada, `40P01`, `55P03` y falla de lock traducida; otro error de integridad sigue siendo 500 sin detalles. En INSERT rechazados reales de reserva y sucesor, capturá salidas antes del advice, incluido ORM/driver y el destino de logs de PostgreSQL del entorno: no deben aparecer los centinelas de email, token ni hash. Si aparece una fuga, acordá una mitigación acotada antes de cambiar logging; no ensanches el handler ni silencies logging global.
+- [ ] 5.5 Con SMTP falso y listener controlado, probá primero `TurnoReprogramado` real y su entrega posterior al commit. Verificá un solo aviso al snapshot heredado y un solo registro del sucesor, sin `TurnoReservado`/`TurnoCancelado` adicional; hasheá el token extraído del correo y comprobá que GET resuelve únicamente el sucesor. Forzá rollback después de publicar y drená el ejecutor para comprobar que no se consume ni notifica; probá en casos separados falla SMTP y rechazo de cola sin revertir ni reintentar. Completá los checks de confidencialidad de D5 para ambos POST y sus errores.
+
+## 6. Concurrencia y regresión integral
+
+- [ ] 6.1 Corré desde `backend/` `.\gradlew.bat test integrationTest -PskipFrontend --console=plain` con PostgreSQL real y SMTP falso. Confirmá regresión de `ReservasConcurrentesIT`, `ReservasConcurrentesApiIT`, `ReservaOnlineIT`, `ReservaEventosIT` y `NotificacionesEmailIT`; corré `openspec validate c-09-gestion-turno-token-api --strict --json` y registrá resultados antes de dar el trabajo por verificado.
