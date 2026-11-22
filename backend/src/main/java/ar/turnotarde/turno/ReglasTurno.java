@@ -1,6 +1,7 @@
 package ar.turnotarde.turno;
 
 import ar.turnotarde.shared.error.ReglaNegocioException;
+import java.time.Instant;
 import org.springframework.http.HttpStatus;
 
 /** Fábrica de los rechazos de reglas de negocio de turnos con su código, estado y mensaje (D4). */
@@ -13,6 +14,16 @@ public final class ReglasTurno {
     public static final String FUERA_DE_AGENDA = "RN-AG-05";
 
     private ReglasTurno() {
+    }
+
+    static void exigirOriginalEditable(Instant inicio, EstadoTurno estado, Instant ahora) {
+        if (!ahora.isBefore(inicio)) {
+            throw new ReglaNegocioException("RN-TU-07", "Este turno ya empezó. Solo podés consultarlo.",
+                    HttpStatus.CONFLICT);
+        }
+        if (estado != EstadoTurno.RESERVADO) {
+            throw new ReglaNegocioException("RN-SE-02", "Este turno solo se puede consultar.", HttpStatus.CONFLICT);
+        }
     }
 
     public static ReglaNegocioException horarioTomado() {

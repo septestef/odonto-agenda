@@ -79,7 +79,8 @@ public class ReservaService {
         Paciente paciente = pacientes.getReferenceById(pacienteId);
         Instant fin = inicio.plus(Duration.ofMinutes(prestacion.getDuracionMinutos()));
         Turno turno = guardia.ejecutar(() -> turnos.saveAndFlush(new Turno(odontologo.getId(), paciente,
-                prestaciones.getReferenceById(prestacion.getId()), inicio, fin, OrigenTurno.ONLINE, token.hash())));
+                prestaciones.getReferenceById(prestacion.getId()), inicio, fin, OrigenTurno.ONLINE, token.hash(),
+                datos.email())));
 
         // 5. Evento dentro de la transacción: los consumidores AFTER_COMMIT lo reciben solo si se confirmó.
         ResumenTurno resumen = new ResumenTurno(turno.getId(), odontologo.getId(), inicio, fin, prestacion.getId(),

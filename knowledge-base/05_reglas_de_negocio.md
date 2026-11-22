@@ -53,6 +53,8 @@ Cada regla tiene un código único `RN-{DOMINIO}-{NN}`. El backend devuelve ese 
 - **RN-SE-02**: El token de gestión del turno tiene 32 bytes aleatorios (codificados en base64url). En la base se guarda solo su hash SHA-256. Deja de servir cuando el turno pasa o se cancela; en ese caso el link muestra el turno en solo lectura.
 - **RN-SE-03**: Las respuestas públicas nunca exponen datos de otros pacientes. La disponibilidad devuelve horarios libres, no turnos.
 
+- **RN-SE-04**: En gestión por token, si el turno no tiene un snapshot de email de gestión o ese snapshot no es un único buzón admisible según el criterio vigente de C-08, se rechaza reprogramar antes de escribir o generar un token nuevo. Respuesta: HTTP 409, `{ "codigo": "RN-SE-04", "mensaje": "No podés reprogramar este turno desde el link." }`. No se usa otro destinatario ni se cambia la validación de reserva o admisión de correo de C-07/C-08. Esto no impide consultar ni cancelar un turno elegible; en ese caso la cancelación no envía correo ni genera auditoría del aviso.
+
 ## Excepciones globales
 
 - **RN-GL-01**: Toda operación que escribe turnos es transaccional. Si la constraint RN-TU-01 se viola, la API responde 409 con el código `RN-TU-01` y el mensaje "Ese horario acaba de ser tomado, elegí otro".

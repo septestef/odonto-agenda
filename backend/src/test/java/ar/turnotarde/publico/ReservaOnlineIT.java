@@ -270,6 +270,27 @@ class ReservaOnlineIT extends IntegracionTest {
     // ---- Paciente por DNI
 
     @Test
+    void reservasDelMismoDniConservanSuPropioDestinatarioDeGestion() throws Exception {
+        String primero = "Luis.Primero@example.com";
+        String segundo = "luis.segundo@example.com";
+        reservar(VIERNES_0900, "12345678", primero).andExpect(status().isCreated())
+                .andExpect(jsonPath("$.email").value(primero));
+        reservar("2026-11-27T10:00:00-03:00", "12345678", segundo).andExpect(status().isCreated())
+                .andExpect(jsonPath("$.email").value(segundo));
+
+        assertThat(jdbc.queryForObject("SELECT email FROM paciente", String.class)).isEqualTo(segundo);
+        assertThat(jdbc.queryForList("SELECT email_gestion FROM turno ORDER BY inicio", String.class))
+                .containsExactly(primero, segundo);
+
+        reservar(VIERNES_0900, "12345678", "rechazado@example.com").andExpect(status().isConflict())
+                .andExpect(jsonPath("$.codigo").value("RN-TU-01"));
+
+        assertThat(jdbc.queryForObject("SELECT email FROM paciente", String.class)).isEqualTo(segundo);
+        assertThat(jdbc.queryForList("SELECT email_gestion FROM turno ORDER BY inicio", String.class))
+                .containsExactly(primero, segundo);
+    }
+
+    @Test
     void dniNuevoCreaElPacienteDelOdontologoYElTurnoQuedaAsociado() throws Exception {
         reservar(VIERNES_0900, "12345678", "luis@example.com").andExpect(status().isCreated());
 

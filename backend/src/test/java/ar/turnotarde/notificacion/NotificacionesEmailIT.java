@@ -1,8 +1,10 @@
 package ar.turnotarde.notificacion;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -13,6 +15,7 @@ import ar.turnotarde.soporte.LimpiezaBase;
 import ar.turnotarde.soporte.RelojDePrueba;
 import ar.turnotarde.turno.CanceladoPor;
 import ar.turnotarde.turno.OrigenTurno;
+import ar.turnotarde.turno.TokenTurno;
 import ar.turnotarde.turno.eventos.ResumenTurno;
 import ar.turnotarde.turno.eventos.TurnoCancelado;
 import ar.turnotarde.turno.eventos.TurnoReprogramado;
@@ -20,11 +23,15 @@ import ar.turnotarde.turno.eventos.TurnoReservado;
 import java.net.SocketTimeoutException;
 import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Pattern;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,9 +41,12 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.event.EventListener;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mail.MailSendException;
@@ -44,14 +54,17 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.json.JsonCompareMode;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 @AutoConfigureMockMvc
-@Import(ConfiguracionRelojDePrueba.class)
+@Import({ConfiguracionRelojDePrueba.class, NotificacionesEmailIT.ObservacionReprogramacion.class})
 @ExtendWith(OutputCaptureExtension.class)
 @DirtiesContext
 @TestPropertySource(properties = {"MAIL_HOST=smtp.example.test", "MAIL_PORT=587",
@@ -68,6 +81,9 @@ class NotificacionesEmailIT extends IntegracionTest {
     @Autowired RelojDePrueba reloj;
     @Autowired ApplicationContext contexto;
     @Autowired PlatformTransactionManager gestor;
+    @Autowired EventosReprogramacion eventos;
+    @MockitoSpyBean RegistroNotificacion registro;
+    private static final String TOKEN_CANCELACION = "E".repeat(42) + "A";
     private FixturesJdbc fixtures;
     private long profesional;
     private long prestacion;
@@ -77,6 +93,7 @@ class NotificacionesEmailIT extends IntegracionTest {
         vaciarEjecutor();
         LimpiezaBase.limpiar(jdbc);
         smtp.limpiar();
+        eventos.reiniciar();
         reloj.fijar(AHORA);
         fixtures = new FixturesJdbc(jdbc);
         profesional = fixtures.odontologo("avisos");
@@ -236,6 +253,278 @@ class NotificacionesEmailIT extends IntegracionTest {
                 .containsExactly("CANCELACION", "REPROGRAMACION");
         assertThat(jdbc.queryForList("SELECT estado FROM turno ORDER BY id", String.class))
                 .containsExactly("RESERVADO", "RESERVADO");
+    }
+
+    @Test
+    void cancelacionRealConfirmaAntesDeSmtpYNotificaUnaSolaVezAlSnapshot() throws Exception {
+        long original = turnoParaCancelar(EMAIL);
+        jdbc.update("UPDATE paciente SET email = 'contacto-editado@example.test'");
+        var llego = new CountDownLatch(1);
+        var liberar = new CountDownLatch(1);
+        var visible = new AtomicBoolean();
+        smtp.accion(() -> {
+            visible.set(!TransactionSynchronizationManager.isActualTransactionActive()
+                    && "CANCELADO".equals(jdbc.queryForObject("SELECT estado FROM turno WHERE id = ?",
+                            String.class, original)));
+            llego.countDown();
+            esperar(liberar);
+        });
+        long antes = tareasPresentadas();
+        try (var solicitudes = Executors.newSingleThreadExecutor()) {
+            try {
+                var respuesta = solicitudes.submit(this::cancelar);
+                respuesta.get(5, TimeUnit.SECONDS).andExpect(status().isNoContent()).andExpect(content().string(""));
+                assertThat(tareasPresentadas()).as("la cancelación despacha un único aviso al confirmar")
+                        .isEqualTo(antes + 1);
+                esperar(llego);
+                assertThat(visible).isTrue();
+                assertThat(smtp.ultimo().getAllRecipients()[0].toString()).isEqualTo(EMAIL);
+                assertThat(smtp.ultimo().getContent().toString()).doesNotContain("href=", TOKEN_CANCELACION);
+            } finally {
+                liberar.countDown();
+            }
+        }
+        vaciarEjecutor();
+        comprobarFila("CANCELACION", "ENVIADO", null);
+        cancelar().andExpect(status().isConflict()).andExpect(jsonPath("$.codigo").value("RN-SE-02"));
+        vaciarEjecutor();
+        assertThat(smtp.intentos()).isEqualTo(1);
+        assertThat(jdbc.queryForList("SELECT turno_id FROM notificacion", Long.class)).containsExactly(original);
+    }
+
+    @ParameterizedTest
+    @org.junit.jupiter.params.provider.NullAndEmptySource
+    @ValueSource(strings = {"ana@ejemplo_com.test"})
+    void cancelacionRealSinBuzonAdmisibleNoIntentaSmtpNiAuditoria(String email) throws Exception {
+        long original = turnoParaCancelar(email);
+        org.mockito.Mockito.clearInvocations(registro);
+        long antes = tareasPresentadas();
+
+        cancelar().andExpect(status().isNoContent());
+        assertThat(tareasPresentadas()).isEqualTo(antes + 1);
+        vaciarEjecutor();
+        assertThat(jdbc.queryForObject("SELECT estado FROM turno WHERE id = ?", String.class, original))
+                .isEqualTo("CANCELADO");
+        sinNotificacion();
+        org.mockito.Mockito.verifyNoInteractions(registro);
+    }
+
+    private long turnoParaCancelar(String email) {
+        long paciente = fixtures.paciente(profesional, DNI);
+        long turno = fixtures.turno(profesional, paciente, prestacion, INICIO, INICIO.plusSeconds(1800),
+                "RESERVADO", TokenTurno.hashear(TOKEN_CANCELACION));
+        jdbc.update("UPDATE turno SET email_gestion = ? WHERE id = ?", email, turno);
+        return turno;
+    }
+
+    private ResultActions cancelar() throws Exception {
+        return mvc.perform(post("/api/public/turnos/{token}/cancelar", TOKEN_CANCELACION));
+    }
+
+    @Test
+    void reprogramacionRealNotificaSoloElSucesorYElLinkResuelveSuHash(CapturedOutput salida) throws Exception {
+        long original = turnoParaCancelar(EMAIL);
+        jdbc.update("UPDATE paciente SET email = 'contacto-editado@example.test'");
+        var visible = new AtomicBoolean();
+        smtp.accion(() -> visible.set(!TransactionSynchronizationManager.isActualTransactionActive()
+                && "CANCELADO".equals(jdbc.queryForObject("SELECT estado FROM turno WHERE id=?", String.class, original))
+                && "RESERVADO".equals(jdbc.queryForObject("SELECT estado FROM turno WHERE reprogramado_desde_id=?",
+                        String.class, original))));
+
+        reprogramar("10:00").andExpect(status().isNoContent()).andExpect(content().string(""))
+                .andExpect(header().doesNotExist("Location"))
+                .andExpect(header().string("Cache-Control", "no-store"))
+                .andExpect(header().string("Referrer-Policy", "no-referrer"))
+                .andExpect(r -> assertThat(r.getRequest().getSession(false)).isNull());
+        vaciarEjecutor();
+
+        assertThat(eventos.publicados.get()).isEqualTo(1);
+        assertThat(eventos.confirmados.get()).isEqualTo(1);
+        assertThat(eventos.otros.get()).isZero();
+        assertThat(visible).isTrue();
+        assertThat(smtp.intentos()).isEqualTo(1);
+        assertThat(smtp.ultimo().getAllRecipients()[0].toString()).isEqualTo(EMAIL);
+        var link = Pattern.compile("href=\"https://example\\.test/sede/turno/([A-Za-z0-9_-]{43})\"")
+                .matcher(smtp.ultimo().getContent().toString());
+        assertThat(link.find()).as("se envió el link nuevo").isTrue();
+        String token = link.group(1);
+        assertThat(link.find()).as("no hay un segundo link").isFalse();
+        assertThat(token.equals(TOKEN_CANCELACION)).isFalse();
+        var sucesor = jdbc.queryForMap("SELECT id, token_hash FROM turno WHERE reprogramado_desde_id=?", original);
+        String hash = TokenTurno.hashear(token);
+        assertThat(hash.equals(sucesor.get("token_hash"))).isTrue();
+        assertThat(eventos.ultimo.get().token().equals(token)).isTrue();
+        assertThat(eventos.ultimo.get().toString().contains(token)).isFalse();
+        assertThat(List.of(token, hash, TOKEN_CANCELACION, TokenTurno.hashear(TOKEN_CANCELACION), EMAIL)
+                .stream().anyMatch(salida.getAll()::contains)).isFalse();
+        assertThat(jdbc.queryForMap("SELECT turno_id, tipo, estado, destinatario FROM notificacion"))
+                .containsEntry("turno_id", sucesor.get("id")).containsEntry("tipo", "REPROGRAMACION")
+                .containsEntry("estado", "ENVIADO").containsEntry("destinatario", EMAIL);
+        mvc.perform(get("/api/public/turnos/{token}", token)).andExpect(status().isOk())
+                .andExpect(jsonPath("$.inicio").value("2026-11-27T10:00:00-03:00"))
+                .andExpect(jsonPath("$.estado").value("RESERVADO"));
+        mvc.perform(get("/api/public/turnos/{token}", TOKEN_CANCELACION)).andExpect(status().isOk())
+                .andExpect(jsonPath("$.inicio").value("2026-11-27T09:00:00-03:00"))
+                .andExpect(jsonPath("$.estado").value("CANCELADO"))
+                .andExpect(jsonPath("$.puedeReprogramar").value(false));
+    }
+
+    @Test
+    void reprogramacionRealRevierteDespuesDePublicarSinEntregarAviso(CapturedOutput salida) throws Exception {
+        long original = turnoParaCancelar(EMAIL);
+        var antes = jdbc.queryForMap("SELECT * FROM turno WHERE id=?", original);
+        eventos.revertir.set(true);
+        long despachos = tareasPresentadas();
+
+        reprogramar("10:00").andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.codigo").value("ERROR_INTERNO"))
+                .andExpect(header().string("Cache-Control", "no-store"))
+                .andExpect(header().string("Referrer-Policy", "no-referrer"))
+                .andExpect(header().doesNotExist("Location"));
+        assertThat(eventos.publicados.get()).isEqualTo(1);
+        assertThat(eventos.escriturasVisiblesAntesDelRollback.get()).isTrue();
+        assertThat(eventos.confirmados.get()).isZero();
+        assertThat(eventos.otros.get()).isZero();
+        assertThat(tareasPresentadas()).isEqualTo(despachos);
+        vaciarEjecutor();
+        sinNotificacion();
+        assertThat(jdbc.queryForMap("SELECT * FROM turno")).isEqualTo(antes);
+        var token = eventos.ultimo.get().token();
+        assertThat(List.of(token, TokenTurno.hashear(token), TOKEN_CANCELACION, EMAIL)
+                .stream().anyMatch(salida.getAll()::contains)).isFalse();
+    }
+
+    @Test
+    void reprogramacionRealConSmtpFallidoNoRevierteNiReintenta() throws Exception {
+        long original = turnoParaCancelar(EMAIL);
+        smtp.accion(() -> { throw new MailSendException("rechazo de prueba"); });
+        reprogramar("10:00").andExpect(status().isNoContent());
+        vaciarEjecutor();
+        assertThat(eventos.confirmados.get()).isEqualTo(1);
+        assertThat(smtp.intentos()).isEqualTo(1);
+        assertThat(jdbc.queryForMap("SELECT tipo, estado, error, turno_id FROM notificacion"))
+                .containsEntry("tipo", "REPROGRAMACION").containsEntry("estado", "ERROR")
+                .containsEntry("error", "SMTP_FALLO").containsEntry("turno_id", sucesorReservado(original));
+    }
+
+    @Test
+    void reprogramacionRealConColaLlenaNoRevierteNiReintenta(CapturedOutput salida) throws Exception {
+        long original = turnoParaCancelar(EMAIL);
+        var ejecutor = contexto.getBean("ejecutorNotificaciones", Executor.class);
+        var ocupados = new CountDownLatch(2);
+        var liberar = new CountDownLatch(1);
+        var drenaje = new CountDownLatch(32);
+        try (var solicitudes = Executors.newSingleThreadExecutor()) {
+            try {
+                ocuparWorkers(ocupados, liberar);
+                for (int i = 0; i < 32; i++) {
+                    ejecutor.execute(drenaje::countDown);
+                }
+                solicitudes.submit(() -> reprogramar("10:00")).get(5, TimeUnit.SECONDS)
+                        .andExpect(status().isNoContent());
+                assertThat(eventos.confirmados.get()).isEqualTo(1);
+                sucesorReservado(original);
+                assertThat(salida.getAll()).containsOnlyOnce("DESPACHO_RECHAZADO");
+            } finally {
+                liberar.countDown();
+            }
+        }
+        esperar(drenaje);
+        vaciarEjecutor();
+        sinNotificacion();
+    }
+
+    @Test
+    void carreraRealDeReprogramacionesSoloNotificaAlGanador() throws Exception {
+        long original = turnoParaCancelar(EMAIL);
+        var empezar = new CountDownLatch(1);
+        try (var solicitudes = Executors.newFixedThreadPool(2)) {
+            var a = solicitudes.submit(() -> { esperar(empezar); return reprogramar("10:00").andReturn(); });
+            var b = solicitudes.submit(() -> { esperar(empezar); return reprogramar("11:00").andReturn(); });
+            empezar.countDown();
+            var primera = a.get(8, TimeUnit.SECONDS).getResponse();
+            var segunda = b.get(8, TimeUnit.SECONDS).getResponse();
+            assertThat(new int[]{primera.getStatus(), segunda.getStatus()}).containsExactlyInAnyOrder(204, 409);
+            assertThat((primera.getStatus() == 409 ? primera : segunda).getContentAsString()).contains("RN-SE-02");
+        }
+        vaciarEjecutor();
+        long sucesor = sucesorReservado(original);
+        assertThat(eventos.publicados.get()).isEqualTo(1);
+        assertThat(eventos.confirmados.get()).isEqualTo(1);
+        assertThat(eventos.otros.get()).isZero();
+        assertThat(smtp.intentos()).isEqualTo(1);
+        assertThat(jdbc.queryForList("SELECT turno_id FROM notificacion", Long.class)).containsExactly(sucesor);
+    }
+
+    private long sucesorReservado(long original) {
+        assertThat(jdbc.queryForObject("SELECT estado FROM turno WHERE id=?", String.class, original))
+                .isEqualTo("CANCELADO");
+        return jdbc.queryForObject("SELECT id FROM turno WHERE reprogramado_desde_id=? AND estado='RESERVADO'",
+                Long.class, original);
+    }
+
+    private ResultActions reprogramar(String hora) throws Exception {
+        return mvc.perform(post("/api/public/turnos/{token}/reprogramar", TOKEN_CANCELACION)
+                .contentType(MediaType.APPLICATION_JSON).content("""
+                        {"inicio":"2026-11-27T%s:00-03:00"}""".formatted(hora)));
+    }
+
+    @TestConfiguration(proxyBeanMethods = false)
+    static class ObservacionReprogramacion {
+        @Bean EventosReprogramacion observarEventos(JdbcTemplate jdbc) {
+            return new EventosReprogramacion(jdbc);
+        }
+    }
+
+    static class EventosReprogramacion {
+        private final JdbcTemplate jdbc;
+        private final AtomicReference<TurnoReprogramado> ultimo = new AtomicReference<>();
+        private final AtomicInteger publicados = new AtomicInteger();
+        private final AtomicInteger confirmados = new AtomicInteger();
+        private final AtomicInteger otros = new AtomicInteger();
+        private final AtomicBoolean revertir = new AtomicBoolean();
+        private final AtomicBoolean escriturasVisiblesAntesDelRollback = new AtomicBoolean();
+
+        EventosReprogramacion(JdbcTemplate jdbc) {
+            this.jdbc = jdbc;
+        }
+
+        void reiniciar() {
+            ultimo.set(null);
+            publicados.set(0);
+            confirmados.set(0);
+            otros.set(0);
+            revertir.set(false);
+            escriturasVisiblesAntesDelRollback.set(false);
+        }
+
+        @EventListener
+        void publicado(TurnoReprogramado evento) {
+            ultimo.set(evento);
+            publicados.incrementAndGet();
+        }
+
+        @EventListener({TurnoReservado.class, TurnoCancelado.class})
+        void otroEvento() {
+            otros.incrementAndGet();
+        }
+
+        @TransactionalEventListener
+        void confirmado(TurnoReprogramado evento) {
+            confirmados.incrementAndGet();
+        }
+
+        @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
+        void antesDelCommit(TurnoReprogramado evento) {
+            if (revertir.get()) {
+                escriturasVisiblesAntesDelRollback.set(TransactionSynchronizationManager.isActualTransactionActive()
+                        && "CANCELADO".equals(jdbc.queryForObject("SELECT estado FROM turno WHERE id=?",
+                                String.class, evento.anterior().turnoId()))
+                        && "RESERVADO".equals(jdbc.queryForObject("SELECT estado FROM turno WHERE id=?",
+                                String.class, evento.nuevo().turnoId())));
+                throw new IllegalStateException("rollback sintético tras publicación");
+            }
+        }
     }
 
     @Test

@@ -1,7 +1,11 @@
 package ar.turnotarde.shared.error;
 
+import ar.turnotarde.publico.ControladorGestionTurno;
 import ar.turnotarde.turno.ReglasTurno;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +26,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
@@ -101,19 +107,33 @@ public class ManejadorErrores {
      * no se traducen acá a propósito.
      */
     @ExceptionHandler(DataAccessException.class)
-    ResponseEntity<ErrorApi> errorDeBase(DataAccessException e) {
+    ResponseEntity<ErrorApi> errorDeBase(DataAccessException e, HttpServletRequest request) {
         if (ConflictoTurnos.esSolapamiento(e)) {
             ReglaNegocioException regla = ReglasTurno.horarioTomado();
             return responder(regla.estado(), new ErrorApi(regla.codigo(), regla.getMessage()));
         }
-        return inesperado(e);
+        return inesperado(e, request);
     }
 
     @ExceptionHandler(Exception.class)
-    ResponseEntity<ErrorApi> inesperado(Exception e) {
-        LOG.error("Error inesperado procesando la solicitud", e);
+    ResponseEntity<ErrorApi> inesperado(Exception e, HttpServletRequest request) {
+        if (request.getAttribute(HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE) instanceof HandlerMethod handler
+                && ControladorGestionTurno.class.isAssignableFrom(handler.getBeanType())) {
+            LOG.error("GESTION_TURNO_ERROR_INESPERADO causas={}", nombresDeCausas(e));
+        } else {
+            LOG.error("Error inesperado procesando la solicitud", e);
+        }
         return responder(HttpStatus.INTERNAL_SERVER_ERROR, new ErrorApi(CodigosError.ERROR_INTERNO,
                 "Ocurrió un error inesperado. Probá de nuevo en unos minutos."));
+    }
+
+    static List<String> nombresDeCausas(Throwable error) {
+        var vistos = Collections.newSetFromMap(new IdentityHashMap<Throwable, Boolean>());
+        var nombres = new ArrayList<String>();
+        for (Throwable causa = error; causa != null && vistos.add(causa); causa = causa.getCause()) {
+            nombres.add(causa.getClass().getName());
+        }
+        return nombres;
     }
 
     private static ResponseEntity<ErrorApi> responder(HttpStatus estado, ErrorApi cuerpo) {
