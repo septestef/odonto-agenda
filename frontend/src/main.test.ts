@@ -256,7 +256,12 @@ describe('arranque de la aplicación', () => {
     ultimo()?.manejadores?.['ingresar']?.(formulario)
     await estabilizar()
 
-    expect(pedidos).toEqual(['POST /api/auth/login'])
+    expect(pedidos).toEqual([
+      'POST /api/auth/login',
+      'GET /api/horarios',
+      'GET /api/prestaciones',
+      'GET /api/bloqueos',
+    ])
     expect(historial.push).toEqual(['/config'])
     expect(historial.replace).toEqual([])
     expect(ultimo()?.descriptor.clase).toBe('layout')
@@ -465,7 +470,12 @@ describe('arranque de la aplicación', () => {
     await estabilizar()
 
     expect(montajes.at(-1)?.descriptor.clase).toBe('layout')
-    expect(pedidos).toEqual(['GET /api/auth/me'])
+    expect(pedidos).toEqual([
+      'GET /api/auth/me',
+      'GET /api/horarios',
+      'GET /api/prestaciones',
+      'GET /api/bloqueos',
+    ])
     detener()
   })
 })

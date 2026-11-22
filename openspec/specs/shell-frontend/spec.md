@@ -44,7 +44,8 @@ Antes de mostrar `/agenda` o `/config`, la aplicación DEBE (MUST) verificar la 
 - **THEN** se muestra una vista de error de carga con una acción de reintento y NO se interpreta la falla como sesión vencida
 
 ### Requirement: Layout base y marcadores de funcionalidad
-Las rutas del odontólogo DEBE (MUST) mostrarse dentro de un layout con: salto al contenido, logo de la marca, navegación a Agenda y Configuración con el elemento activo marcado para lectores de pantalla, nombre del odontólogo sesionado y acción de cerrar sesión. Las rutas `/agenda`, `/config`, `/reservar/{slug}` y `/turno/{token}` DEBE (MUST) mostrar únicamente un marcador genérico que indique qué pantalla vendrá, sin lógica de negocio, formularios ni pedidos propios.
+
+Las rutas del odontólogo DEBE (MUST) mostrarse dentro de un layout con: salto al contenido, logo de la marca, navegación a Agenda y Configuración con el elemento activo marcado para lectores de pantalla, nombre del odontólogo sesionado y acción de cerrar sesión. Las rutas `/agenda`, `/reservar/{slug}` y `/turno/{token}` DEBE (MUST) seguir mostrando únicamente un marcador genérico que indique qué pantalla vendrá, sin lógica de negocio, formularios ni pedidos propios. La ruta `/config` DEBE (MUST) mostrar la interfaz real de configuración de horarios, prestaciones y bloqueos, con sus propios formularios y pedidos a la API, según lo especificado en `configuracion-agenda-ui`. El guard de sesión y el comportamiento de las rutas públicas NO DEBE (MUST) cambiar.
 
 #### Scenario: Identificación de la sección activa
 - **WHEN** se muestra `/agenda` y cuando se muestra `/config`
@@ -59,5 +60,9 @@ Las rutas del odontólogo DEBE (MUST) mostrarse dentro de un layout con: salto a
 - **THEN** el primer control visible es "Saltar al contenido" y al activarlo el foco queda en el contenido principal
 
 #### Scenario: Marcadores sin lógica de funcionalidad
-- **WHEN** se abre cualquiera de las cuatro rutas de funcionalidad
+- **WHEN** se abre `/agenda`, `/reservar/{slug}` o `/turno/{token}`
 - **THEN** se muestra solo el texto del marcador y no se consultan endpoints de agenda, turnos ni configuración
+
+#### Scenario: Configuración con lógica propia
+- **WHEN** se abre `/config` con sesión válida
+- **THEN** se muestran las secciones Horarios, Prestaciones y Bloqueos y se consultan los endpoints de configuración, sin mostrar el marcador genérico

@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup · Horarios (móvil 360×844) · PENDIENTE DE APROBACIÓN — OdontoAgenda</title>
+<link rel="icon" href="../../../../design-system/assets/logo.png">
+<link rel="stylesheet" href="../../../../design-system/tokens.css">
+<style>
+  /* Mockup estático. Valores visuales solo desde design-system/tokens.css.
+     Literales admitidos: 0, 1px de borde, porcentajes y medidas de viewport
+     (360 px es el ancho del dispositivo, no un valor de diseño). */
+  *, *::before, *::after { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    line-height: var(--leading-normal);
+  }
+  h1, h2, h3 { margin: 0; line-height: var(--leading-tight); }
+  p { margin: 0; }
+  ul { margin: 0; padding: 0; list-style: none; }
+
+  .sr-only {
+    position: absolute; width: var(--space-1); height: var(--space-1); padding: 0; margin: 0;
+    overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+  }
+  .container { max-width: var(--container-max); margin: 0 auto; padding: 0 var(--space-4); }
+
+  /* ---------- Salto al contenido ---------- */
+  .skip {
+    position: absolute; left: var(--space-4); top: var(--space-2);
+    transform: translateY(-200%); background: var(--color-primary-600);
+    color: var(--color-text-inverse); font-weight: var(--weight-semibold);
+    padding: var(--space-3) var(--space-4); border-radius: var(--radius-md);
+    text-decoration: none; z-index: 10;
+  }
+  .skip:focus { transform: translateY(0); outline: none; box-shadow: var(--focus-ring); }
+
+  /* ---------- App bar (shell de C-04) ---------- */
+  .appbar { background: var(--color-surface); border-bottom: 1px solid var(--color-border); }
+  .appbar__inner {
+    display: flex; align-items: center; gap: var(--space-3);
+    min-height: calc(var(--space-8) * 2); flex-wrap: wrap;
+  }
+  .appbar__marca { display: flex; align-items: center; gap: var(--space-2); }
+  .appbar__marca img { height: var(--control-height); width: auto; display: block; }
+  .appbar__espacio { flex: 1; }
+  .appbar__sesion {
+    display: flex; align-items: center; gap: var(--space-2);
+    font-size: var(--text-sm); color: var(--color-text-muted);
+  }
+  .nav { display: flex; align-items: center; gap: var(--space-1); }
+  .nav__link {
+    display: inline-flex; align-items: center; min-height: var(--control-height);
+    padding: 0 var(--space-3); border-radius: var(--radius-md);
+    color: var(--color-text-muted); font-weight: var(--weight-medium);
+    font-size: var(--text-base); text-decoration: none;
+  }
+  .nav__link:hover { background: var(--color-surface-alt); color: var(--color-text); }
+  .nav__link:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+  .nav__link[aria-current="page"] {
+    background: var(--color-primary-50); color: var(--color-primary-700);
+    font-weight: var(--weight-semibold);
+  }
+
+  /* ---------- Botones ---------- */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+    min-height: var(--control-height); padding: 0 var(--space-5);
+    border: 1px solid transparent; border-radius: var(--radius-md);
+    font: inherit; font-size: var(--text-base); font-weight: var(--weight-semibold); cursor: pointer;
+  }
+  .btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+  .btn--primary { background: var(--color-primary-600); color: var(--color-text-inverse); }
+  .btn--secondary { background: var(--color-surface); color: var(--color-primary-700); border-color: var(--color-border-strong); }
+  .btn--ghost { background: transparent; color: var(--color-primary-700); }
+  .btn--sm { min-height: var(--control-height); padding: 0 var(--space-3); font-size: var(--text-sm); }
+  .btn--block { width: 100%; }
+
+  /* ---------- Contenido ---------- */
+  main { padding-bottom: var(--space-12); }
+  .page-head { padding: var(--space-5) 0 var(--space-3); }
+  .page-head h1 { font-size: var(--text-xl); }
+  .page-head p { color: var(--color-text-muted); margin-top: var(--space-2); font-size: var(--text-sm); }
+  .tabs {
+    display: flex; gap: var(--space-2); overflow-x: auto;
+    border-bottom: 1px solid var(--color-border); margin-bottom: var(--space-5);
+  }
+  .tab {
+    min-height: var(--control-height); padding: 0 var(--space-3);
+    border: 0; border-bottom: 1px solid transparent; background: transparent;
+    color: var(--color-text-muted); font: inherit; font-size: var(--text-sm);
+    font-weight: var(--weight-medium); cursor: pointer; white-space: nowrap;
+  }
+  .tab:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+  .tab[aria-current="page"] {
+    color: var(--color-primary-700); font-weight: var(--weight-semibold);
+    border-bottom-color: var(--color-primary-600);
+  }
+  .bloque {
+    background: var(--color-surface); border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); padding: var(--space-4);
+    margin-bottom: var(--space-4);
+  }
+  .bloque > h2 { font-size: var(--text-lg); margin-bottom: var(--space-1); }
+  .bloque > .desc { color: var(--color-text-muted); font-size: var(--text-sm); margin-bottom: var(--space-4); }
+  .acciones { display: grid; gap: var(--space-3); margin-top: var(--space-5); }
+
+  /* ---------- Alertas ---------- */
+  .alert {
+    display: flex; gap: var(--space-3); padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-md); border: 1px solid;
+    font-size: var(--text-sm); margin-bottom: var(--space-3);
+  }
+  .alert:last-child { margin-bottom: 0; }
+  .alert strong { display: block; font-size: var(--text-base); }
+  .alert__icon { flex: 0 0 auto; width: var(--space-5); height: var(--space-5); }
+  .alert--success { background: var(--color-success-50); border-color: var(--color-success-600); color: var(--color-success-600); }
+  .alert--error { background: var(--color-danger-50); border-color: var(--color-danger-600); color: var(--color-danger-700); }
+
+  /* ---------- Semana y franjas, una columna ---------- */
+  .semana { display: grid; grid-template-columns: 1fr; gap: var(--space-3); }
+  .dia {
+    min-width: 0; background: var(--color-surface); border: 1px solid var(--color-border);
+    border-radius: var(--radius-md); padding: var(--space-3);
+  }
+  .dia h3 { font-size: var(--text-base); margin-bottom: var(--space-2); }
+  .dia__vacio { color: var(--color-text-subtle); font-size: var(--text-sm); padding: var(--space-2) 0; }
+  .franja {
+    border: 1px solid var(--color-primary-200); border-radius: var(--radius-sm);
+    background: var(--color-primary-50); padding: var(--space-2);
+    margin-bottom: var(--space-2); font-size: var(--text-sm);
+  }
+  .franja__hora { display: block; font-weight: var(--weight-semibold); font-variant-numeric: tabular-nums; }
+  .franja--error { border-color: var(--color-danger-600); background: var(--color-danger-50); color: var(--color-danger-700); }
+  .franja__error { display: block; font-size: var(--text-xs); color: var(--color-danger-600); margin-top: var(--space-1); }
+  .dia .btn { width: 100%; margin-top: var(--space-1); }
+
+  /* ---------- Marco del dispositivo ---------- */
+  .movil-marco {
+    max-width: 360px; margin: 0 auto;
+    border: 1px solid var(--color-border-strong); border-radius: var(--radius-lg);
+    overflow: hidden; background: var(--color-surface); box-shadow: var(--shadow-sm);
+  }
+  .movil-marco .appbar__inner { min-height: auto; padding: var(--space-2) var(--space-4) 0; }
+  .movil-marco .nav { width: 100%; border-top: 1px solid var(--color-border); }
+  .movil-marco .nav__link { flex: 1; justify-content: center; font-size: var(--text-sm); }
+  .movil-marco .contenido-movil { padding: 0 var(--space-4) var(--space-6); }
+  .rotulo {
+    font-size: var(--text-xs); font-weight: var(--weight-semibold);
+    color: var(--color-text-subtle); margin-bottom: var(--space-3);
+  }
+  .nota-mockup { margin-top: var(--space-8); font-size: var(--text-sm); color: var(--color-text-subtle); }
+</style>
+</head>
+<body>
+
+<a class="skip" href="#contenido">Saltar al contenido</a>
+
+<!-- ===== App bar (móvil) ===== -->
+<header class="appbar">
+  <div class="movil-marco">
+    <div class="appbar__inner">
+      <div class="appbar__marca">
+        <img src="../../../../design-system/assets/logo.svg" alt="" width="135" height="44">
+        <span class="sr-only" data-brand-name>OdontoAgenda</span>
+      </div>
+      <div class="appbar__espacio"></div>
+      <div class="appbar__sesion">
+        <span>Dra. Ana Gómez</span>
+        <button class="btn btn--ghost btn--sm" type="button">Salir</button>
+      </div>
+    </div>
+    <nav class="nav" aria-label="Secciones de la aplicación (celular)">
+      <a class="nav__link" href="#agenda">Agenda</a>
+      <a class="nav__link" href="#configuracion" aria-current="page">Configuración</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ===== Contenido ===== -->
+<main id="contenido" tabindex="-1">
+  <div class="movil-marco">
+    <div class="contenido-movil">
+
+      <div class="page-head">
+        <h1>Configuración</h1>
+        <p>Horarios, prestaciones y bloqueos de tu agenda.</p>
+      </div>
+
+      <nav class="tabs" aria-label="Secciones de configuración">
+        <a class="tab" href="#horarios" aria-current="page">Horarios</a>
+        <a class="tab" href="#prestaciones">Prestaciones</a>
+        <a class="tab" href="#bloqueos">Bloqueos</a>
+      </nav>
+
+      <section class="bloque" aria-labelledby="h-horarios-movil">
+        <h2 id="h-horarios-movil">Horario semanal</h2>
+        <p class="desc">Definí las franjas en las que atendés. Todo se muestra en hora de Argentina.</p>
+
+        <div class="alert alert--error" role="alert">
+          <svg class="alert__icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 1.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zm.8 12.7H9.2v-1.6h1.6zm0-3.2H9.2V5.8h1.6z"/></svg>
+          <div>
+            <strong>Las franjas del mismo día no pueden solaparse</strong>
+            En miércoles, 10:00–12:00 se superpone con 09:00–11:00.
+          </div>
+        </div>
+
+        <div class="semana">
+          <div class="dia">
+            <h3>Lunes</h3>
+            <div class="franja"><span class="franja__hora">09:00–13:00</span></div>
+            <div class="franja"><span class="franja__hora">16:00–20:00</span></div>
+            <button class="btn btn--secondary btn--sm" type="button">Agregar franja</button>
+          </div>
+          <div class="dia">
+            <h3>Martes</h3>
+            <div class="franja"><span class="franja__hora">09:00–13:00</span></div>
+            <button class="btn btn--secondary btn--sm" type="button">Agregar franja</button>
+          </div>
+          <div class="dia">
+            <h3>Miércoles</h3>
+            <div class="franja franja--error" aria-invalid="true">
+              <span class="franja__hora">09:00–11:00</span>
+              <span class="franja__error">Se superpone con la otra franja.</span>
+            </div>
+            <div class="franja franja--error" aria-invalid="true">
+              <span class="franja__hora">10:00–12:00</span>
+              <span class="franja__error">Se superpone con la otra franja.</span>
+            </div>
+            <button class="btn btn--secondary btn--sm" type="button">Agregar franja</button>
+          </div>
+          <div class="dia">
+            <h3>Jueves</h3>
+            <p class="dia__vacio">Sin atención</p>
+            <button class="btn btn--secondary btn--sm" type="button">Agregar franja</button>
+          </div>
+          <div class="dia">
+            <h3>Viernes</h3>
+            <div class="franja"><span class="franja__hora">09:00–13:00</span></div>
+            <button class="btn btn--secondary btn--sm" type="button">Agregar franja</button>
+          </div>
+          <div class="dia">
+            <h3>Sábado</h3>
+            <p class="dia__vacio">Sin atención</p>
+            <button class="btn btn--secondary btn--sm" type="button">Agregar franja</button>
+          </div>
+          <div class="dia">
+            <h3>Domingo</h3>
+            <p class="dia__vacio">Sin atención</p>
+            <button class="btn btn--secondary btn--sm" type="button">Agregar franja</button>
+          </div>
+        </div>
+
+        <div class="acciones">
+          <button class="btn btn--primary btn--block" type="button">Guardar horario</button>
+          <button class="btn btn--ghost btn--block" type="button">Descartar cambios</button>
+        </div>
+      </section>
+
+      <div class="alert alert--success" role="status">
+        <svg class="alert__icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 1.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zm4 6.3-4.7 5a.8.8 0 0 1-1.1 0L6 10.6a.8.8 0 1 1 1.1-1.1l1.6 1.6 4.2-4.4A.8.8 0 1 1 14 7.8z"/></svg>
+        <div><strong>Cambios guardados</strong>El horario de atención quedó actualizado.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="container">
+    <p class="nota-mockup">
+      Mockup estático · <strong>PENDIENTE DE APROBACIÓN del usuario</strong> · design system revisión 2 · valores en
+      <a href="../../../../design-system/tokens.css">tokens.css</a>.
+    </p>
+  </div>
+</main>
+
+<script src="../../../../design-system/brand.js"></script>
+</body>
+</html>

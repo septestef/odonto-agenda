@@ -227,7 +227,7 @@ Camino crítico post-demo: `C-16 → C-17 → C-18` (C-20 cierra el camino hacia
   - `knowledge-base/03_actores_y_roles.md` §RBAC
 
 ### [C-06] `configuracion-agenda-ui` **[UI]**
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado (archivado 2026-11-22 como `2026-11-22-c-06-configuracion-agenda-ui`; UI de horarios, prestaciones y bloqueos; 263 tests frontend en verde)
 - **Scope**:
   - `features/config`: pantallas de horario semanal (franjas múltiples por día), prestaciones (alta, edición, baja) y bloqueos (rango fecha-hora; si hay turnos afectados se listan con acción de cancelar).
   - Validación en cliente (duración múltiplo de 15, inicio < fin) y mensajes de error del backend.

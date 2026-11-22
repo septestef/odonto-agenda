@@ -8,6 +8,9 @@ import type { AdaptadorNodos, ManejadoresUI, NodoUI } from './shared/ui/adaptado
 import { alerta, boton } from './shared/ui/componentes'
 import type { Descriptor } from './shared/ui/componentes'
 import { layout } from './shared/ui/layout'
+import { crearApiConfig } from './features/config/api-config'
+import { crearConfig } from './features/config/config'
+import type { ControlConfig } from './features/config/config'
 import { crearControlLogin } from './features/auth/login'
 import { vistaMarcador } from './vistas/marcador'
 
@@ -74,6 +77,7 @@ export function arrancar(
   const cliente = crearClienteApi({ fetch: opciones.fetch, leerCookie: opciones.leerCookie })
   const guard = crearGuard(opciones.fetch, cliente.suscribirSesionVencida, cliente)
   let cola: Promise<void> = Promise.resolve()
+  let controlConfig: ControlConfig | undefined
 
   function crearLogin(ruta: string): ControlVista {
     const manejadores: ManejadoresUI = {
@@ -143,6 +147,28 @@ export function arrancar(
       return undefined
     }
 
+    if (vista.tipo === 'ruta' && vista.nombre === 'config') {
+      if (controlConfig === undefined) {
+        controlConfig = crearConfig({
+          api: crearApiConfig(cliente),
+          alCambiar: () => {
+            if (router.rutaActual() === '/config') {
+              programarRenderizado()
+            }
+          },
+        })
+        void controlConfig.cargar()
+      }
+      return {
+        descriptor: layout({
+          odontologo: decision.odontologo,
+          ruta,
+          contenido: controlConfig.descriptor(),
+        }),
+        manejadores: controlConfig.manejadores(),
+      }
+    }
+
     return {
       descriptor: layout({
         odontologo: decision.odontologo,
@@ -159,6 +185,9 @@ export function arrancar(
       .then(async () => {
         if (router.rutaActual() !== ruta) {
           return
+        }
+        if (ruta !== '/config') {
+          controlConfig = undefined
         }
         const vista = resolverRuta(ruta)
         const control = await resolverVista(vista, ruta)
