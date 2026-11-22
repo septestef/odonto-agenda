@@ -173,7 +173,7 @@ Camino crítico post-demo: `C-16 → C-17 → C-18` (C-20 cierra el camino hacia
 > C-03 (backend) y C-04 (frontend) son independientes; el login E2E se verifica cuando ambos están.
 
 ### [C-03] `auth-sesion-odontologo`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado (archivado 2026-11-22 como `2026-11-22-c-03-auth-sesion-odontologo`)
 - **Scope**:
   - US-001 backend: `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/me` con Spring Security, sesión HTTP de servidor (`JSESSIONID` HttpOnly, SameSite=Lax), expiración a 8 h de inactividad (RN-AU-04), sin JWT (DD-04).
   - BCrypt (RN-AU-02); mensaje genérico 401 que no revela si el email existe; bloqueo de 15 min tras 5 intentos fallidos por email con contador en memoria y 429 con tiempo restante (RN-AU-03).
@@ -190,7 +190,7 @@ Camino crítico post-demo: `C-16 → C-17 → C-18` (C-20 cierra el camino hacia
   - `knowledge-base/09_decisiones_y_supuestos.md` §DD-04
 
 ### [C-04] `shell-frontend-y-login` **[UI]**
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado (archivado 2026-11-22 como `2026-11-22-c-04-shell-frontend-y-login`; mockups en `openspec/changes/archive/2026-11-22-c-04-shell-frontend-y-login/mockups/`)
 - **Scope**:
   - `frontend/src/main.ts` y `router.ts` (router propio, rutas `/login`, `/agenda`, `/config`, `/reservar/{slug}`, `/turno/{token}`) con guard de sesión vía `GET /api/auth/me`.
   - `shared/api-client.ts` (fetch + reenvío de `X-XSRF-TOKEN`, manejo de errores `{codigo, mensaje}`), `shared/fechas.ts` (zona Buenos Aires), componentes de UI base construidos desde `design-system/tokens.css` y `components.html` (botones, inputs, modal de confirmación, toasts, layout).
@@ -264,7 +264,7 @@ Camino crítico post-demo: `C-16 → C-17 → C-18` (C-20 cierra el camino hacia
   - `knowledge-base/09_decisiones_y_supuestos.md` §DD-02, §DD-03, §SU-02
 
 ### [C-08] `notificaciones-email`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado (archivado 2026-11-22 como `2026-11-22-c-08-notificaciones-email`). Con C-03, C-04, C-07 y C-08 integrados en `main`: 204 tests unitarios y 217 de integración en el backend, 184 tests de Vitest en el frontend
 - **Scope**:
   - Contrato heredado de C-07: `TurnoReservado(ResumenTurno, origen, token)` se publica dentro de la transacción; el token en claro viaja **solo en memoria** dentro del evento (su `toString` lo oculta). Consumir con `@TransactionalEventListener(AFTER_COMMIT)` y nunca loguear el token ni el link. `ReservaEventosIT` tiene un listener de ejemplo. Si el proceso cae entre el commit y el envío, el paciente no recibe el link (aceptado para la demo).
   - `NotificacionService` con listeners `@TransactionalEventListener(AFTER_COMMIT)` sobre `TurnoReservado`, `TurnoCancelado`, `TurnoReprogramado` (DD-09); emails vía Gmail SMTP (`MAIL_*`, DD-06) con `JavaMailSender`.
