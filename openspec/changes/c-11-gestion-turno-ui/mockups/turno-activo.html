@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>Mockup C-11 · Turno activo — OdontoAgenda</title>
+<link rel="icon" href="../../../../design-system/assets/logo.png">
+<link rel="stylesheet" href="../../../../design-system/tokens.css">
+<link rel="stylesheet" href="mockup.css">
+</head>
+<body>
+<header class="barra">
+  <div class="barra__inner">
+    <img src="../../../../design-system/assets/logo.svg" alt="" width="135" height="44">
+    <span class="sr-only" data-brand-name>OdontoAgenda</span>
+  </div>
+</header>
+
+<div class="pagina">
+  <main class="pagina__main">
+    <p class="saludo">Tu turno con Ana Pérez</p>
+    <h1 class="titulo">Gestioná tu turno</h1>
+
+    <section class="tarjeta" aria-labelledby="h-turno">
+      <h2 id="h-turno" class="sr-only">Detalle del turno</h2>
+      <div class="turno-hero">
+        <div class="turno-hero__badges"><span class="badge badge--reservado">Reservado</span></div>
+        <p class="turno-hero__fecha">Viernes 27 de noviembre</p>
+        <p class="turno-hero__hora">09:00 a 09:30</p>
+      </div>
+      <dl class="datos">
+        <dt>Prestación</dt><dd>Consulta</dd>
+        <dt>Profesional</dt><dd>Ana Pérez</dd>
+        <dt>Dirección</dt><dd>Av. Colón 1234, Córdoba</dd>
+      </dl>
+
+      <div class="acciones">
+        <a class="btn btn--secondary" href="reprogramar.html">Cambiar horario</a>
+        <a class="btn btn--danger" href="cancelar-confirmacion.html">Cancelar turno</a>
+      </div>
+      <p class="nota-mockup">Los botones se muestran según <code>puedeReprogramar</code> y <code>puedeCancelar</code> del GET. Si <code>direccionConsultorio</code> es null, la fila “Dirección” no aparece.</p>
+    </section>
+
+    <!-- Variante: puedeReprogramar = false (turno sin email de gestión válido, RN-SE-04) -->
+    <section class="tarjeta" aria-labelledby="h-variante">
+      <h2 id="h-variante" class="sr-only">Variante sin reprogramación</h2>
+      <p class="nota-mockup" style="margin:0 0 var(--space-4)">Variante: <code>puedeReprogramar: false</code>, <code>puedeCancelar: true</code>.</p>
+      <div class="alert alert--info" role="status">
+        <svg class="alert__icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 1.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zm.8 13H9.2V9h1.6zm0-7H9.2V5.9h1.6z"/></svg>
+        <div>Este turno no se puede cambiar desde el link. Si necesitás otro horario, cancelalo y <a class="link" href="#">reservá uno nuevo</a>.</div>
+      </div>
+      <div class="acciones acciones--una">
+        <a class="btn btn--danger" href="cancelar-confirmacion.html">Cancelar turno</a>
+      </div>
+    </section>
+  </main>
+
+  <aside class="lateral" aria-label="Información">
+    <section class="ayuda">
+      <h2>Antes de tu turno</h2>
+      <ul>
+        <li>Podés cancelar en cualquier momento antes de que empiece.</li>
+        <li>Si cambiás el horario, el nuevo tiene que ser con al menos 24 h de anticipación.</li>
+        <li>Cada cambio te llega por email.</li>
+      </ul>
+    </section>
+    <section class="ayuda ayuda--aviso">
+      <h2>Este link es personal</h2>
+      <p>Con este link se puede cancelar o cambiar tu turno. No lo compartas.</p>
+    </section>
+  </aside>
+</div>
+<script src="../../../../design-system/brand.js"></script>
+</body>
+</html>

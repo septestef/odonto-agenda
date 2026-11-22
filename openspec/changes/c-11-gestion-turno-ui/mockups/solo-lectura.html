@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>Mockup C-11 · Turno en solo lectura — OdontoAgenda</title>
+<link rel="icon" href="../../../../design-system/assets/logo.png">
+<link rel="stylesheet" href="../../../../design-system/tokens.css">
+<link rel="stylesheet" href="mockup.css">
+</head>
+<body>
+<header class="barra">
+  <div class="barra__inner">
+    <img src="../../../../design-system/assets/logo.svg" alt="" width="135" height="44">
+    <span class="sr-only" data-brand-name>OdontoAgenda</span>
+  </div>
+</header>
+
+<div class="pagina">
+  <main class="pagina__main">
+    <p class="saludo">Tu turno con Ana Pérez</p>
+    <h1 class="titulo">Tu turno</h1>
+
+    <!-- A. Recién cancelado por el paciente -->
+    <p class="nota-mockup" style="margin:0 0 var(--space-3)">A · Después de cancelar (la página vuelve a pedir el turno).</p>
+    <div class="alert alert--success" role="status">
+      <svg class="alert__icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 1.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zm4 6.3-4.7 5a.8.8 0 0 1-1.1 0L6 10.6a.8.8 0 1 1 1.1-1.1l1.6 1.6 4.2-4.4A.8.8 0 1 1 14 7.8z"/></svg>
+      <div><strong>Cancelaste tu turno</strong>El horario quedó libre. Te mandamos un email con la cancelación.</div>
+    </div>
+    <section class="tarjeta" aria-labelledby="h-a">
+      <h2 id="h-a" class="sr-only">Turno cancelado</h2>
+      <div class="turno-hero turno-hero--inactivo turno-hero--tachado">
+        <div class="turno-hero__badges"><span class="badge badge--cancelado">Cancelado</span></div>
+        <p class="turno-hero__fecha">Viernes 27 de noviembre</p>
+        <p class="turno-hero__hora">09:00 a 09:30</p>
+      </div>
+      <dl class="datos">
+        <dt>Prestación</dt><dd>Consulta</dd>
+        <dt>Profesional</dt><dd>Ana Pérez</dd>
+      </dl>
+      <div class="acciones acciones--una">
+        <a class="btn btn--secondary" href="#">Reservar otro turno</a>
+      </div>
+    </section>
+
+    <!-- B. Recién reprogramado: el link viejo muestra el original cancelado -->
+    <p class="nota-mockup" style="margin:var(--space-8) 0 var(--space-3)">B · Después de cambiar el horario. La página no recibe ni muestra el turno nuevo: solo confirma la hora elegida.</p>
+    <div class="alert alert--success" role="status">
+      <svg class="alert__icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 1.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zm4 6.3-4.7 5a.8.8 0 0 1-1.1 0L6 10.6a.8.8 0 1 1 1.1-1.1l1.6 1.6 4.2-4.4A.8.8 0 1 1 14 7.8z"/></svg>
+      <div><strong>Listo, cambiaste tu turno al jueves 26/11 a las 10:30</strong>Te mandamos un email con el link nuevo para gestionarlo. Este link queda solo para consultar el turno anterior.</div>
+    </div>
+    <section class="tarjeta" aria-labelledby="h-b">
+      <h2 id="h-b" class="sr-only">Turno anterior</h2>
+      <div class="turno-hero turno-hero--inactivo turno-hero--tachado">
+        <div class="turno-hero__badges"><span class="badge badge--cancelado">Cancelado</span></div>
+        <p class="turno-hero__fecha">Viernes 27 de noviembre</p>
+        <p class="turno-hero__hora">09:00 a 09:30</p>
+      </div>
+      <dl class="datos">
+        <dt>Prestación</dt><dd>Consulta</dd>
+        <dt>Profesional</dt><dd>Ana Pérez</dd>
+      </dl>
+    </section>
+
+    <!-- C. Turno pasado (abierto días después) -->
+    <p class="nota-mockup" style="margin:var(--space-8) 0 var(--space-3)">C · Turno que ya pasó (o empezó). No se puede cancelar ni cambiar.</p>
+    <div class="alert alert--info" role="status">
+      <svg class="alert__icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 1.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zm.8 13H9.2V9h1.6zm0-7H9.2V5.9h1.6z"/></svg>
+      <div>Este turno ya pasó. Solo podés consultarlo.</div>
+    </div>
+    <section class="tarjeta" aria-labelledby="h-c">
+      <h2 id="h-c" class="sr-only">Turno pasado</h2>
+      <div class="turno-hero turno-hero--inactivo">
+        <div class="turno-hero__badges"><span class="badge badge--pasado">Pasado</span></div>
+        <p class="turno-hero__fecha">Viernes 27 de noviembre</p>
+        <p class="turno-hero__hora">09:00 a 09:30</p>
+      </div>
+      <dl class="datos">
+        <dt>Prestación</dt><dd>Consulta</dd>
+        <dt>Profesional</dt><dd>Ana Pérez</dd>
+        <dt>Dirección</dt><dd>Av. Colón 1234, Córdoba</dd>
+      </dl>
+      <div class="acciones acciones--una">
+        <a class="btn btn--secondary" href="#">Reservar otro turno</a>
+      </div>
+    </section>
+  </main>
+
+  <aside class="lateral" aria-label="Información">
+    <section class="ayuda">
+      <h2>¿Necesitás otro turno?</h2>
+      <p>Podés reservar uno nuevo con Ana Pérez desde su página de reservas.</p>
+    </section>
+  </aside>
+</div>
+<script src="../../../../design-system/brand.js"></script>
+</body>
+</html>
