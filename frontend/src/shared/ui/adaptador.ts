@@ -1,11 +1,16 @@
 import type { Descriptor } from './componentes'
 
+/** Parte del evento del DOM que necesita el adaptador; lo satisface un `Event` real. */
+export interface EventoUI {
+  preventDefault(): void
+}
+
 /** Contrato mínimo que satisfacen tanto los nodos reales como los falsos de los tests. */
 export interface NodoUI {
   textContent: string | null
   append(...nodos: NodoUI[]): void
   setAttribute(nombre: string, valor: string): void
-  addEventListener(tipo: string, callback: () => void): void
+  addEventListener(tipo: string, callback: (evento?: EventoUI) => void): void
 }
 
 export interface DocumentoUI {
@@ -48,7 +53,12 @@ export function crearAdaptadorNodos(documento: DocumentoUI): AdaptadorNodos {
       const manejador = manejadores?.[descriptor.accion]
       if (manejador !== undefined) {
         const tipo = descriptor.etiqueta === 'form' ? 'submit' : 'click'
-        nodo.addEventListener(tipo, () => manejador(nodo))
+        nodo.addEventListener(tipo, (evento?: EventoUI) => {
+          if (tipo === 'submit') {
+            evento?.preventDefault()
+          }
+          manejador(nodo)
+        })
       }
     }
   }

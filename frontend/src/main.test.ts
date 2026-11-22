@@ -39,6 +39,21 @@ class NodoInteractivo implements NodoUI {
   }
 }
 
+/** Botón con `data-accion="ingresar"` que, como en el DOM, halla su form con `closest`. */
+class BotonIngresar extends NodoInteractivo {
+  private readonly formulario: NodoInteractivo
+
+  constructor(formulario: NodoInteractivo) {
+    super()
+    this.formulario = formulario
+    this.setAttribute('data-accion', 'ingresar')
+  }
+
+  closest(selector: string): NodoUI | null {
+    return selector === 'form' ? this.formulario : null
+  }
+}
+
 function historialFalso(rutaInicial: string) {
   let ruta = rutaInicial
   const push: string[] = []
@@ -133,6 +148,20 @@ function fetchConLogin(cuerpo: unknown, status: number, pedidos: string[] = []):
       return respuesta(cuerpo, status)
     }
     return new Response(null, { status: 204 })
+  }
+}
+
+interface PedidoRegistrado {
+  url: string
+  metodo: string | undefined
+  cuerpo: unknown
+}
+
+function fetchQueRegistraPedidos(pedidos: PedidoRegistrado[]): FetchLike {
+  return async (url, init) => {
+    const cuerpo: unknown = typeof init?.body === 'string' ? JSON.parse(init.body) : undefined
+    pedidos.push({ url, metodo: init?.method, cuerpo })
+    return respuesta(ODONTOLOGO, 200)
   }
 }
 
@@ -277,6 +306,84 @@ describe('arranque de la aplicación', () => {
     detener()
   })
 
+  it('propaga el lector de cookie inyectado al logout real', async () => {
+    const cabecerasLogout: Headers[] = []
+    const fetchQueRegistra: FetchLike = async (url, init) => {
+      if (url === '/api/auth/logout') {
+        cabecerasLogout.push(new Headers(init?.headers))
+      }
+      if (url === '/api/auth/me') {
+        return respuesta(ODONTOLOGO, 200)
+      }
+      return new Response(null, { status: 204 })
+    }
+    const { adaptador, ultimo } = adaptadorFalso()
+    const detener = arrancar({}, adaptador, {
+      historial: historialFalso('/agenda').historial,
+      fetch: fetchQueRegistra,
+      leerCookie: () => 'token-csrf-real',
+    })
+    await estabilizar()
+
+    await ultimo()?.manejadores?.['cerrar-sesion']?.(new NodoInteractivo())
+    await estabilizar()
+
+    expect(cabecerasLogout).toHaveLength(1)
+    expect(cabecerasLogout[0]?.get('X-XSRF-TOKEN')).toBe('token-csrf-real')
+    detener()
+  })
+
+  it('no envía CSRF al login público aunque haya un lector inyectado', async () => {
+    const cabecerasLogin: Headers[] = []
+    const fetchQueRegistra: FetchLike = async (url, init) => {
+      if (url === '/api/auth/login') {
+        cabecerasLogin.push(new Headers(init?.headers))
+        return respuesta(ODONTOLOGO, 200)
+      }
+      return new Response(null, { status: 204 })
+    }
+    const { adaptador, ultimo } = adaptadorFalso()
+    const detener = arrancar({}, adaptador, {
+      historial: historialFalso('/login').historial,
+      fetch: fetchQueRegistra,
+      leerCookie: () => 'token-csrf-real',
+    })
+    await estabilizar()
+
+    await ultimo()?.manejadores?.['ingresar']?.(formularioCon('ana@consultorio.com', 'secreto'))
+    await estabilizar()
+
+    expect(cabecerasLogin).toHaveLength(1)
+    expect(cabecerasLogin[0]?.get('X-XSRF-TOKEN')).toBeNull()
+    detener()
+  })
+
+  it('no inventa el header CSRF en el logout sin lector inyectado', async () => {
+    const cabecerasLogout: Headers[] = []
+    const fetchQueRegistra: FetchLike = async (url, init) => {
+      if (url === '/api/auth/logout') {
+        cabecerasLogout.push(new Headers(init?.headers))
+      }
+      if (url === '/api/auth/me') {
+        return respuesta(ODONTOLOGO, 200)
+      }
+      return new Response(null, { status: 204 })
+    }
+    const { adaptador, ultimo } = adaptadorFalso()
+    const detener = arrancar({}, adaptador, {
+      historial: historialFalso('/agenda').historial,
+      fetch: fetchQueRegistra,
+    })
+    await estabilizar()
+
+    await ultimo()?.manejadores?.['cerrar-sesion']?.(new NodoInteractivo())
+    await estabilizar()
+
+    expect(cabecerasLogout).toHaveLength(1)
+    expect(cabecerasLogout[0]?.get('X-XSRF-TOKEN')).toBeNull()
+    detener()
+  })
+
   it('sigue enlaces internos del layout con pushState', async () => {
     const pedidos: string[] = []
     const { adaptador, ultimo } = adaptadorFalso()
@@ -312,6 +419,13 @@ describe('arranque de la aplicación', () => {
     expect(codigo).toContain('pushState')
     expect(codigo).toContain('replaceState')
     expect(codigo).toContain('popstate')
+  })
+
+  it('el punto de entrada real inyecta un lector que lee document.cookie', () => {
+    const codigo = readFileSync(new URL('./bootstrap.ts', import.meta.url), 'utf8')
+
+    expect(codigo).toContain('leerCookieDeCadena(document.cookie, nombre)')
+    expect(codigo).toContain('leerCookie:')
   })
 
   it('el documento carga el punto de entrada real', () => {
@@ -730,6 +844,94 @@ describe('regresiones de rutas públicas y cliente compartido', () => {
     await estabilizar()
 
     expect(consultasMe).toBe(1)
+    detener()
+  })
+})
+
+describe('cableamiento del botón Ingresar', () => {
+  it('envía el email y la contraseña del formulario al hacer clic en el botón', async () => {
+    const pedidos: PedidoRegistrado[] = []
+    const { adaptador, ultimo } = adaptadorFalso()
+    const detener = arrancar({}, adaptador, {
+      historial: historialFalso('/login').historial,
+      fetch: fetchQueRegistraPedidos(pedidos),
+    })
+    await estabilizar()
+
+    await ultimo()?.manejadores?.['ingresar']?.(new BotonIngresar(formularioCon('ana@consultorio.com', 'secreto')))
+    await estabilizar()
+
+    expect(pedidos).toEqual([
+      {
+        url: '/api/auth/login',
+        metodo: 'POST',
+        cuerpo: { email: 'ana@consultorio.com', password: 'secreto' },
+      },
+    ])
+    detener()
+  })
+
+  it('mantiene el submit directo: lee los campos del propio formulario', async () => {
+    const pedidos: PedidoRegistrado[] = []
+    const { adaptador, ultimo } = adaptadorFalso()
+    const detener = arrancar({}, adaptador, {
+      historial: historialFalso('/login').historial,
+      fetch: fetchQueRegistraPedidos(pedidos),
+    })
+    await estabilizar()
+
+    await ultimo()?.manejadores?.['ingresar']?.(formularioCon('otra@consultorio.com', 'otra-clave'))
+    await estabilizar()
+
+    expect(pedidos).toEqual([
+      {
+        url: '/api/auth/login',
+        metodo: 'POST',
+        cuerpo: { email: 'otra@consultorio.com', password: 'otra-clave' },
+      },
+    ])
+    detener()
+  })
+
+  it('un nodo sin closest y sin campos sigue mostrando el error de validación', async () => {
+    const pedidos: string[] = []
+    const { adaptador, ultimo } = adaptadorFalso()
+    const detener = arrancar({}, adaptador, {
+      historial: historialFalso('/login').historial,
+      fetch: fetchConLogin(ODONTOLOGO, 200, pedidos),
+    })
+    await estabilizar()
+
+    await ultimo()?.manejadores?.['ingresar']?.(new NodoInteractivo())
+    await estabilizar()
+
+    expect(pedidos).toEqual([])
+    expect(alertaDe(ultimo()?.descriptor)?.texto).toBe('Ingresá tu email.')
+    detener()
+  })
+
+  it('prioriza los campos del formulario incluso si el botón tiene valores propios', async () => {
+    const pedidos: PedidoRegistrado[] = []
+    const { adaptador, ultimo } = adaptadorFalso()
+    const detener = arrancar({}, adaptador, {
+      historial: historialFalso('/login').historial,
+      fetch: fetchQueRegistraPedidos(pedidos),
+    })
+    await estabilizar()
+    const boton = new BotonIngresar(formularioCon('ana@consultorio.com', 'secreto'))
+    boton.valores['email'] = 'valor-del-boton@consultorio.com'
+    boton.valores['password'] = 'clave-del-boton'
+
+    await ultimo()?.manejadores?.['ingresar']?.(boton)
+    await estabilizar()
+
+    expect(pedidos).toEqual([
+      {
+        url: '/api/auth/login',
+        metodo: 'POST',
+        cuerpo: { email: 'ana@consultorio.com', password: 'secreto' },
+      },
+    ])
     detener()
   })
 })

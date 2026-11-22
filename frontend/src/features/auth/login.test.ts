@@ -428,9 +428,25 @@ describe('inserción segura de mensajes', () => {
 })
 
 describe('textos alineados con la spec y los mockups', () => {
-  const rutaMockups = '../../../../openspec/changes/c-04-shell-frontend-y-login/mockups/'
-  const escritorio = readFileSync(new URL(`${rutaMockups}login-escritorio.html`, import.meta.url), 'utf8')
-  const movil = readFileSync(new URL(`${rutaMockups}login-movil.html`, import.meta.url), 'utf8')
+  // El change ya está archivado; se acepta la ruta archivada y la original para no acoplar el test al move.
+  const rutasMockups = [
+    '../../../../openspec/changes/archive/2026-11-22-c-04-shell-frontend-y-login/mockups/',
+    '../../../../openspec/changes/c-04-shell-frontend-y-login/mockups/',
+  ]
+
+  function leerMockup(nombre: string): string {
+    for (const ruta of rutasMockups) {
+      try {
+        return readFileSync(new URL(`${ruta}${nombre}`, import.meta.url), 'utf8')
+      } catch {
+        // Se prueba la siguiente ubicación.
+      }
+    }
+    throw new Error(`No se encontró el mockup ${nombre}`)
+  }
+
+  const escritorio = leerMockup('login-escritorio.html')
+  const movil = leerMockup('login-movil.html')
 
   function textosDe(descriptor: Descriptor): string[] {
     return [
