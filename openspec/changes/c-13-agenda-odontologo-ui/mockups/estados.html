@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup C-13 · Estados de la agenda — OdontoAgenda</title>
+<link rel="icon" href="../../../../design-system/assets/logo.png">
+<link rel="stylesheet" href="../../../../design-system/tokens.css">
+<link rel="stylesheet" href="mockup.css">
+</head>
+<body>
+<header class="appbar">
+  <div class="container appbar__inner">
+    <div class="appbar__marca">
+      <img src="../../../../design-system/assets/logo.svg" alt="" width="135" height="44">
+      <span class="sr-only" data-brand-name>OdontoAgenda</span>
+    </div>
+    <nav class="nav" aria-label="Secciones de la aplicación">
+      <a class="nav__link" href="#" aria-current="page">Agenda</a>
+      <a class="nav__link" href="#">Configuración</a>
+    </nav>
+    <div class="appbar__espacio"></div>
+    <div class="appbar__sesion"><span>Dra. Ana Gómez</span><button class="btn btn--ghost btn--sm" type="button">Cerrar sesión</button></div>
+  </div>
+</header>
+
+<main class="container">
+  <div class="agenda-head"><div class="agenda-head__titulo"><h1>Estados de la agenda</h1></div></div>
+  <p class="nota-mockup" style="margin:0 0 var(--space-6)">Galería para revisar. En la UI real se ve uno por vez dentro de la vista diaria o semanal.</p>
+
+  <div class="galeria">
+    <section aria-labelledby="e1">
+      <h2 id="e1" class="estado__nombre">1 · Cargando</h2>
+      <div class="franja" aria-busy="true" aria-label="Cargando la agenda">
+        <div class="esqueleto"></div><div class="esqueleto"></div><div class="esqueleto" style="margin-bottom:0"></div>
+      </div>
+    </section>
+
+    <section aria-labelledby="e2">
+      <h2 id="e2" class="estado__nombre">2 · Sin horario de atención cargado</h2>
+      <div class="empty">
+        <h3>Todavía no cargaste tus horarios</h3>
+        <p>Definí los días y las franjas en las que atendés para empezar a recibir turnos.</p>
+        <a class="btn btn--secondary" href="#">Ir a Configuración</a>
+      </div>
+    </section>
+
+    <section aria-labelledby="e3">
+      <h2 id="e3" class="estado__nombre">3 · Día sin turnos</h2>
+      <div class="empty">
+        <h3>No tenés turnos este día</h3>
+        <p>Atendés de 09:00 a 13:00 y de 16:00 a 19:00. Los turnos que reserven tus pacientes aparecen acá.</p>
+        <button class="btn btn--secondary" type="button">Ir al próximo día con turnos</button>
+      </div>
+    </section>
+
+    <section aria-labelledby="e4">
+      <h2 id="e4" class="estado__nombre">4 · Día que no atendés</h2>
+      <div class="empty">
+        <h3>El sábado no atendés</h3>
+        <p>No hay franjas cargadas para este día.</p>
+      </div>
+    </section>
+
+    <section aria-labelledby="e5">
+      <h2 id="e5" class="estado__nombre">5 · Turno cancelado (aviso)</h2>
+      <div class="toast" role="status">
+        <svg class="alert__icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" style="color:var(--color-success-600)"><path d="M10 1.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zm4 6.3-4.7 5a.8.8 0 0 1-1.1 0L6 10.6a.8.8 0 1 1 1.1-1.1l1.6 1.6 4.2-4.4A.8.8 0 1 1 14 7.8z"/></svg>
+        <div><strong>Turno cancelado</strong>Le avisamos a Ana Pérez por email.</div>
+        <button class="toast__cerrar" type="button" aria-label="Cerrar el aviso">Cerrar</button>
+      </div>
+      <p class="nota-mockup">Toast del mockup aprobado de C-04, abajo a la derecha en escritorio y abajo a lo ancho en celular. El turno queda en la lista como “Cancelado”.</p>
+    </section>
+
+    <section aria-labelledby="e6">
+      <h2 id="e6" class="estado__nombre">6 · El turno ya empezó · 409 RN-TU-07</h2>
+      <div class="alert alert--warning" role="alert">
+        <svg class="alert__icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10.9 2.6a1 1 0 0 0-1.8 0L1.6 16a1 1 0 0 0 .9 1.5h15a1 1 0 0 0 .9-1.5zM10.8 15H9.2v-1.6h1.6zm0-3.2H9.2V7.4h1.6z"/></svg>
+        <div><strong>No se pudo cancelar</strong>Este turno ya empezó. Actualizamos la agenda.</div>
+      </div>
+    </section>
+
+    <section aria-labelledby="e7">
+      <h2 id="e7" class="estado__nombre">7 · Ya no se puede cancelar · 404 / 409</h2>
+      <div class="alert alert--info" role="alert">
+        <svg class="alert__icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 1.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zm.8 13H9.2V9h1.6zm0-7H9.2V5.9h1.6z"/></svg>
+        <div><strong>Este turno cambió</strong>Puede que el paciente lo haya cancelado o cambiado de horario. Actualizamos la agenda.</div>
+      </div>
+      <p class="nota-mockup">Códigos exactos a confirmar con el contrato de C-12 (turno inexistente o ajeno → 404; ya no reservado → 409). En todos los casos se recarga el rango visible.</p>
+    </section>
+
+    <section aria-labelledby="e8">
+      <h2 id="e8" class="estado__nombre">8 · Sin conexión o error inesperado</h2>
+      <div class="alert alert--error" role="alert">
+        <svg class="alert__icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 1.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zm.8 12.7H9.2v-1.6h1.6zm0-3.2H9.2V5.8h1.6z"/></svg>
+        <div><strong>No pudimos cargar la agenda</strong>Revisá la conexión y probá de nuevo.</div>
+      </div>
+      <button class="btn btn--secondary" type="button">Reintentar</button>
+    </section>
+  </div>
+</main>
+<script src="../../../../design-system/brand.js"></script>
+</body>
+</html>
