@@ -43,10 +43,10 @@ describe('marca y favicon', () => {
   })
 
   it('el shell usa el nombre centralizado en lugar de un literal', () => {
-    const codigo = leer('../main.ts')
+    const codigo = leer('./ui/layout.ts')
 
-    expect(codigo).toContain("import { NOMBRE_MARCA } from './shared/brand'")
-    expect(codigo).toContain('app.textContent = NOMBRE_MARCA')
+    expect(codigo).toContain("import { NOMBRE_MARCA } from '../brand'")
+    expect(codigo).toContain('texto: NOMBRE_MARCA')
     expect(codigo.includes("'OdontoAgenda'")).toBe(false)
   })
 

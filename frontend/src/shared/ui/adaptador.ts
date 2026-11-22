@@ -1,0 +1,76 @@
+import type { Descriptor } from './componentes'
+
+/** Contrato mínimo que satisfacen tanto los nodos reales como los falsos de los tests. */
+export interface NodoUI {
+  textContent: string | null
+  append(...nodos: NodoUI[]): void
+  setAttribute(nombre: string, valor: string): void
+  addEventListener(tipo: string, callback: () => void): void
+}
+
+export interface DocumentoUI {
+  createElement(etiqueta: string): NodoUI
+}
+
+export type ManejadoresUI = Readonly<Record<string, (nodo: NodoUI) => void>>
+
+export interface AdaptadorNodos {
+  montar(destino: unknown, descriptor: Descriptor, manejadores?: ManejadoresUI): void
+}
+
+function esNodo(valor: unknown): valor is NodoUI {
+  if (typeof valor !== 'object' || valor === null) {
+    return false
+  }
+  const candidato: Record<string, unknown> = valor as Record<string, unknown>
+
+  return (
+    'textContent' in candidato &&
+    typeof candidato['append'] === 'function' &&
+    typeof candidato['setAttribute'] === 'function' &&
+    typeof candidato['addEventListener'] === 'function'
+  )
+}
+
+export function crearAdaptadorNodos(documento: DocumentoUI): AdaptadorNodos {
+  function aplicar(nodo: NodoUI, descriptor: Descriptor, manejadores: ManejadoresUI | undefined): void {
+    if (descriptor.clase !== undefined) {
+      nodo.setAttribute('class', descriptor.clase)
+    }
+    for (const [nombre, valor] of Object.entries(descriptor.atributos ?? {})) {
+      nodo.setAttribute(nombre, valor)
+    }
+    if (descriptor.texto !== undefined) {
+      nodo.textContent = descriptor.texto
+    }
+    if (descriptor.accion !== undefined) {
+      nodo.setAttribute('data-accion', descriptor.accion)
+      const manejador = manejadores?.[descriptor.accion]
+      if (manejador !== undefined) {
+        const tipo = descriptor.etiqueta === 'form' ? 'submit' : 'click'
+        nodo.addEventListener(tipo, () => manejador(nodo))
+      }
+    }
+  }
+
+  function construir(descriptor: Descriptor, manejadores: ManejadoresUI | undefined): NodoUI {
+    const nodo = documento.createElement(descriptor.etiqueta)
+    aplicar(nodo, descriptor, manejadores)
+
+    for (const hijo of descriptor.hijos ?? []) {
+      nodo.append(construir(hijo, manejadores))
+    }
+
+    return nodo
+  }
+
+  return {
+    montar(destino, descriptor, manejadores) {
+      if (!esNodo(destino)) {
+        throw new Error('El destino del adaptador debe ser un nodo')
+      }
+      destino.textContent = ''
+      destino.append(construir(descriptor, manejadores))
+    },
+  }
+}
