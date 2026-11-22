@@ -90,6 +90,25 @@ function esConsultable(nodo: unknown): nodo is NodoConsultable {
   return typeof (nodo as Partial<NodoConsultable>).querySelectorAll === 'function'
 }
 
+interface NodoConAncestros {
+  closest(selector: string): unknown
+}
+
+function tieneAncestros(nodo: unknown): nodo is NodoConAncestros {
+  return typeof nodo === 'object' && nodo !== null && typeof (nodo as Partial<NodoConAncestros>).closest === 'function'
+}
+
+/**
+ * Devuelve el formulario que contiene al nodo (o el nodo mismo si no se puede subir).
+ * Sirve para leer lo que el usuario tipeó cuando la acción sale de un botón interno.
+ */
+export function formularioDe(nodo: unknown): unknown {
+  if (!tieneAncestros(nodo)) {
+    return nodo
+  }
+  return nodo.closest('form') ?? nodo
+}
+
 /** Lee los valores del formulario cuando el nodo real lo permite. */
 export function valoresDeFormulario(nodo: unknown): ReadonlyMap<string, string> {
   const valores = new Map<string, string>()

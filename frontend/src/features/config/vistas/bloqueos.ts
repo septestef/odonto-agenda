@@ -2,7 +2,8 @@ import { boton } from '../../../shared/ui/componentes'
 import type { Descriptor } from '../../../shared/ui/componentes'
 import type { ManejadoresUI, NodoUI } from '../../../shared/ui/adaptador'
 import type { ApiConfig } from '../api-config'
-import { fechaVisible, instanteConOffset, rangoVisible } from '../instantes'
+import { fechaLocalArgentina } from '../../../shared/fechas'
+import { instanteConOffset, rangoBloqueoVisible, rangoVisible } from '../instantes'
 import { MENSAJE_FIN_BLOQUEO, validarRangoBloqueo } from '../validadores'
 import { traducirError } from '../errores'
 import type { Bloqueo, ErroresCampo, MomentoLocal, TurnoAfectado } from '../modelos'
@@ -43,6 +44,8 @@ export interface ControlBloqueos {
 export interface OpcionesVistaBloqueos {
   readonly api: ApiConfig
   readonly alCambiar?: () => void
+  /** Reloj inyectable para la fecha por defecto del formulario (tests). */
+  readonly reloj?: () => Date
 }
 
 const AVISO_NO_CANCELA = 'Crear un bloqueo no cancela tus turnos.'
@@ -101,7 +104,7 @@ export function renderTurno(turno: TurnoAfectado): Descriptor {
   }
 }
 
-function renderBloqueo(bloqueo: Bloqueo): Descriptor {
+function renderBloqueo(bloqueo: Bloqueo, ocupado: boolean): Descriptor {
   const turnos = bloqueo.turnosAfectados
   return {
     etiqueta: 'article',
@@ -114,7 +117,7 @@ function renderBloqueo(bloqueo: Bloqueo): Descriptor {
           {
             etiqueta: 'span',
             clase: 'bloqueo__rango',
-            texto: `${fechaVisible(bloqueo.inicio)} · ${rangoVisible(bloqueo.inicio, bloqueo.fin)}`,
+            texto: rangoBloqueoVisible(bloqueo.inicio, bloqueo.fin),
           },
           {
             etiqueta: 'button',
@@ -124,6 +127,7 @@ function renderBloqueo(bloqueo: Bloqueo): Descriptor {
               type: 'button',
               'data-accion': 'baja-bloqueo',
               'data-id': String(bloqueo.id),
+              ...(ocupado ? { disabled: '' } : {}),
             },
             accion: 'baja-bloqueo',
           },
@@ -157,10 +161,12 @@ function datosDelFormulario(nodo: NodoUI, actuales: DatosBloqueoFormulario): Dat
 
 export function crearVistaBloqueos(opciones: OpcionesVistaBloqueos): ControlBloqueos {
   let estado: EstadoBloqueos = { tipo: 'cargando', bloqueos: [] }
-  const borrador: DatosBloqueoFormulario = {
-    fechaInicio: '2026-11-27',
+  const hoy = fechaLocalArgentina((opciones.reloj ?? (() => new Date()))())
+  // Lo último que envió el usuario: se re-dibuja así tras un error en vez de volver a los valores por defecto.
+  let borrador: DatosBloqueoFormulario = {
+    fechaInicio: hoy,
     horaInicio: '10:00',
-    fechaFin: '2026-11-27',
+    fechaFin: hoy,
     horaFin: '12:00',
     motivo: '',
   }
@@ -209,7 +215,14 @@ export function crearVistaBloqueos(opciones: OpcionesVistaBloqueos): ControlBloq
               clase: 'field-row',
               hijos: [
                 entrada({ nombre: 'fechaInicio', etiqueta: 'Fecha de inicio', valor: borrador.fechaInicio, tipo: 'date' }),
-                entrada({ nombre: 'horaInicio', etiqueta: 'Hora de inicio', valor: borrador.horaInicio, tipo: 'time' }),
+                entrada({
+                  nombre: 'horaInicio',
+                  etiqueta: 'Hora de inicio',
+                  valor: borrador.horaInicio,
+                  tipo: 'time',
+                  error: errores['inicio'],
+                  foco: foco === 'inicio',
+                }),
                 entrada({ nombre: 'fechaFin', etiqueta: 'Fecha de fin', valor: borrador.fechaFin, tipo: 'date' }),
                 entrada({
                   nombre: 'horaFin',
@@ -237,7 +250,7 @@ export function crearVistaBloqueos(opciones: OpcionesVistaBloqueos): ControlBloq
               etiqueta: 'div',
               clase: 'acciones',
               hijos: [
-                boton({ texto: 'Agregar bloqueo', textoEnviando: 'Agregando…', enviando, accion: 'crear-bloqueo' }),
+                boton({ texto: 'Agregar bloqueo', textoEnviando: 'Agregando…', enviando }),
                 boton({ texto: 'Cancelar', accion: 'cancelar-bloqueo', variante: 'fantasma', tipo: 'button' }),
               ],
             },
@@ -252,7 +265,7 @@ export function crearVistaBloqueos(opciones: OpcionesVistaBloqueos): ControlBloq
         {
           etiqueta: 'div',
           clase: 'lista',
-          hijos: estado.bloqueos.map(renderBloqueo),
+          hijos: estado.bloqueos.map((bloqueo) => renderBloqueo(bloqueo, enviando)),
         },
         ...(estado.tipo === 'cargando' ? [alertaVisual('Cargando bloqueos…', 'info')] : []),
         ...(estado.tipo === 'error' && estado.reintentar
@@ -307,6 +320,7 @@ export function crearVistaBloqueos(opciones: OpcionesVistaBloqueos): ControlBloq
     },
 
     async crear(datos) {
+      borrador = { ...datos }
       const inicio: MomentoLocal = { fecha: datos.fechaInicio, hora: datos.horaInicio }
       const fin: MomentoLocal = { fecha: datos.fechaFin, hora: datos.horaFin }
       const validacion = validarRangoBloqueo(inicio, fin)
@@ -314,7 +328,7 @@ export function crearVistaBloqueos(opciones: OpcionesVistaBloqueos): ControlBloq
         cambiar({
           tipo: 'error',
           bloqueos: estado.bloqueos,
-          alerta: MENSAJE_FIN_BLOQUEO,
+          alerta: (validacion.primero === undefined ? undefined : validacion.errores[validacion.primero]) ?? MENSAJE_FIN_BLOQUEO,
           detalle: DETALLE_RANGO_BLOQUEO,
           errores: validacion.errores,
           ...(validacion.primero === undefined ? {} : { foco: validacion.primero }),
@@ -345,7 +359,11 @@ export function crearVistaBloqueos(opciones: OpcionesVistaBloqueos): ControlBloq
     },
 
     async baja(id) {
+      if (estado.tipo === 'guardando') {
+        return
+      }
       const anteriores = estado.bloqueos
+      cambiar({ tipo: 'guardando', bloqueos: anteriores })
       try {
         await opciones.api.bajaBloqueo(id)
         cambiar({ tipo: 'listo', bloqueos: anteriores.filter((bloqueo) => bloqueo.id !== id) })

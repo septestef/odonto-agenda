@@ -2,11 +2,11 @@ import { boton } from '../../../shared/ui/componentes'
 import type { Descriptor } from '../../../shared/ui/componentes'
 import type { ManejadoresUI, NodoUI } from '../../../shared/ui/adaptador'
 import type { ApiConfig } from '../api-config'
-import { aplanarFranjas, agruparFranjas, textoFranja } from '../franjas'
+import { aplanarFranjas, agruparFranjas, ordenarFranjas, textoFranja } from '../franjas'
 import { MENSAJE_SOLAPE, MENSAJE_SOLAPE_FRANJA, validarFranjas } from '../validadores'
 import { traducirError } from '../errores'
 import type { DiaSemana, ErroresCampo, Franja } from '../modelos'
-import { alertaVisual, atributosValidacion, etiquetaError, valoresDeFormulario } from './compartido'
+import { alertaVisual, atributosValidacion, etiquetaError, formularioDe, valoresDeFormulario } from './compartido'
 
 export type EstadoHorarios =
   | { readonly tipo: 'cargando'; readonly dias: readonly DiaSemana[] }
@@ -27,8 +27,10 @@ export interface ControlHorarios {
   manejadores(): ManejadoresUI
   cargar(): Promise<void>
   guardar(dias?: readonly DiaSemana[]): Promise<void>
-  agregarFranja(diaSemana: number): void
-  quitarFranja(diaSemana: number, indice: number): void
+  /** `base` son los días con lo que el usuario tipeó; si falta, se usa el estado actual. */
+  agregarFranja(diaSemana: number, base?: readonly DiaSemana[]): void
+  /** `indice` es la posición de la franja dentro de su día. */
+  quitarFranja(diaSemana: number, indice: number, base?: readonly DiaSemana[]): void
   descartarCambios(): void
 }
 
@@ -52,7 +54,7 @@ function atributoDe(nodo: NodoUI, nombre: string): string | undefined {
   return consultable.getAttribute?.(nombre) ?? undefined
 }
 
-function diasDesdeFormulario(nodo: NodoUI, actuales: readonly DiaSemana[]): readonly DiaSemana[] {
+function diasDesdeFormulario(nodo: unknown, actuales: readonly DiaSemana[]): readonly DiaSemana[] {
   const valores = valoresDeFormulario(nodo)
   if (valores.size === 0) {
     return actuales
@@ -116,6 +118,7 @@ export function crearVistaHorarios(opciones: OpcionesVistaHorarios): ControlHora
     franja: Franja,
     diaSemana: number,
     indice: number,
+    indiceEnDia: number,
     errores: ErroresCampo,
     foco?: string,
   ): Descriptor {
@@ -138,7 +141,7 @@ export function crearVistaHorarios(opciones: OpcionesVistaHorarios): ControlHora
             type: 'button',
             'data-accion': 'quitar-franja',
             'data-dia': String(diaSemana),
-            'data-indice': String(indice),
+            'data-indice': String(indiceEnDia),
           },
           accion: 'quitar-franja',
         },
@@ -148,7 +151,7 @@ export function crearVistaHorarios(opciones: OpcionesVistaHorarios): ControlHora
 
   function renderDia(dia: DiaSemana, indiceGlobal: number, errores: ErroresCampo, foco?: string): Descriptor {
     const franjas = dia.franjas.map((franja, indiceLocal) =>
-      renderFranja(franja, dia.diaSemana, indiceGlobal + indiceLocal, errores, foco),
+      renderFranja(franja, dia.diaSemana, indiceGlobal + indiceLocal, indiceLocal, errores, foco),
     )
     return {
       etiqueta: 'section' as const,
@@ -212,7 +215,6 @@ export function crearVistaHorarios(opciones: OpcionesVistaHorarios): ControlHora
                   texto: 'Guardar horario',
                   textoEnviando: 'Guardando…',
                   enviando,
-                  accion: 'guardar-horario',
                 }),
                 boton({
                   texto: 'Descartar cambios',
@@ -244,14 +246,14 @@ export function crearVistaHorarios(opciones: OpcionesVistaHorarios): ControlHora
         'agregar-franja'(nodo: NodoUI) {
           const dia = Number(atributoDe(nodo, 'data-dia'))
           if (Number.isInteger(dia)) {
-            vista.agregarFranja(dia)
+            vista.agregarFranja(dia, diasDesdeFormulario(formularioDe(nodo), estado.dias))
           }
         },
         'quitar-franja'(nodo: NodoUI) {
           const dia = Number(atributoDe(nodo, 'data-dia'))
           const indice = Number(atributoDe(nodo, 'data-indice'))
           if (Number.isInteger(dia) && Number.isInteger(indice)) {
-            vista.quitarFranja(dia, indice)
+            vista.quitarFranja(dia, indice, diasDesdeFormulario(formularioDe(nodo), estado.dias))
           }
         },
         'descartar-horarios'() {
@@ -277,7 +279,9 @@ export function crearVistaHorarios(opciones: OpcionesVistaHorarios): ControlHora
     },
 
     async guardar(dias = estado.dias) {
-      const borrador = clonarDias(dias)
+      // Se reordena igual que `aplanarFranjas` para que `franjas[i]` (del validador
+      // y del backend) apunte a la misma franja que se dibuja en la posición i.
+      const borrador = clonarDias(dias).map((dia) => ({ ...dia, franjas: [...ordenarFranjas(dia.franjas)] }))
       const franjas = aplanarFranjas(borrador)
       const validacion = validarFranjas(franjas)
       if (!validacion.valido) {
@@ -311,8 +315,8 @@ export function crearVistaHorarios(opciones: OpcionesVistaHorarios): ControlHora
       }
     },
 
-    agregarFranja(diaSemana) {
-      const dias = clonarDias(estado.dias)
+    agregarFranja(diaSemana, base = estado.dias) {
+      const dias = clonarDias(base)
       const dia = dias.find((item) => item.diaSemana === diaSemana)
       if (dia === undefined) {
         return
@@ -321,8 +325,8 @@ export function crearVistaHorarios(opciones: OpcionesVistaHorarios): ControlHora
       cambiar({ tipo: 'listo', dias })
     },
 
-    quitarFranja(diaSemana, indice) {
-      const dias = clonarDias(estado.dias)
+    quitarFranja(diaSemana, indice, base = estado.dias) {
+      const dias = clonarDias(base)
       const dia = dias.find((item) => item.diaSemana === diaSemana)
       if (dia === undefined || indice < 0 || indice >= dia.franjas.length) {
         return

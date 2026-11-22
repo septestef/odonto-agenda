@@ -100,3 +100,16 @@ export function fechaVisible(iso: string): string {
 export function rangoVisible(inicio: string, fin: string): string {
   return rangoTexto(horaArgentina(instanteDe(inicio)), horaArgentina(instanteDe(fin)))
 }
+
+/**
+ * Rango de un bloqueo: `27/11/2026 · 10:00–12:00` si empieza y termina el mismo día
+ * (en hora de Argentina) y `27/11/2026 10:00 – 29/11/2026 12:00` si abarca varios días.
+ */
+export function rangoBloqueoVisible(inicio: string, fin: string): string {
+  const desde = desglosarInstante(inicio)
+  const hasta = desglosarInstante(fin)
+  if (desde.fecha === hasta.fecha) {
+    return `${fechaVisible(inicio)} · ${rangoTexto(desde.hora, hasta.hora)}`
+  }
+  return `${fechaVisible(inicio)} ${desde.hora} – ${fechaVisible(fin)} ${hasta.hora}`
+}

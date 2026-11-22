@@ -6,7 +6,9 @@ export const MENSAJE_SOLAPE = 'Las franjas del mismo día no pueden solaparse'
 export const MENSAJE_SOLAPE_FRANJA = 'Se superpone con la otra franja.'
 export const MENSAJE_DURACION = 'La duración tiene que ser un múltiplo de 15 minutos.'
 export const MENSAJE_FIN_BLOQUEO = 'La hora de fin debe ser posterior a la de inicio.'
-export const MENSAJE_DIA = 'Elegí un día entre el lunes y el domingo.'
+export const MENSAJE_INICIO_INCOMPLETO = 'Completá la fecha y la hora de inicio.'
+export const MENSAJE_FIN_INCOMPLETO = 'Completá la fecha y la hora de fin.'
+export const MENSAJE_DIA ='Elegí un día entre el lunes y el domingo.'
 export const MENSAJE_HORA = 'Usá el formato HH:mm.'
 
 const FORMATO_HORA = /^([01]\d|2[0-3]):[0-5]\d$/
@@ -95,10 +97,10 @@ function claveDe(momento: MomentoLocal): string {
 export function validarRangoBloqueo(inicio: MomentoLocal, fin: MomentoLocal): ResultadoValidacion {
   const errores: Record<string, string> = {}
   if (!esFechaValida(inicio.fecha) || !validarHora(inicio.hora)) {
-    errores['inicio'] = MENSAJE_HORA
+    errores['inicio'] = MENSAJE_INICIO_INCOMPLETO
   }
   if (!esFechaValida(fin.fecha) || !validarHora(fin.hora)) {
-    errores['fin'] = MENSAJE_FIN_BLOQUEO
+    errores['fin'] = MENSAJE_FIN_INCOMPLETO
   }
   if (Object.keys(errores).length === 0 && claveDe(fin) <= claveDe(inicio)) {
     errores['fin'] = MENSAJE_FIN_BLOQUEO

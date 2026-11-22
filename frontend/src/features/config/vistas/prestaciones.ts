@@ -5,13 +5,18 @@ import type { ApiConfig, DatosPrestacion } from '../api-config'
 import { MENSAJE_DURACION, validarDuracion } from '../validadores'
 import { traducirError } from '../errores'
 import type { ErroresCampo, Prestacion } from '../modelos'
-import { alertaVisual, entrada } from './compartido'
+import { alertaVisual, entrada, valoresDeFormulario } from './compartido'
 
 export type EstadoPrestaciones =
   | { readonly tipo: 'cargando'; readonly prestaciones: readonly Prestacion[] }
   | { readonly tipo: 'listo'; readonly prestaciones: readonly Prestacion[]; readonly aviso?: string }
   | { readonly tipo: 'guardando'; readonly prestaciones: readonly Prestacion[] }
-  | { readonly tipo: 'confirmando-baja'; readonly prestaciones: readonly Prestacion[]; readonly id: number }
+  | {
+      readonly tipo: 'confirmando-baja'
+      readonly prestaciones: readonly Prestacion[]
+      readonly id: number
+      readonly enviando?: boolean
+    }
   | {
       readonly tipo: 'error'
       readonly prestaciones: readonly Prestacion[]
@@ -114,7 +119,13 @@ export function crearVistaPrestaciones(opciones: OpcionesVistaPrestaciones): Con
           clase: 'modal__acciones',
           hijos: [
             boton({ texto: 'Volver', accion: 'cancelar-baja', variante: 'secundaria', tipo: 'button' }),
-            boton({ texto: 'Dar de baja', accion: 'confirmar-baja', tipo: 'button' }),
+            boton({
+              texto: 'Dar de baja',
+              textoEnviando: 'Dando de baja…',
+              enviando: estado.enviando === true,
+              accion: 'confirmar-baja',
+              tipo: 'button',
+            }),
           ],
         },
       ],
@@ -173,7 +184,6 @@ export function crearVistaPrestaciones(opciones: OpcionesVistaPrestaciones): Con
                   texto: 'Guardar prestación',
                   textoEnviando: 'Guardando…',
                   enviando,
-                  accion: 'guardar-prestacion',
                 }),
                 boton({ texto: 'Cancelar', accion: 'cancelar-edicion', variante: 'fantasma', tipo: 'button' }),
               ],
@@ -207,12 +217,16 @@ export function crearVistaPrestaciones(opciones: OpcionesVistaPrestaciones): Con
 
     manejadores() {
       return {
-        'guardar-prestacion': async () => {
-          const campos = new Map<string, string>()
-          await vista.guardar({
-            nombre: campos.get('nombre') ?? '',
-            duracionMinutos: Number(campos.get('duracionMinutos') ?? ''),
-          })
+        'guardar-prestacion': async (nodo) => {
+          const campos = valoresDeFormulario(nodo)
+          const textoDuracion = (campos.get('duracionMinutos') ?? '').trim()
+          await vista.guardar(
+            {
+              nombre: (campos.get('nombre') ?? '').trim(),
+              duracionMinutos: textoDuracion === '' ? Number.NaN : Number(textoDuracion),
+            },
+            editando,
+          )
         },
         'cancelar-edicion'() {
           editando = undefined
@@ -326,10 +340,11 @@ export function crearVistaPrestaciones(opciones: OpcionesVistaPrestaciones): Con
     },
 
     async confirmarBaja() {
-      if (estado.tipo !== 'confirmando-baja') {
+      if (estado.tipo !== 'confirmando-baja' || estado.enviando === true) {
         return
       }
       const id = estado.id
+      cambiar({ ...estado, enviando: true })
       try {
         await opciones.api.bajaPrestacion(id)
         const prestaciones = estado.prestaciones.map((item) =>
