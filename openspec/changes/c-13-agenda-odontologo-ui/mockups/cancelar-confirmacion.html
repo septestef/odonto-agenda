@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup C-13 · Cancelar turno — OdontoAgenda</title>
+<link rel="icon" href="../../../../design-system/assets/logo.png">
+<link rel="stylesheet" href="../../../../design-system/tokens.css">
+<link rel="stylesheet" href="mockup.css">
+</head>
+<body>
+<header class="appbar" aria-hidden="true">
+  <div class="container appbar__inner">
+    <div class="appbar__marca"><img src="../../../../design-system/assets/logo.svg" alt="" width="135" height="44"></div>
+    <nav class="nav"><a class="nav__link" aria-current="page">Agenda</a><a class="nav__link">Configuración</a></nav>
+    <div class="appbar__espacio"></div>
+    <div class="appbar__sesion"><span>Dra. Ana Gómez</span><span class="btn btn--ghost btn--sm">Cerrar sesión</span></div>
+  </div>
+</header>
+<main class="container" aria-hidden="true">
+  <div class="agenda-head">
+    <div class="agenda-head__titulo"><h1>Miércoles 25 de noviembre</h1><p>Hoy · horarios en hora de Argentina</p></div>
+  </div>
+  <section class="franja">
+    <h2 class="franja__titulo">Mañana <span>09:00 – 13:00</span></h2>
+    <article class="turno turno--reservado">
+      <div class="turno__fila"><span class="turno__hora">10:30–11:00</span><span class="badge badge--reservado">Reservado</span><span class="badge badge--online">Online</span></div>
+      <div class="turno__quien">Ana Pérez</div>
+      <div class="turno__meta">Consulta</div>
+      <div class="turno__acciones"><span class="btn btn--secondary btn--sm">Ver</span><span class="btn btn--danger btn--sm">Cancelar</span></div>
+    </article>
+    <div class="esqueleto"></div><div class="esqueleto"></div>
+  </section>
+</main>
+
+<div class="velo velo--alto"></div>
+<div class="dialogo" role="alertdialog" aria-modal="true" aria-labelledby="c-titulo" aria-describedby="c-texto">
+  <h2 id="c-titulo">¿Cancelás el turno de Ana Pérez?</h2>
+  <div class="resumen">
+    <strong>Miércoles 25 de noviembre, 10:30</strong>
+    <span>Consulta · reservado online</span>
+  </div>
+  <p id="c-texto">Le avisamos por email a la paciente y el horario vuelve a quedar libre para reservas. No se puede deshacer.</p>
+  <div class="dialogo__acciones">
+    <button class="btn btn--danger-solid" type="button">Sí, cancelar turno</button>
+    <button class="btn btn--secondary" type="button" autofocus>No, volver</button>
+  </div>
+  <p class="nota-mockup">Mismo diálogo derivado que en C-11. El foco arranca en “No, volver”. Al confirmar: “Cancelando…” con spinner, después se cierra, se recarga el día y aparece el aviso “Turno cancelado” (ver <code>estados.html</code>). Si el turno estaba dentro de un bloqueo, la frase sobre el horario libre se omite.</p>
+</div>
+<script src="../../../../design-system/brand.js"></script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup C-13 · Detalle del turno — OdontoAgenda</title>
+<link rel="icon" href="../../../../design-system/assets/logo.png">
+<link rel="stylesheet" href="../../../../design-system/tokens.css">
+<link rel="stylesheet" href="mockup.css">
+</head>
+<body>
+<header class="appbar" aria-hidden="true">
+  <div class="container appbar__inner">
+    <div class="appbar__marca"><img src="../../../../design-system/assets/logo.svg" alt="" width="135" height="44"></div>
+    <nav class="nav"><a class="nav__link" aria-current="page">Agenda</a><a class="nav__link">Configuración</a></nav>
+    <div class="appbar__espacio"></div>
+    <div class="appbar__sesion"><span>Dra. Ana Gómez</span><span class="btn btn--ghost btn--sm">Cerrar sesión</span></div>
+  </div>
+</header>
+<main class="container" aria-hidden="true">
+  <div class="agenda-head">
+    <div class="agenda-head__titulo"><h1>Miércoles 25 de noviembre</h1><p>Hoy · horarios en hora de Argentina</p></div>
+  </div>
+  <section class="franja">
+    <h2 class="franja__titulo">Mañana <span>09:00 – 13:00</span></h2>
+    <div class="esqueleto"></div><div class="esqueleto"></div><div class="esqueleto"></div>
+  </section>
+</main>
+
+<div class="velo"></div>
+<aside class="cajon" role="dialog" aria-modal="true" aria-labelledby="d-titulo">
+  <div class="panel__cab">
+    <div>
+      <h2 id="d-titulo">Martín Sosa</h2>
+      <p>Miércoles 25/11 · 11:15 a 12:00</p>
+    </div>
+    <button class="btn btn--ghost btn--icono" type="button" aria-label="Cerrar el detalle" autofocus>✕</button>
+  </div>
+  <div class="panel__badges"><span class="badge badge--reservado">Reservado</span><span class="badge badge--online">Online</span></div>
+
+  <div class="alert alert--warning" role="status">
+    <svg class="alert__icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10.9 2.6a1 1 0 0 0-1.8 0L1.6 16a1 1 0 0 0 .9 1.5h15a1 1 0 0 0 .9-1.5zM10.8 15H9.2v-1.6h1.6zm0-3.2H9.2V7.4h1.6z"/></svg>
+    <div><strong>Está dentro de un bloqueo</strong>“Trámite personal”, 11:00 a 12:00. El turno sigue reservado hasta que lo canceles.</div>
+  </div>
+
+  <dl class="datos">
+    <dt>Prestación</dt><dd>Limpieza (45 min)</dd>
+    <dt>DNI</dt><dd>28.456.789</dd>
+    <dt>Teléfono</dt><dd><a href="tel:+5493517654321">+54 9 351 765 4321</a></dd>
+    <dt>Email</dt><dd>martin.sosa@ejemplo.com</dd>
+    <dt>Origen</dt><dd>Lo reservó el paciente online</dd>
+  </dl>
+  <div class="panel__acciones">
+    <div class="reservado-c14">Lugar del botón WhatsApp (C-14)</div>
+    <a class="btn btn--danger" href="cancelar-confirmacion.html">Cancelar turno</a>
+  </div>
+  <p class="nota-mockup">Celular: hoja desde abajo. Escritorio: cajón a la derecha sobre la vista semanal (en la vista diaria de escritorio se usa el panel fijo de <code>agenda-dia.html</code>). Los datos del paciente dependen del contrato de C-12. En turnos pasados o cancelados el botón “Cancelar turno” no aparece.</p>
+</aside>
+<script src="../../../../design-system/brand.js"></script>
+</body>
+</html>
