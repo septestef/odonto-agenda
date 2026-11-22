@@ -83,6 +83,11 @@ public final class AplicacionDemo {
                         "--spring.flyway.schemas=" + ESQUEMA,
                         "--spring.flyway.default-schema=" + ESQUEMA,
                         "--spring.jpa.properties.hibernate.default_schema=" + ESQUEMA,
-                        "--app.demo.password=" + password);
+                        "--app.demo.password=" + password,
+                        "--MAIL_HOST=smtp.example.test",
+                        "--MAIL_PORT=587",
+                        "--MAIL_USERNAME=demo@example.test",
+                        "--MAIL_PASSWORD=centinela-sin-red",
+                        "--MAIL_FROM_NAME=OdontoAgenda de prueba");
     }
 }

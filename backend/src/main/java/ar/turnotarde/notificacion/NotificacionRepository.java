@@ -2,5 +2,5 @@ package ar.turnotarde.notificacion;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface NotificacionRepository extends JpaRepository<Notificacion, Long> {
+public interface NotificacionRepository extends JpaRepository<Notificacion, Long>, InsercionNotificacion {
 }
