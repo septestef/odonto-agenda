@@ -19,7 +19,7 @@ El frontend que dejó C-01 es un `<main id="app">` vacío: no hay router, no hay
 
 **Fuera de alcance**: las pantallas reales de agenda, configuración, reserva pública y gestión por token, que son de C-13, C-06, C-10 y C-11 respectivamente; acá las cuatro rutas apuntan a un único marcador genérico sin lógica. También quedan fuera cualquier endpoint o cambio de backend (C-03 es otro change) y el smoke E2E del login contra el backend real.
 
-**Diferido explícitamente**: `C-03` (`auth-sesion-odontologo`) todavía no existe, así que el login no se puede probar de punta a punta. Este change se implementa y se verifica con Vitest y `fetch` mockeado; el E2E de login (y la verificación de que el contrato de `/api/auth/me`, 401 y 429 coincide) queda para cuando C-03 esté implementado, como parte de C-16 `cierre-demo-y-ensayo`.
+**Diferido explícitamente**: `C-03` (`auth-sesion-odontologo`) **sí existe** en `origin/feat/c-03-auth-sesion-odontologo`, pero **no está mergeado en `main`** y su rama está ramada de un `main` viejo, así que necesita un rebase antes de integrarse. Por eso el login todavía no se puede probar de punta a punta. Este change se implementa y se verifica con Vitest y `fetch` mockeado; el E2E de login (y la verificación de que el contrato de `/api/auth/me`, 401 y 429 coincide) queda para C-16 `cierre-demo-y-ensayo`, después del rebase de C-03.
 
 ## Capabilities
 
@@ -36,8 +36,8 @@ El frontend que dejó C-01 es un `<main id="app">` vacío: no hay router, no hay
 
 ## Impact
 
-- **Código nuevo (solo frontend)**: `frontend/src/router.ts`, `frontend/src/main.ts`, `frontend/src/estilos/app.css`, `frontend/src/shared/{api-client,fechas,csrf,brand,sesion}.ts`, `frontend/src/shared/ui/*`, `frontend/src/features/auth/*`, `frontend/src/vistas/marcador.ts` (marcador genérico para las cuatro rutas de feature), `frontend/src/vistas/no-encontrado.ts`, `frontend/src/vistas/error-carga.ts`, y sus `*.test.ts`.
-- **Configuración**: `frontend/vite.config.ts` (alias y acceso de lectura a `design-system/` para dev y build), `frontend/eslint.config.js` (prohibición de `innerHTML`), `frontend/tsconfig.json` (paths del alias si hacen falta). `frontend/index.html` suma la hoja de estilos y el favicon del logo.
+- **Código nuevo (solo frontend)**: `frontend/src/router.ts`, `frontend/src/main.ts` (exporta `arrancar(app, adaptador)`), `frontend/src/estilos/app.css`, `frontend/src/shared/{api-client,fechas,brand,seguridad-html}.ts`, `frontend/src/shared/ui/*`, `frontend/src/features/auth/*`, `frontend/src/vistas/marcador.ts` (marcador genérico para las cuatro rutas de feature, con la vista "no encontrado"), y sus `*.test.ts`. No se crean `shared/csrf.ts`, `shared/sesion.ts` ni `vistas/error-carga.ts`: CSRF vive en el api-client, la sesión en `router.ts` y el error de carga es un descriptor del router.
+- **Configuración**: `frontend/vite.config.ts` (alias y acceso de lectura a `design-system/` para dev y build, preservando el `server.proxy` existente), `frontend/eslint.config.js` (importa las reglas desde `shared/seguridad-html.ts`, prohibiendo `innerHTML`, `outerHTML` e `insertAdjacentHTML`), `frontend/tsconfig.json` (paths del alias si hacen falta). `frontend/index.html` suma la hoja de estilos y el favicon del logo desde `design-system/assets/`.
 - **Dependencias**: ninguna nueva. No se agrega `jsdom` ni librería de fechas: los módulos con DOM quedan finos y la lógica testeable se extrae a funciones puras con dependencias inyectadas.
 - **Contrato con C-03 (pendiente)**: `GET /api/auth/me` (forma de la sesión), `POST /api/auth/login`, `POST /api/auth/logout`, el 401 genérico y el 429 con tiempo restante. C-04 define el mínimo que consume y lo deja documentado en `design.md`; si C-03 devuelve otra forma, se ajusta el tipo en un solo lugar.
 - **Changes siguientes**: C-06, C-10, C-11, C-13, C-14 y C-15 consumen el router, el api-client, las fechas y los componentes base; cualquier cambio en sus firmas impacta en seis changes.
