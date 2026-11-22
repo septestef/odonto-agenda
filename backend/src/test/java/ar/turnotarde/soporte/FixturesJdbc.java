@@ -55,6 +55,14 @@ public final class FixturesJdbc {
         return odontologo(slug, slug + "@example.com");
     }
 
+    /** C-03: permite fijar el hash y el estado para los tests de login. */
+    public long odontologo(String slug, String email, String passwordHash, boolean activo) {
+        return insertar("""
+                INSERT INTO odontologo (nombre, apellido, email, password_hash, slug, activo, creado_en, actualizado_en)
+                VALUES ('Nombre', 'Apellido', ?, ?, ?, ?, ?, ?)""",
+                email, passwordHash, slug, activo, ts(INSTANTE_FIJO), ts(INSTANTE_FIJO));
+    }
+
     public long prestacion(long odontologoId, String nombre, int duracionMinutos) {
         return insertar("""
                 INSERT INTO prestacion (odontologo_id, nombre, duracion_minutos, creado_en, actualizado_en)

@@ -49,7 +49,7 @@ class ArranqueAplicacionIT extends IntegracionTest {
         List<String> versiones = jdbc.queryForList(
                 "select version from flyway_schema_history where version is not null", String.class);
 
-        assertThat(versiones).contains("2").doesNotContain("900");
+        assertThat(versiones).contains("2", "3").doesNotContain("900");
     }
 
     @Test

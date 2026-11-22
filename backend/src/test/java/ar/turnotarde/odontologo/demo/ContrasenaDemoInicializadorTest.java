@@ -25,7 +25,7 @@ class ContrasenaDemoInicializadorTest {
     }
 
     private ContrasenaDemoInicializador inicializador(String clave) {
-        return new ContrasenaDemoInicializador(repositorio, new PropiedadesDemo(clave));
+        return new ContrasenaDemoInicializador(repositorio, new PropiedadesDemo(clave), bcrypt);
     }
 
     private static Odontologo demoConHash(String hash) {

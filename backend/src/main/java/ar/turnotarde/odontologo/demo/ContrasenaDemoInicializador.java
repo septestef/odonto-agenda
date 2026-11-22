@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Profile;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,11 +27,14 @@ public class ContrasenaDemoInicializador implements ApplicationRunner {
 
     private final OdontologoRepository odontologos;
     private final PropiedadesDemo propiedades;
-    private final BCryptPasswordEncoder bcrypt = new BCryptPasswordEncoder();
+    /** El mismo bean BCrypt sin prefijo que usa el login (D6). */
+    private final PasswordEncoder codificador;
 
-    public ContrasenaDemoInicializador(OdontologoRepository odontologos, PropiedadesDemo propiedades) {
+    public ContrasenaDemoInicializador(OdontologoRepository odontologos, PropiedadesDemo propiedades,
+            PasswordEncoder codificador) {
         this.odontologos = odontologos;
         this.propiedades = propiedades;
+        this.codificador = codificador;
     }
 
     @Override
@@ -39,8 +42,8 @@ public class ContrasenaDemoInicializador implements ApplicationRunner {
     public void run(ApplicationArguments args) {
         Odontologo demo = odontologos.findBySlug(SLUG_DEMO).orElseThrow(() -> new IllegalStateException(
                 "No existe el odontólogo '" + SLUG_DEMO + "': falta aplicar el seed V900 (perfil demo)."));
-        if (!bcrypt.matches(propiedades.password(), demo.getPasswordHash())) {
-            demo.cambiarPasswordHash(bcrypt.encode(propiedades.password()));
+        if (!codificador.matches(propiedades.password(), demo.getPasswordHash())) {
+            demo.cambiarPasswordHash(codificador.encode(propiedades.password()));
             odontologos.save(demo);
             LOG.info("Contraseña de demo aplicada al odontólogo '{}'.", SLUG_DEMO);
         } else {

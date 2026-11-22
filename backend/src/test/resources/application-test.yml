@@ -5,3 +5,9 @@ spring:
     url: ${TEST_DB_URL:jdbc:postgresql://localhost:5432/turnotarde_test}
     username: ${TEST_DB_USER:${DB_USER:turnotarde}}
     password: ${TEST_DB_PASSWORD:${DB_PASSWORD:}}
+    # Cada configuración distinta de @SpringBootTest deja un contexto (y su pool) en caché.
+    # Sin esto, una corrida completa agota el max_connections de PostgreSQL local.
+    hikari:
+      maximum-pool-size: 4
+      minimum-idle: 0
+      idle-timeout: 5000
