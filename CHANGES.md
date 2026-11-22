@@ -211,7 +211,7 @@ Camino crítico post-demo: `C-16 → C-17 → C-18` (C-20 cierra el camino hacia
 ## FASE 2 — Configuración de la agenda
 
 ### [C-05] `configuracion-agenda-api`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado (archivado 2026-11-22 como `2026-11-22-c-05-configuracion-agenda-api`). Con C-03, C-04, C-05, C-07 y C-08 integrados en `main`: 252 tests unitarios y 251 de integración en el backend. Cumple, junto con C-08, el GATE 3.
 - **Scope**:
   - US-002: `GET/PUT /api/horarios` (reemplazo semanal, varias franjas por día, rechazo de franjas solapadas o con inicio >= fin; RN-AG-01).
   - US-003: `GET/POST/PUT /api/prestaciones` y baja lógica `DELETE` (duración múltiplo de 15, RN-AG-03/04); la prestación dada de baja deja de ofrecerse pero los turnos la conservan.
