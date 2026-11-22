@@ -34,7 +34,7 @@ public class ManejadorErrores {
 
     private static final Logger LOG = LoggerFactory.getLogger(ManejadorErrores.class);
 
-    private static final String MENSAJE_VALIDACION = "Hay datos inválidos. Revisalos y probá de nuevo.";
+    private static final String MENSAJE_VALIDACION = ErroresValidacion.MENSAJE;
 
     @ExceptionHandler(ReglaNegocioException.class)
     ResponseEntity<ErrorApi> reglaDeNegocio(ReglaNegocioException e) {

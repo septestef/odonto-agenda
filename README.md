@@ -145,6 +145,17 @@ El login se bloquea transitoriamente tras 5 intentos fallidos por email (429 `RN
 
 > **Riesgo R12 (aceptado para la demo)**: como el contador es por email y no distingue quién intenta entrar, 5 intentos fallidos contra `demo@example.com` dejan afuera 15 minutos también al odontólogo legítimo. En la demo basta esperar o reiniciar la app; no se mitigó porque no hay segundo factor ni rate limiting distribuido en el alcance actual.
 
+## Configuración de la agenda
+
+El odontólogo configura su agenda desde el frontend con estas rutas (todas exigen sesión; las escrituras, además, la cabecera `X-XSRF-TOKEN`). El dueño de los datos sale siempre de la sesión: un `odontologoId` que venga en el cuerpo, la query o una cabecera se ignora, y un recurso ajeno responde 404 como si no existiera.
+
+| Ruta | Uso |
+|---|---|
+| `GET /api/horarios`, `PUT /api/horarios` | Consultar y reemplazar la semana completa con `{ "franjas": [{ "diaSemana", "inicio", "fin" }] }` (día 1–7, horas `HH:mm`). El `PUT` valida antes de borrar: un rango invertido o dos franjas solapadas dan 422 `RN-AG-01` y dejan el horario anterior intacto. |
+| `GET /api/prestaciones` | Listar `{ "prestaciones": [...] }`, incluidas las inactivas para que puedas mostrar su estado. |
+| `POST /api/prestaciones`, `PUT /api/prestaciones/{id}`, `DELETE /api/prestaciones/{id}` | Crear, editar y dar de baja con `{ "nombre", "duracionMinutos" }`. La duración tiene que ser múltiplo de 15 (si no, 422 `RN-AG-03`); un nombre repetido para el mismo odontólogo da 400 `VALIDACION` con detalle en `nombre`. La baja es lógica: responde 204, conserva la fila con `activa: false` y la prestación deja de ofrecerse en el perfil público. |
+| `GET /api/bloqueos?desde=&hasta=`, `POST /api/bloqueos`, `DELETE /api/bloqueos/{id}` | Listar, crear y borrar bloqueos con `{ "inicio", "fin", "motivo" }` (instante con offset, `motivo` opcional). Cada bloqueo trae `turnosAfectados`; un bloqueo no cancela turnos: solo deja de ofrecer ese rango en la disponibilidad pública. Un rango invertido da 400 `VALIDACION` con detalle en `fin`. |
+
 ## Tiempo
 
 El servidor usa un único `Clock` UTC inyectable (`shared.tiempo`); la zona del negocio (`APP_TIMEZONE`, por defecto `America/Argentina/Buenos_Aires`) solo se usa para interpretar y mostrar fechas (`ZonaNegocio`). Un test de ArchUnit (`SinHoraDelSistemaTest`) hace fallar la build si el código de producción llama a `now()` sin reloj, a `System.currentTimeMillis()` o a `new Date()`.

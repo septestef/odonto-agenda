@@ -43,6 +43,12 @@ public class Prestacion extends EntidadAuditada {
         this.activa = false;
     }
 
+    /** Edición de la configuración; la duración ya fue validada como múltiplo de 15 (RN-AG-03). */
+    public void actualizar(String nombreNuevo, short duracionNueva) {
+        this.nombre = nombreNuevo;
+        this.duracionMinutos = duracionNueva;
+    }
+
     public Long getId() {
         return id;
     }
