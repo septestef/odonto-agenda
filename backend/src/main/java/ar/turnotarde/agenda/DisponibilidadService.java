@@ -53,8 +53,20 @@ public class DisponibilidadService {
      */
     public void validarInicio(Long odontologoId, Prestacion prestacion, Instant inicio) {
         LocalDate fecha = LocalDate.ofInstant(inicio, zonaNegocio.zona());
-        MotivoRechazo motivo = CalculadoraDisponibilidad.evaluar(inicio, agendaDelDia(odontologoId, fecha),
-                duracion(prestacion), zonaNegocio.ahora(), ANTICIPACION_ONLINE, zonaNegocio.hoy(),
+        validarInicio(inicio, agendaDelDia(odontologoId, fecha), duracion(prestacion), zonaNegocio.ahora(),
+                zonaNegocio.hoy());
+    }
+
+    /** C-09: reusa el instante fijado tras adquirir los locks, sin leer nuevamente el reloj. */
+    public void validarInicio(Long odontologoId, Prestacion prestacion, Instant inicio, Instant ahora) {
+        var zona = zonaNegocio.zona();
+        LocalDate fecha = LocalDate.ofInstant(inicio, zona);
+        validarInicio(inicio, agendaDelDia(odontologoId, fecha), duracion(prestacion), ahora,
+                LocalDate.ofInstant(ahora, zona));
+    }
+
+    private void validarInicio(Instant inicio, AgendaDelDia agenda, Duration duracion, Instant ahora, LocalDate hoy) {
+        MotivoRechazo motivo = CalculadoraDisponibilidad.evaluar(inicio, agenda, duracion, ahora, ANTICIPACION_ONLINE, hoy,
                 propiedades.reservaMaxDias());
         switch (motivo) {
             case NINGUNO -> { }

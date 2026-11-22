@@ -3,11 +3,17 @@ package ar.turnotarde.turno;
 import ar.turnotarde.agenda.Intervalo;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface TurnoRepository extends JpaRepository<Turno, Long> {
+
+    Optional<Turno> findByTokenHash(String tokenHash);
+
+    @Query(value = "SELECT * FROM turno WHERE token_hash = :hash FOR UPDATE", nativeQuery = true)
+    Optional<Turno> bloquearPorHash(@Param("hash") String hash);
 
     /**
      * Turnos que ocupan lugar ({@code RESERVADO}, {@code ATENDIDO}, {@code AUSENTE}) y cruzan {@code [desde, hasta)},

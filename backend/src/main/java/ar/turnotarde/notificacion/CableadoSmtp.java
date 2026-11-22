@@ -1,5 +1,6 @@
 package ar.turnotarde.notificacion;
 
+import ar.turnotarde.shared.correo.BuzonCorreo;
 import java.util.regex.Pattern;
 
 record CableadoSmtp(String host, String puerto, String usuario, String clave, String nombre) {
@@ -14,7 +15,7 @@ record CableadoSmtp(String host, String puerto, String usuario, String clave, St
         if (puerto == null || !PUERTO.matcher(puerto).matches() || numeroPuerto() < 1 || numeroPuerto() > 65535) {
             return "MAIL_PORT";
         }
-        if (!AvisoCorreo.buzonValido(usuario)) {
+        if (!BuzonCorreo.admisible(usuario)) {
             return "MAIL_USERNAME";
         }
         if (!textoSeguro(clave)) {

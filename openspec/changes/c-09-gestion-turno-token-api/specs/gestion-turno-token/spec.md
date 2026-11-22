@@ -98,7 +98,7 @@ Una violación de la constraint `turno_sin_solapamiento`, un deadlock `40P01` o 
 
 ### Requirement: Destinatario de gestión estable y fallback cerrado
 
-El destinatario MUST salir del snapshot del turno y copiarse al sucesor, nunca de `paciente.email`, `notificacion`, otro turno ni el request. Reprogramar MUST requerir un único buzón admisible según C-08, no solo un valor no nulo. Si falta o no es admisible, MUST rechazarse antes de escribir o generar token con 409 `RN-SE-04` (propuesto, pendiente de Estefi).
+El destinatario MUST salir del snapshot del turno y copiarse al sucesor, nunca de `paciente.email`, `notificacion`, otro turno ni el request. Reprogramar MUST requerir un único buzón admisible según C-08, no solo un valor no nulo. Si falta o no es admisible, MUST rechazarse antes de escribir o generar token con 409 `RN-SE-04`.
 
 #### Scenario: Nuevo contacto del mismo DNI
 - **WHEN** otra reserva cambia el contacto del paciente y luego el titular usa el link del turno anterior para moverlo

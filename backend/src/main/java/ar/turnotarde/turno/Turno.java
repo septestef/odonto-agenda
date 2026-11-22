@@ -69,6 +69,9 @@ public class Turno extends EntidadAuditada {
     @Column(name = "token_hash", nullable = false, length = 64)
     private String tokenHash;
 
+    @Column(name = "email_gestion", length = 255, updatable = false)
+    private String emailGestion;
+
     @Column(name = "recordatorio_enviado_en")
     private Instant recordatorioEnviadoEn;
 
@@ -77,6 +80,11 @@ public class Turno extends EntidadAuditada {
 
     public Turno(Long odontologoId, Paciente paciente, Prestacion prestacion, Instant inicio, Instant fin,
             OrigenTurno origen, String tokenHash) {
+        this(odontologoId, paciente, prestacion, inicio, fin, origen, tokenHash, null);
+    }
+
+    Turno(Long odontologoId, Paciente paciente, Prestacion prestacion, Instant inicio, Instant fin,
+            OrigenTurno origen, String tokenHash, String emailGestion) {
         this.odontologoId = odontologoId;
         this.paciente = paciente;
         this.prestacion = prestacion;
@@ -84,6 +92,7 @@ public class Turno extends EntidadAuditada {
         this.fin = fin;
         this.origen = origen;
         this.tokenHash = tokenHash;
+        this.emailGestion = emailGestion;
     }
 
     public Long getId() {
@@ -132,6 +141,23 @@ public class Turno extends EntidadAuditada {
 
     public String getTokenHash() {
         return tokenHash;
+    }
+
+    void cancelarPorPaciente(Instant ahora) {
+        estado = EstadoTurno.CANCELADO;
+        canceladoPor = CanceladoPor.PACIENTE;
+        canceladoEn = ahora;
+    }
+
+    Turno sucesor(Instant nuevoInicio, Instant nuevoFin, String nuevoHash) {
+        var nuevo = new Turno(odontologoId, paciente, prestacion, nuevoInicio, nuevoFin, OrigenTurno.ONLINE,
+                nuevoHash, emailGestion);
+        nuevo.reprogramadoDesdeId = id;
+        return nuevo;
+    }
+
+    String getEmailGestion() {
+        return emailGestion;
     }
 
     public Instant getRecordatorioEnviadoEn() {

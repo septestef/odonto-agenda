@@ -13,7 +13,7 @@ C-08 ya consume los tres tipos de eventos inmutables. Para reprogramar usa `nuev
 
 ## Decisions
 
-**Governance ALTO — diseño general aprobado con condiciones.** Esta revisión no cierra las decisiones pendientes ni habilita Apply. Los deltas describen el comportamiento propuesto, sujeto al corte explícito al final.
+**Governance ALTO; alcance de seguridad CRÍTICO.** La segunda auditoría de Estefi sobre `cd7fcee` aprobó explícitamente las decisiones del corte al final. El usuario autorizó Apply por separado hasta 5.2/5.3; esa autorización no abarca mitigaciones nuevas de logging.
 
 ### D1 - Rutas, detalle y frontera de la credencial
 
@@ -62,12 +62,12 @@ Orden de evaluación para solicitudes que el ruteo entregó a gestión; un error
 | 3 | Original con `inicio <= ahora`, cualquiera sea su estado | 409 `RN-TU-07` | “Este turno ya empezó. Solo podés consultarlo.” |
 | 4 | Original futuro no `RESERVADO` | 409 `RN-SE-02` | “Este turno solo se puede consultar.” |
 | 5 | Reprogramar sin odontólogo o prestación activos y asociados | 404 `NO_ENCONTRADO` | Mismo mensaje genérico que arriba |
-| 6 | Reprogramar sin snapshot o con buzón no admisible según C-08 | 409 `RN-SE-04` (propuesta pendiente de Estefi) | “No podés reprogramar este turno desde el link.” |
+| 6 | Reprogramar sin snapshot o con buzón no admisible según C-08 | 409 `RN-SE-04` | “No podés reprogramar este turno desde el link.” |
 | 7 | Destino anterior a `ahora + 24 h` → posterior al horizonte local → fuera de agenda o bloqueado | 422 `RN-TU-03` → `RN-TU-11` → `RN-AG-05` | Reusar mensajes de C-07, en ese orden |
 | 8 | Solapamiento o conflicto SQL de turno, incluso lock | 409 `RN-TU-01` | “Ese horario acaba de ser tomado, elegí otro” |
 | — | Otro error de integridad (p. ej. colisión de hash) o error inesperado | 500 `ERROR_INTERNO` | Genérico, sin valores ni texto de base |
 
-`RN-TU-07` prevalece sobre `RN-SE-02` cuando `inicio <= ahora`, aun con un original cancelado. `RN-SE-04` no colisiona con un código existente en el repo y figura en [KB 05](../../../knowledge-base/05_reglas_de_negocio.md#propuesta-para-c-09-pendiente-de-aprobación-de-estefi-no-vigente) solo como propuesta: aplica al destinatario, no a otros rechazos ni a C-07/C-08. Los 409 de negocio usan JSON `{codigo, mensaje}` sin `detalles`. La anticipación se valida **solo para el destino**. Cancelar no necesita probar agenda, horizonte, que haya email ni que el horario vaya a figurar en la disponibilidad: libera ocupación, no altera los demás filtros.
+`RN-TU-07` prevalece sobre `RN-SE-02` cuando `inicio <= ahora`, aun con un original cancelado. `RN-SE-04` quedó vigente en [KB 05](../../../knowledge-base/05_reglas_de_negocio.md#dominio-seguridad-rn-se): aplica al destinatario, no a otros rechazos ni a C-07/C-08. Los 409 de negocio usan JSON `{codigo, mensaje}` sin `detalles`. La anticipación se valida **solo para el destino**. Cancelar no necesita probar agenda, horizonte, que haya email ni que el horario vaya a figurar en la disponibilidad: libera ocupación, no altera los demás filtros.
 
 ### D3 - Una transacción, dos protecciones y orden de locks
 
@@ -86,7 +86,7 @@ El reemplazo de un futuro por otro futuro no suma reservas para ese DNI (RN-PA-0
 
 ### D4 - Destinatario de gestión, legados y eventos
 
-**Default propuesto:** capturar `turno.email_gestion` de la misma solicitud de reserva y dentro de su transacción, con el valor exacto que C-07 ya acepta. Al reprogramar copiarlo del original; no se actualiza con el upsert ni se permite elegirlo desde la gestión. Este dato vincula un turno a la dirección a la que se dirigió su link, no verifica propiedad ni entrega. No usar `paciente.email`, `notificacion` ni un turno cercano: el primero es editable por DNI y la auditoría es best effort, incompleta y no un vínculo de autorización.
+**Snapshot aprobado:** capturar `turno.email_gestion` de la misma solicitud de reserva y dentro de su transacción, con el valor exacto que C-07 ya acepta. Al reprogramar copiarlo del original; no se actualiza con el upsert ni se permite elegirlo desde la gestión. Este dato vincula un turno a la dirección a la que se dirigió su link, no verifica propiedad ni entrega. No usar `paciente.email`, `notificacion` ni un turno cercano: el primero es editable por DNI y la auditoría es best effort, incompleta y no un vínculo de autorización.
 
 **Legados y buzones no admisibles:** dejar el snapshot nullable sin backfill. C-07 acepta hasta 255 caracteres y una sintaxis más amplia que C-08 (`AvisoCorreo.buzonValido`: hasta 254 y un buzón ASCII estricto). Un snapshot presente no basta. Extraer/reusar el mismo predicado puro de buzón en una pieza interna compartida que C-08 siga usando sin cambios de conducta. No endurecer `SolicitudReserva.EMAIL`, normalizar para forzar admisión ni prometer entrega. Si falta el snapshot o el buzón no es admisible, permitir leer y cancelar; emitir `TurnoCancelado` sin email utilizable, que C-08 descarta sin transporte ni intento de auditoría. Rechazar la reprogramación **antes de escribir o generar el token**; no quemar el único link de gestión a sabiendas de que el nuevo será descartado. Alternativa a revisar: hacer legados solo lectura incluso antes del inicio. No se recomienda porque no permite liberar el turno y no mejora el secreto cuando la cancelación no envía correo. No proponer recuperación ni reenvío para completar datos legados.
 
@@ -119,15 +119,15 @@ Con un `Clock` controlable, avanzar mientras espera un lock hasta el inicio exac
 
 ## Migration Plan
 
-Si Estefi aprueba D4, agregar `V9__email_gestion_turno.sql` con `email_gestion varchar(255)` nullable, sin default ni backfill. No editar migraciones existentes ni seeds reales, ni exigir `NOT NULL` a legados; verificar Flyway sobre base vacía y copia de prueba con turnos viejos. Aplicar la migración antes de usar la versión nueva; nuevos turnos de C-07 escriben el snapshot y los sucesores lo heredan. No hay nuevas variables ni dependencias. Si se vuelve a la versión anterior, dejar la columna aditiva y los datos confirmados intactos: las altas de esa versión quedan sin snapshot. Volver a desplegar no reenvía ni recupera links; no revertir destructivamente V9.
+Agregar `V9__email_gestion_turno.sql` con `email_gestion varchar(255)` nullable, sin default ni backfill, según D4 aprobado. No editar migraciones existentes ni seeds reales, ni exigir `NOT NULL` a legados; verificar Flyway sobre base vacía y copia de prueba con turnos viejos. Aplicar la migración antes de usar la versión nueva; nuevos turnos de C-07 escriben el snapshot y los sucesores lo heredan. No hay nuevas variables ni dependencias. Si se vuelve a la versión anterior, dejar la columna aditiva y los datos confirmados intactos: las altas de esa versión quedan sin snapshot. Volver a desplegar no reenvía ni recupera links; no revertir destructivamente V9.
 
-## Corte antes de Apply (ALTO)
+## Corte de Apply — segunda auditoría de Estefi (`cd7fcee`)
 
-1. **GATE 3:** C-08 archivado; C-05 pendiente aunque la ficha C-09 solo liste C-07/C-08. No empezar sin cumplir el gate o sin excepción explícita de Estefi.
-2. **V9:** aprobación explícita de Estefi pendiente para la columna nullable, su propósito y el vínculo entre turno y destinatario. Solo si la aprueba, documentar en KB 04 (`§turno`) la columna, el propósito y ese vínculo (D4 y tareas); no actualizar KB 04 en esta revisión.
-3. **Política de legados y `RN-SE-04`:** pendientes de aprobación explícita de Estefi; consulta y cancelación sin aviso si corresponde, reprogramación bloqueada ante snapshot ausente/no admisible. No activar la RN propuesta en KB 05 sin esa decisión.
+1. **GATE 3 satisfecho:** C-08 archivado y C-05 archivado e incorporado (ancestro `152452f`); no se necesita excepción.
+2. **V9 aprobada:** columna nullable, sin default ni backfill, con propósito y vínculo estable documentados en KB 04 (`§turno`).
+3. **Legados y errores aprobados:** consulta y cancelación sin aviso si corresponde; `RN-SE-04` vigente para reprogramación sin snapshot admisible, 409 antes de escribir. `RN-SE-02` para originales futuros de solo lectura; ante `inicio <= ahora` prevalece `RN-TU-07`.
 4. **C-11:** la actualización de su contrato en `CHANGES.md` queda pendiente, a cargo de Estefi.
-5. **Apply:** autorización separada pendiente, aun con diseño general aprobado con condiciones. No empezar al cerrar solo esta revisión documental.
+5. **Apply:** autorización separada del usuario hasta el checkpoint obligatorio 5.2/5.3 en verde. No empezar 5.4 ni posteriores; la cobertura final del evento y aviso de 5.3 queda para 5.5.
 
 ## UI Mockups
 

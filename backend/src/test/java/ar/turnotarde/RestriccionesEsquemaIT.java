@@ -49,7 +49,7 @@ class RestriccionesEsquemaIT extends IntegracionTest {
             "paciente", List.of("id", "odontologo_id", "dni", "nombre", "apellido", "telefono", "email"),
             "turno", List.of("id", "odontologo_id", "paciente_id", "prestacion_id", "inicio", "fin", "estado",
                     "origen", "cancelado_por", "cancelado_en", "reprogramado_desde_id", "token_hash",
-                    "recordatorio_enviado_en"),
+                    "recordatorio_enviado_en", "email_gestion"),
             "notificacion", List.of("id", "turno_id", "tipo", "destinatario", "enviado_en", "estado", "error"));
 
     private List<String> columnasDe(String tabla) {

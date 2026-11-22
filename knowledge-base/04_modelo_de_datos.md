@@ -68,6 +68,7 @@ Convenciones: claves `bigint` identity; fechas y horas en `timestamptz`, guardad
 - `cancelado_por` varchar(20) NULL: `PACIENTE | ODONTOLOGO`; `cancelado_en` timestamptz NULL
 - `reprogramado_desde_id` FK NULL a turno
 - `token_hash` char(64) NOT NULL UNIQUE (SHA-256 del token de gestión; el token en claro nunca se guarda)
+- `email_gestion` varchar(255) NULL: snapshot estable del destinatario al que se dirigió el link del turno. Se captura al reservar y se copia al sucesor al reprogramar; no depende del contacto mutable de `paciente` ni prueba propiedad o entrega. V9 agrega la columna sin default ni backfill: los turnos previos quedan con `NULL`.
 - `recordatorio_enviado_en` timestamptz NULL
 - **Constraint anti-solapamiento**, la pieza central del modelo:
   ```sql
