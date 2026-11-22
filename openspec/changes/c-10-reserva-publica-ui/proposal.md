@@ -28,7 +28,7 @@ Ninguna. C-10 consume los contratos ya definidos en `reserva-online`, `disponibi
 ## Impact
 
 - **Código**: `frontend/src/features/reservar/` (página, estado del flujo, validadores y cliente de la API pública), componentes compartidos de selección de horarios y ruta `/reservar/{slug}` en el router.
-- **Dependencias**: C-04 (shell, router, `api-client` y componentes base) y C-07 (endpoints públicos) ya están mergeados y archivados; el apply queda a la espera de la aprobación de los mockups en el PR #12.
+- **Dependencias**: C-04 (shell, router, `api-client` y componentes base) y C-07 (endpoints públicos) ya están mergeados y archivados; los mockups quedaron aprobados en el PR #12 (2026-11-22).
 - **API**: consume `GET /api/public/{slug}`, `GET /api/public/{slug}/disponibilidad` y `POST /api/public/{slug}/turnos`; no agrega ni modifica endpoints.
 - **Diseño**: usa `design-system/tokens.css`, `brand.js`, `assets/logo.svg` y los patrones de `components.html` (opciones, tira de días, chips de horario, alertas, resumen y estado vacío). Sin colores ni medidas hardcodeadas.
 - **Datos**: no toca el modelo ni las migraciones. No expone tokens ni datos de otros pacientes.

@@ -11,7 +11,7 @@ Este directorio contiene los mockups estáticos de alta fidelidad para la featur
 
 ## Estado
 
-- **Approval: pending** — En revisión de Estefi (PR #12).
+- **Approval: approved (2026-11-22, by user)** — Aprobados por Estefi en el PR #12. Cualquier cambio posterior vuelve el estado a pending.
 - **Voseo**: Textos adaptados al español rioplatense (voseo argentino).
 - **Tokens**: Utiliza exclusivamente `design-system/tokens.css`.
 

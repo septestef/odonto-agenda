@@ -105,19 +105,19 @@ Se testean en `node` con Vitest: validadores (casos válidos e inválidos por ca
 - Design system revision: 2
 - Decision: yes (2026-11-22)
 - Mockups: `openspec/changes/c-10-reserva-publica-ui/mockups/`
-- Approval: pending
+- Approval: approved (2026-11-22, by user)
 - Preview: rendered (2026-11-22, `mockups/previews/`)
 
 Política `system-and-mockups`, revisión 2. Antes del apply hay que crear y aprobar:
 
 - **Ubicación**: `openspec/changes/c-10-reserva-publica-ui/mockups/`.
 - **Archivos**: `reserva-seleccion.html`, `reserva-formulario.html`, `reserva-exito.html`, `reserva-conflicto.html`, `mockup.css` (estilos compartidos, solo con tokens), `mockup.js` (navegación de días de la selección) y `README.md`.
-- **Estado**: **Approval: pending** — en revisión de Estefi (PR #12); todavía no aprobados. Capturas en `mockups/previews/`.
+- **Estado**: **Approval: approved (2026-11-22, by user)** — aprobados por Estefi en el PR #12 (revisión del commit `0c767cf`). Son criterio de aceptación del apply; capturas en `mockups/previews/`.
 - **Tamaños de referencia**: 390×844 y 1440×900 (capturas en `mockups/previews/`).
 - **Base**: importan `design-system/tokens.css`, `design-system/brand.js` y `design-system/assets/logo.svg`; replican los patrones de `components.html` (opciones, tira de días, chips, alertas, resumen, estado vacío).
 - **Pasos**: exactamente 4 — Paso 1 de 4 · Prestación, Paso 2 de 4 · Día, Paso 3 de 4 · Horario y Paso 4 de 4 · Tus datos.
 - **Estados cubiertos**: perfil con prestaciones, cargando, día sin horarios, error de red, link inválido, formulario con error por campo, envío, error de validación del servidor, resumen previo, éxito con email, conflicto `RN-TU-01`, límite `RN-PA-03`, `RN-TU-03`, `RN-TU-11`, `RN-AG-05` y vista a 390 px.
-- **Gate**: sin aprobación explícita de Estefi en el PR #12 no se ejecuta el apply.
+- **Gate**: superado; el apply puede arrancar. Un cambio posterior a los mockups vuelve la aprobación a pending.
 
 ## Risks / Trade-offs
 
