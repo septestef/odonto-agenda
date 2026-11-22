@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>C-10 · Selección — OdontoAgenda</title>
+  <link rel="icon" href="../../../../design-system/assets/logo.png">
+  <link rel="stylesheet" href="../../../../design-system/tokens.css">
+  <link rel="stylesheet" href="mockup.css">
+</head>
+<body>
+  <div class="mockup-bar" role="note">
+    <span><b>C-10</b> Reserva pública</span>
+    <span>Pantalla: selección de prestación, día y horario</span>
+    <span>390×844 · 1440×900 · 360 px</span>
+  </div>
+
+  <header class="appbar">
+    <div class="appbar__inner">
+      <div class="appbar__brand">
+        <img src="../../../../design-system/assets/logo.svg" alt="" width="135" height="44">
+        <span class="sr-only" data-brand-name>OdontoAgenda</span>
+      </div>
+      <div class="appbar__spacer"></div>
+      <span class="appbar__hint">Reserva online</span>
+    </div>
+  </header>
+
+  <main class="flow">
+    <div class="page-head">
+      <h1>Reservá tu turno</h1>
+      <p>Elegí la prestación, el día y el horario. No necesitás crear una cuenta.</p>
+    </div>
+
+    <div class="card stack-6">
+      <div class="profile">
+        <div class="profile__avatar" aria-hidden="true">AG</div>
+        <div>
+          <div class="profile__name">Dra. Ana Gómez</div>
+          <div class="profile__meta">Av. Colón 1234, Córdoba</div>
+        </div>
+      </div>
+
+      <fieldset class="options">
+        <legend class="step">Paso 1 de 3 · Elegí tu prestación</legend>
+        <button class="option" type="button" aria-pressed="true">
+          <span class="option__title">Consulta</span>
+          <span class="option__meta">30 min</span>
+        </button>
+        <button class="option" type="button" aria-pressed="false">
+          <span class="option__title">Limpieza</span>
+          <span class="option__meta">45 min</span>
+        </button>
+        <button class="option" type="button" aria-pressed="false">
+          <span class="option__title">Extracción</span>
+          <span class="option__meta">60 min</span>
+        </button>
+      </fieldset>
+
+      <div>
+        <p class="step">Paso 2 de 3 · Elegí el día</p>
+        <div class="days" role="group" aria-label="Elegí el día">
+          <button class="day" type="button" disabled><small>mié</small><strong>25</strong></button>
+          <button class="day" type="button" aria-pressed="true"><small>jue</small><strong>26</strong></button>
+          <button class="day" type="button" aria-pressed="false"><small>vie</small><strong>27</strong></button>
+          <button class="day" type="button" disabled><small>sáb</small><strong>28</strong></button>
+          <button class="day" type="button" disabled><small>dom</small><strong>29</strong></button>
+          <button class="day" type="button" aria-pressed="false"><small>lun</small><strong>30</strong></button>
+          <button class="day" type="button" aria-pressed="false"><small>mar</small><strong>1</strong></button>
+        </div>
+
+        <p class="step" style="margin-top: var(--space-6)">Paso 3 de 3 · Elegí un horario</p>
+        <div class="slots" role="group" aria-label="Elegí un horario">
+          <button class="chip" type="button" aria-pressed="false">09:00</button>
+          <button class="chip" type="button" aria-pressed="false">09:15</button>
+          <button class="chip" type="button" aria-pressed="false">09:30</button>
+          <button class="chip" type="button" aria-pressed="true">10:30</button>
+          <button class="chip" type="button" aria-pressed="false">11:00</button>
+          <button class="chip" type="button" aria-pressed="false">16:00</button>
+        </div>
+      </div>
+
+      <div class="summary" aria-label="Resumen de la selección">
+        <dl>
+          <dt>Prestación</dt><dd>Consulta · 30 min</dd>
+          <dt>Fecha</dt><dd>Jueves 26 de noviembre, 10:30</dd>
+          <dt>Lugar</dt><dd>Av. Colón 1234, Córdoba</dd>
+        </dl>
+      </div>
+
+      <div>
+        <button class="btn btn--primary btn--block" type="button">Continuar con mis datos</button>
+        <p class="small muted center" style="margin-top: var(--space-3)">Los turnos se reservan con al menos 24 h de anticipación.</p>
+      </div>
+    </div>
+  </main>
+
+  <section class="variants" aria-labelledby="estados-seleccion">
+    <h2 id="estados-seleccion">Estados de la pantalla</h2>
+    <p>Variantes que tiene que cubrir la implementación, además del estado principal.</p>
+
+    <div class="variant-grid">
+      <div class="variant" aria-label="Estado cargando">
+        <h3>Cargando horarios</h3>
+        <p class="variant__note">Mientras llega la disponibilidad, se mantiene la estructura para evitar saltos.</p>
+        <div class="skeleton skeleton--title" aria-hidden="true"></div>
+        <div class="skeleton skeleton--option" aria-hidden="true"></div>
+        <div class="skeleton skeleton--option" aria-hidden="true"></div>
+        <div class="skeleton-grid" aria-hidden="true">
+          <div class="skeleton skeleton--slot"></div>
+          <div class="skeleton skeleton--slot"></div>
+          <div class="skeleton skeleton--slot"></div>
+          <div class="skeleton skeleton--slot"></div>
+          <div class="skeleton skeleton--slot"></div>
+          <div class="skeleton skeleton--slot"></div>
+        </div>
+        <p class="sr-only" aria-live="polite">Cargando horarios disponibles.</p>
+      </div>
+
+      <div class="variant" aria-label="Estado vacío">
+        <h3>Día sin horarios</h3>
+        <p class="variant__note">La fecha existe, pero no quedan horarios libres.</p>
+        <div class="empty">
+          <h3>No hay horarios libres este día</h3>
+          <p>Probá con otro día o con otra prestación más corta.</p>
+          <button class="btn btn--secondary" type="button">Ver el próximo día disponible</button>
+        </div>
+      </div>
+
+      <div class="variant" aria-label="Estado de error de red">
+        <h3>Error al cargar los horarios</h3>
+        <p class="variant__note">Se conservan la prestación y el día elegidos.</p>
+        <div class="alert alert--error" role="alert">
+          <svg class="alert__icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 1.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zm.8 12.7H9.2v-1.6h1.6zm0-3.2H9.2V5.8h1.6z"/></svg>
+          <div><strong>No pudimos cargar los horarios</strong>Revisá tu conexión y volvé a intentar.</div>
+        </div>
+        <button class="btn btn--secondary btn--block" type="button">Reintentar</button>
+      </div>
+
+      <div class="variant" aria-label="Estado de link inválido">
+        <h3>Link inválido o consultorio inactivo</h3>
+        <p class="variant__note">Mismo mensaje para no revelar cuál de los casos ocurrió.</p>
+        <div class="alert alert--error" role="alert">
+          <svg class="alert__icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 1.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zm.8 12.7H9.2v-1.6h1.6zm0-3.2H9.2V5.8h1.6z"/></svg>
+          <div><strong>Este link no es válido</strong>Puede haber cambiado o el consultorio ya no está disponible. Pedile un link nuevo a tu odontólogo.</div>
+        </div>
+        <button class="btn btn--secondary btn--block" type="button">Volver al inicio</button>
+      </div>
+    </div>
+  </section>
+
+  <script src="../../../../design-system/brand.js"></script>
+</body>
+</html>
