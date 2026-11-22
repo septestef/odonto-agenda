@@ -2,7 +2,7 @@ import './estilos/app.css'
 import { crearRouter, resolverRuta } from './router'
 import type { HistorialNavegacion, ResultadoRuta } from './router'
 import { crearClienteApi } from './shared/api-client'
-import type { FetchLike } from './shared/api-client'
+import type { FetchLike, LectorCookie } from './shared/api-client'
 import { crearGuard } from './shared/guard-sesion'
 import type { AdaptadorNodos, ManejadoresUI, NodoUI } from './shared/ui/adaptador'
 import { alerta, boton } from './shared/ui/componentes'
@@ -14,6 +14,7 @@ import { vistaMarcador } from './vistas/marcador'
 export interface OpcionesArranque {
   historial: HistorialNavegacion
   fetch: FetchLike
+  leerCookie?: LectorCookie
 }
 
 export type DetenerArranque = () => void
@@ -51,6 +52,12 @@ function valorCampo(nodo: NodoUI, nombre: string): string {
   return nodo.querySelector(`[data-campo="${nombre}"]`)?.value ?? ''
 }
 
+/** El manejador de `ingresar` recibe el form en `submit` y el botón en `click`. */
+function formularioDe(nodo: NodoUI): NodoUI {
+  const conCercania = nodo as { closest?: (selector: string) => NodoUI | null }
+  return conCercania.closest?.('form') ?? nodo
+}
+
 function hrefDe(nodo: NodoUI): string | undefined {
   if (!esConsultable(nodo)) {
     return undefined
@@ -64,14 +71,15 @@ export function arrancar(
   opciones: OpcionesArranque,
 ): DetenerArranque {
   const router = crearRouter(opciones.historial)
-  const cliente = crearClienteApi({ fetch: opciones.fetch })
+  const cliente = crearClienteApi({ fetch: opciones.fetch, leerCookie: opciones.leerCookie })
   const guard = crearGuard(opciones.fetch, cliente.suscribirSesionVencida, cliente)
   let cola: Promise<void> = Promise.resolve()
 
   function crearLogin(ruta: string): ControlVista {
     const manejadores: ManejadoresUI = {
       async ingresar(nodo: NodoUI) {
-        await control.enviar(valorCampo(nodo, 'email'), valorCampo(nodo, 'password'))
+        const formulario = formularioDe(nodo)
+        await control.enviar(valorCampo(formulario, 'email'), valorCampo(formulario, 'password'))
       },
     }
 

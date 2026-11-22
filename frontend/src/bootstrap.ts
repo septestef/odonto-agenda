@@ -1,5 +1,6 @@
 import { arrancar } from './main'
 import type { HistorialNavegacion } from './router'
+import { leerCookieDeCadena } from './shared/api-client'
 import { crearAdaptadorNodos } from './shared/ui/adaptador'
 
 function historialDelNavegador(): HistorialNavegacion {
@@ -20,5 +21,6 @@ if (app) {
   arrancar(app, crearAdaptadorNodos(document), {
     historial: historialDelNavegador(),
     fetch: (url, init) => window.fetch(url, init),
+    leerCookie: (nombre) => leerCookieDeCadena(document.cookie, nombre),
   })
 }

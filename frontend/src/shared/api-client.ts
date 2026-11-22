@@ -14,6 +14,21 @@ export type FetchLike = (url: string, init?: RequestInit) => Promise<Response>
 
 export type LectorCookie = (nombre: string) => string | undefined
 
+/** Lee una cookie de una cadena `document.cookie` sin depender del DOM. */
+export function leerCookieDeCadena(cadena: string, nombre: string): string | undefined {
+  for (const parte of cadena.split(';')) {
+    const cookie = parte.trim()
+    const separador = cookie.indexOf('=')
+    if (separador < 0 || cookie.slice(0, separador) !== nombre) {
+      continue
+    }
+    const valor = cookie.slice(separador + 1)
+    return valor === '' ? undefined : valor
+  }
+
+  return undefined
+}
+
 export interface OpcionesClienteApi {
   fetch?: FetchLike
   leerCookie?: LectorCookie

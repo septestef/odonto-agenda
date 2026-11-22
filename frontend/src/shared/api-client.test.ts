@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { crearClienteApi } from './api-client'
+import { crearClienteApi, leerCookieDeCadena } from './api-client'
 import type { FetchLike, LectorCookie } from './api-client'
 import type { ErrorApi } from './error-api'
 
@@ -41,6 +41,30 @@ function clienteQueRegistra(leerCookie: LectorCookie = () => 'abc') {
 
   return { cliente: crearClienteApi({ fetch: fetchFalso, leerCookie }), pedidos, urls }
 }
+
+describe('lector real de cookies desde una cadena', () => {
+  it('extrae XSRF-TOKEN de una cookie única', () => {
+    expect(leerCookieDeCadena('XSRF-TOKEN=abc123', 'XSRF-TOKEN')).toBe('abc123')
+  })
+
+  it('extrae XSRF-TOKEN cuando hay varias cookies separadas por \'; \'', () => {
+    const cadena = 'JSESSIONID=s%3Axyz; XSRF-TOKEN=token-real; tema=oscuro'
+
+    expect(leerCookieDeCadena(cadena, 'XSRF-TOKEN')).toBe('token-real')
+  })
+
+  it('devuelve undefined cuando la cookie no está', () => {
+    expect(leerCookieDeCadena('JSESSIONID=s%3Axyz; tema=oscuro', 'XSRF-TOKEN')).toBeUndefined()
+  })
+
+  it('no confunde un nombre que termina con el buscado', () => {
+    expect(leerCookieDeCadena('otra-XSRF-TOKEN=falso; XSRF-TOKEN=verdadero', 'XSRF-TOKEN')).toBe('verdadero')
+  })
+
+  it('devuelve undefined cuando la cookie está vacía', () => {
+    expect(leerCookieDeCadena('XSRF-TOKEN=; tema=oscuro', 'XSRF-TOKEN')).toBeUndefined()
+  })
+})
 
 describe('CSRF en escrituras', () => {
   it('reenvía la cookie XSRF-TOKEN en un POST protegido', async () => {

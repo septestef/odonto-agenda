@@ -1,12 +1,12 @@
 import { describe, expect, it, vi } from 'vitest'
 import { crearAdaptadorNodos } from './adaptador'
-import type { NodoUI } from './adaptador'
+import type { EventoUI, NodoUI } from './adaptador'
 import type { Descriptor } from './componentes'
 
 class NodoFalso implements NodoUI {
   readonly hijos: NodoUI[] = []
   readonly atributos: Record<string, string> = {}
-  readonly escuchas: Record<string, Array<() => void>> = {}
+  readonly escuchas: Record<string, Array<(evento?: EventoUI) => void>> = {}
   private texto = ''
   readonly etiqueta: string
 
@@ -31,7 +31,7 @@ class NodoFalso implements NodoUI {
     this.atributos[nombre] = valor
   }
 
-  addEventListener(tipo: string, callback: () => void): void {
+  addEventListener(tipo: string, callback: (evento?: EventoUI) => void): void {
     const lista = this.escuchas[tipo]
     if (lista === undefined) {
       this.escuchas[tipo] = [callback]
@@ -99,6 +99,107 @@ describe('adaptador a nodos con document falso', () => {
     }
 
     expect(manejador).toHaveBeenCalledTimes(1)
+  })
+
+  it('previene el submit nativo del formulario y ejecuta el manejador', () => {
+    const { documento } = documentoFalso()
+    const destino = new NodoFalso('main')
+    const manejador = vi.fn()
+    const preventDefault = vi.fn()
+
+    crearAdaptadorNodos(documento).montar(
+      destino,
+      { etiqueta: 'form', accion: 'ingresar', atributos: { 'data-campo': 'email' } },
+      { ingresar: manejador },
+    )
+    const formulario = destino.hijos[0]
+    if (!(formulario instanceof NodoFalso)) {
+      throw new Error('El adaptador no creó un nodo falso')
+    }
+    for (const callback of formulario.escuchas['submit'] ?? []) {
+      callback({ preventDefault })
+    }
+
+    expect(preventDefault).toHaveBeenCalledTimes(1)
+    expect(manejador).toHaveBeenCalledTimes(1)
+    expect(manejador).toHaveBeenCalledWith(formulario)
+  })
+
+  it('conserva los dos caminos de ingreso del formulario de login', () => {
+    const { documento, creados } = documentoFalso()
+    const destino = new NodoFalso('main')
+    const manejador = vi.fn()
+    const preventDefaultSubmit = vi.fn()
+    const preventDefaultBoton = vi.fn()
+    const descriptor: Descriptor = {
+      etiqueta: 'form',
+      accion: 'ingresar',
+      hijos: [
+        { etiqueta: 'input', atributos: { type: 'email', name: 'email' } },
+        { etiqueta: 'input', atributos: { type: 'password', name: 'password' } },
+        { etiqueta: 'button', texto: 'Ingresar', accion: 'ingresar', atributos: { type: 'submit' } },
+      ],
+    }
+
+    crearAdaptadorNodos(documento).montar(destino, descriptor, { ingresar: manejador })
+    const formulario = creados[0]
+    const boton = creados[3]
+    if (!(formulario instanceof NodoFalso) || !(boton instanceof NodoFalso)) {
+      throw new Error('El adaptador no creó el formulario y el botón')
+    }
+    for (const callback of formulario.escuchas['submit'] ?? []) {
+      callback({ preventDefault: preventDefaultSubmit })
+    }
+    for (const callback of boton.escuchas['click'] ?? []) {
+      callback({ preventDefault: preventDefaultBoton })
+    }
+
+    expect(preventDefaultSubmit).toHaveBeenCalledTimes(1)
+    expect(preventDefaultBoton).not.toHaveBeenCalled()
+    expect(manejador).toHaveBeenCalledTimes(2)
+    expect(manejador).toHaveBeenNthCalledWith(1, formulario)
+    expect(manejador).toHaveBeenNthCalledWith(2, boton)
+  })
+
+  it('no previene el evento en los botones con acción click', () => {
+    const { documento } = documentoFalso()
+    const destino = new NodoFalso('main')
+    const manejador = vi.fn()
+    const preventDefault = vi.fn()
+
+    crearAdaptadorNodos(documento).montar(
+      destino,
+      { etiqueta: 'button', texto: 'Ingresar', accion: 'ingresar', atributos: { type: 'submit' } },
+      { ingresar: manejador },
+    )
+    const boton = destino.hijos[0]
+    if (!(boton instanceof NodoFalso)) {
+      throw new Error('El adaptador no creó un nodo falso')
+    }
+    for (const callback of boton.escuchas['click'] ?? []) {
+      callback({ preventDefault })
+    }
+
+    expect(preventDefault).not.toHaveBeenCalled()
+    expect(manejador).toHaveBeenCalledTimes(1)
+  })
+
+  it('ejecuta el manejador del submit aunque el evento no esté presente', () => {
+    const { documento } = documentoFalso()
+    const destino = new NodoFalso('main')
+    const manejador = vi.fn()
+
+    crearAdaptadorNodos(documento).montar(destino, { etiqueta: 'form', accion: 'ingresar' }, { ingresar: manejador })
+    const formulario = destino.hijos[0]
+    if (!(formulario instanceof NodoFalso)) {
+      throw new Error('El adaptador no creó un nodo falso')
+    }
+    for (const callback of formulario.escuchas['submit'] ?? []) {
+      callback()
+    }
+
+    expect(manejador).toHaveBeenCalledTimes(1)
+    expect(manejador).toHaveBeenCalledWith(formulario)
   })
 
   it('inserta marcas HTML como texto literal y sin hijos', () => {
