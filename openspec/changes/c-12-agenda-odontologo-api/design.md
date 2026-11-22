@@ -32,7 +32,7 @@ Integración verificada (lectura de repositorio e historial; no ejecución de su
 
 Resoluciones aprobadas: P1 fechas locales y rango semiabierto de 1–31 días; P2 DTO exacto, duración real, privacidad y consulta sin N+1; P3 paginación propia y aislamiento; P4 CANCELADO → tiempo RN-TU-07 → inconsistencia futura ERROR_INTERNO → cancelar RESERVADO futuro; P5 lock solo de fila y reloj posterior, sin inversión de locks; P6 destinatario exclusivo email_gestion admisible y snapshot/evento compatibles; P7 errores exactos por advice existente; P8 RN-TU-01 compartido sin excepción nueva; P9 sesión/rol/CSRF heredados y su precedencia. No se inventan RN ni se extiende RN-SE-02 a sesión.
 
-Checkpoint vigente: primera etapa exclusivamente preparación y baseline existente, sin producción ni tests nuevos. Continuación por checkpoints de agenda, pacientes y cancelación/aviso. Todo local en `feat/c-12-agenda-odontologo-api`, sin commit/push/PR/archive ni cambios en CHANGES.md, specs principales, firmas compartidas, advice o configuración de seguridad.
+Checkpoint 3 implementado: cancelación/aviso, seguridad y concurrencia verificados junto con agenda/pacientes. Check final 299 unitarios/416 PostgreSQL IT, todos 0 failures/errors/skipped. Sin decisiones fuera de P1–P9. TDD-EVIDENCE.md registra ciclos reales y una desviación de trazabilidad: locks/guardia y algunos escenarios transaccionales se probaron después del primer GREEN del POST, sin RED independiente previo; esas tareas y 7.2 quedan abiertas para revisión del coordinador. Todo local en `feat/c-12-agenda-odontologo-api`, sin commit/push/PR/archive ni cambios en CHANGES.md, specs principales, firmas compartidas, advice o configuración de seguridad.
 
 ### P1 — Rango de agenda por fechas locales
 
