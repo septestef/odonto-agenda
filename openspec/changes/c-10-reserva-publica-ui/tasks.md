@@ -2,10 +2,11 @@
 
 ## 1. Precondiciones y gate de diseño
 
-- [ ] 1.1 Verificar que C-04 esté archivado y que existan el router, `shared/api-client.ts`, `shared/fechas.ts` y los componentes base; si falta, detener el apply y reportarlo (verificación: `git log`/`openspec list --specs` y lectura de `frontend/src`).
+- [ ] 1.1 Verificar que C-04 esté archivado y que existan `router.ts`, `shared/api-client.ts`, `shared/fechas.ts`, `shared/guard-sesion.ts`, `shared/brand.ts`, `shared/error-api.ts`, `shared/seguridad-html.ts` y los componentes base en `shared/ui/`; si falta, detener el apply y reportarlo (verificación: `git log`/`openspec list --specs` y lectura de `frontend/src`).
 - [x] 1.2 Crear los mockups `mockups/reserva-seleccion.html`, `reserva-formulario.html`, `reserva-exito.html` y `reserva-conflicto.html` importando `design-system/tokens.css`, `brand.js` y `assets/logo.svg` (verificación: abrir cada archivo en 390×844 y 1440×900 y confirmar que no hay colores ni medidas hardcodeadas).
-- [x] 1.3 Incluir en los mockups los estados de perfil, día sin horarios, error por campo, resumen, éxito, conflicto `RN-TU-01`, límite `RN-PA-03` y la vista a 360 px (verificación: checklist visual contra `design-system/components.html`).
-- [x] 1.4 Obtener la aprobación explícita del usuario sobre los mockups antes de escribir código (verificación: confirmación del usuario; sin ella no se continúa).
+- [x] 1.3 Incluir en los mockups los estados de perfil, día sin horarios, error por campo, resumen, éxito, conflicto `RN-TU-01`, límite `RN-PA-03` y la vista a 390 px (verificación: checklist visual contra `design-system/components.html`).
+- [ ] 1.4 Obtener la aprobación explícita de Estefi en el PR #12 sobre los mockups y sus capturas antes de escribir código (verificación: revisión aprobada en el PR; sin ella no se continúa). Estado: **Approval: pending**.
+- [x] 1.5 Documentar los mockups en `mockups/README.md` y generar las capturas 390×844 y 1440×900 en `mockups/previews/` sin desborde horizontal (verificación: las 8 capturas existen y `scrollWidth <= clientWidth` en cada una). Los mockups deben reflejar exactamente 4 pasos de reserva.
 
 ## 2. Modelo y cliente de la API pública
 

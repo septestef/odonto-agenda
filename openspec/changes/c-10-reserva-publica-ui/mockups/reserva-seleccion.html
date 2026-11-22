@@ -12,7 +12,7 @@
   <div class="mockup-bar" role="note">
     <span><b>C-10</b> Reserva pública</span>
     <span>Pantalla: selección de prestación, día y horario</span>
-    <span>390×844 · 1440×900 · 360 px</span>
+    <span>390&times;844 &middot; 1440&times;900</span>
   </div>
 
   <header class="appbar">
@@ -42,7 +42,7 @@
       </div>
 
       <fieldset class="options">
-        <legend class="step">Paso 1 de 3 · Elegí tu prestación</legend>
+        <legend class="step">Paso 1 de 4: Prestación</legend>
         <button class="option" type="button" aria-pressed="true">
           <span class="option__title">Consulta</span>
           <span class="option__meta">30 min</span>
@@ -58,18 +58,39 @@
       </fieldset>
 
       <div>
-        <p class="step">Paso 2 de 3 · Elegí el día</p>
-        <div class="days" role="group" aria-label="Elegí el día">
-          <button class="day" type="button" disabled><small>mié</small><strong>25</strong></button>
-          <button class="day" type="button" aria-pressed="true"><small>jue</small><strong>26</strong></button>
-          <button class="day" type="button" aria-pressed="false"><small>vie</small><strong>27</strong></button>
-          <button class="day" type="button" disabled><small>sáb</small><strong>28</strong></button>
-          <button class="day" type="button" disabled><small>dom</small><strong>29</strong></button>
-          <button class="day" type="button" aria-pressed="false"><small>lun</small><strong>30</strong></button>
-          <button class="day" type="button" aria-pressed="false"><small>mar</small><strong>1</strong></button>
+        <p class="step">Paso 2 de 4: Día</p>
+
+        <div class="day-nav">
+          <div class="week-nav" role="group" aria-label="Navegación por semana">
+            <button class="week-btn" id="semana-anterior" type="button" aria-label="Semana anterior" disabled>
+              <span aria-hidden="true">←</span><span class="week-btn__text">Semana anterior</span>
+            </button>
+            <button class="week-btn" id="semana-siguiente" type="button" aria-label="Semana siguiente">
+              <span class="week-btn__text">Semana siguiente</span><span aria-hidden="true">→</span>
+            </button>
+          </div>
+          <label class="date-jump">
+            <span>Ir a una fecha</span>
+            <input class="input" id="salto-fecha" type="date" min="2026-11-22" max="2027-01-21" value="2026-11-26">
+          </label>
         </div>
 
-        <p class="step" style="margin-top: var(--space-6)">Paso 3 de 3 · Elegí un horario</p>
+        <p class="days-range" id="rango-semana" aria-live="polite">Semana del 22 al 28 de noviembre</p>
+
+        <div class="days-wrap" id="dias-wrap">
+          <div class="days" id="dias" role="group" aria-label="Elegí el día">
+            <button class="day" type="button" disabled aria-label="Domingo 22 de noviembre, sin horarios"><small>dom</small><strong>22</strong></button>
+            <button class="day" type="button" disabled aria-label="Lunes 23 de noviembre, sin horarios"><small>lun</small><strong>23</strong></button>
+            <button class="day" type="button" disabled aria-label="Martes 24 de noviembre, sin horarios"><small>mar</small><strong>24</strong></button>
+            <button class="day" type="button" disabled aria-label="Miércoles 25 de noviembre, sin horarios"><small>mié</small><strong>25</strong></button>
+            <button class="day" type="button" aria-pressed="true" aria-label="Jueves 26 de noviembre"><small>jue</small><strong>26</strong></button>
+            <button class="day" type="button" aria-pressed="false" aria-label="Viernes 27 de noviembre"><small>vie</small><strong>27</strong></button>
+            <button class="day" type="button" disabled aria-label="Sábado 28 de noviembre, sin horarios"><small>sáb</small><strong>28</strong></button>
+          </div>
+        </div>
+        <p class="scroll-hint">Deslizá para ver más días <span aria-hidden="true">→</span></p>
+
+        <p class="step" style="margin-top: var(--space-6)">Paso 3 de 4: Horario</p>
         <div class="slots" role="group" aria-label="Elegí un horario">
           <button class="chip" type="button" aria-pressed="false">09:00</button>
           <button class="chip" type="button" aria-pressed="false">09:15</button>
@@ -83,7 +104,7 @@
       <div class="summary" aria-label="Resumen de la selección">
         <dl>
           <dt>Prestación</dt><dd>Consulta · 30 min</dd>
-          <dt>Fecha</dt><dd>Jueves 26 de noviembre, 10:30</dd>
+          <dt>Fecha</dt><dd id="resumen-fecha">Jueves 26 de noviembre, 10:30</dd>
           <dt>Lugar</dt><dd>Av. Colón 1234, Córdoba</dd>
         </dl>
       </div>
@@ -149,6 +170,7 @@
     </div>
   </section>
 
+  <script src="mockup.js"></script>
   <script src="../../../../design-system/brand.js"></script>
 </body>
 </html>

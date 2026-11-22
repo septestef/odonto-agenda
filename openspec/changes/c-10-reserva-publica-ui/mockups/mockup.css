@@ -1,4 +1,4 @@
-﻿/* Mockups C-10 — Reserva pública
+/* Mockups C-10 — Reserva pública
    Solo usa variables de design-system/tokens.css. Revisión 2. */
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -113,6 +113,48 @@ h1, h2, h3 { line-height: var(--leading-tight); }
 .option__meta { font-size: var(--text-sm); color: var(--color-text-muted); white-space: nowrap; }
 
 /* Tira de días */
+.day-nav {
+  display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between;
+  gap: var(--space-3); margin-bottom: var(--space-2);
+}
+.week-nav { display: flex; gap: var(--space-2); }
+.week-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--space-1);
+  min-height: var(--control-height); padding: 0 var(--space-3);
+  border: 1px solid var(--color-border-strong); border-radius: var(--radius-md);
+  background: var(--color-surface); color: var(--color-primary-700);
+  font: inherit; font-size: var(--text-sm); font-weight: var(--weight-semibold);
+  cursor: pointer;
+}
+.week-btn:hover:not(:disabled) { background: var(--color-primary-50); }
+.week-btn:disabled { opacity: .5; cursor: not-allowed; }
+.week-btn__text { display: none; }
+@media (min-width: 480px) { .week-btn__text { display: inline; } }
+.date-jump {
+  display: flex; flex: 1 1 180px; flex-direction: column; gap: var(--space-1);
+  font-size: var(--text-sm); font-weight: var(--weight-medium);
+}
+.date-jump .input { width: 100%; }
+.days-range { font-size: var(--text-sm); color: var(--color-text-muted); margin-bottom: var(--space-2); }
+.days-wrap { position: relative; }
+.days-wrap::before, .days-wrap::after {
+  content: ""; position: absolute; top: 0; bottom: var(--space-2);
+  width: var(--space-8); pointer-events: none; opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+.days-wrap::before { left: 0; background: linear-gradient(to right, var(--color-surface), transparent); }
+.days-wrap::after { right: 0; background: linear-gradient(to left, var(--color-surface), transparent); }
+.days-wrap.is-scrolled::before { opacity: 1; }
+.days-wrap:not(.is-at-end)::after { opacity: 1; }
+@media (min-width: 560px) {
+  .days-wrap::before, .days-wrap::after { display: none; }
+}
+.scroll-hint {
+  display: flex; align-items: center; gap: var(--space-1);
+  margin-top: var(--space-1); font-size: var(--text-sm); color: var(--color-text-muted);
+}
+@media (min-width: 560px) { .scroll-hint { display: none; } }
+
 .days {
   display: flex; gap: var(--space-2);
   overflow-x: auto; padding-bottom: var(--space-2);
@@ -310,7 +352,7 @@ h1, h2, h3 { line-height: var(--leading-tight); }
 .link { color: var(--color-primary-700); text-underline-offset: 3px; }
 
 /* Foco visible, igual que components.html */
-.btn:focus-visible, .input:focus-visible, .chip:focus-visible,
+.btn:focus-visible, .input:focus-visible, .chip:focus-visible, .week-btn:focus-visible,
 .option:focus-visible, .day:focus-visible, .link:focus-visible {
   outline: none; box-shadow: var(--focus-ring);
 }
@@ -318,5 +360,3 @@ h1, h2, h3 { line-height: var(--leading-tight); }
 @media (prefers-reduced-motion: reduce) {
   .skeleton::after, .spinner { animation: none; }
 }
-
-
