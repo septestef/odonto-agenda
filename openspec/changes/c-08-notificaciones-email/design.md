@@ -13,7 +13,7 @@ El backend ya tiene `AppProperties.baseUrl()` enlazado a `APP_BASE_URL`, `ZonaNe
 
 ## Decisions
 
-**Governance ALTO — Estefi aprobó P1–P6 el 2026-11-21.** La aprobación cierra la revisión de planificación, no autoriza Apply.
+**Governance ALTO — Estefi aprobó P1–P6 el 2026-11-21.** La autorización separada de Apply está registrada en `tasks.md`.
 
 ### D1 — Separar commit, despacho y escritura
 
@@ -39,11 +39,11 @@ Agregar el starter de Spring Mail y usar `JavaMailSender` para Gmail por `MAIL_H
 
 **P5 — Semántica de auditoría y datos personales.** Reutilizar el esquema sin migración: guardar turno, tipo, `destinatario` como único dato personal directo, `estado`, `enviado_en` en UTC obtenido del `Clock` inyectado al iniciar el procesamiento y `error` nulo en éxito o de lista cerrada en falla. En `ERROR`, `enviado_en NOT NULL` indica el instante del intento, no que el aviso salió por SMTP. Las únicas categorías persistidas son `CONFIG_SMTP`, `URL_INVALIDA`, `RENDER` y `SMTP_FALLO`. No guardar texto de excepción, cuerpo, token ni link. No loguear snapshots (su `toString` puede contener datos personales), objetos MIME, parámetros SQL, identificadores de turno, credenciales ni causas crudas. `ENVIADO` indica aceptación por el transporte, no llegada a la bandeja.
 
-**P6 — Escritura fallida o resultado SMTP ambiguo.** Si SMTP acepta el correo pero falla la escritura, emití solo un diagnóstico sanitizado, sin afirmar que se guardó una fila ni intentar otra escritura. Si un timeout deja sin confirmar si SMTP aceptó el correo, emití solo un diagnóstico sanitizado, sin intentar registrar una fila. En ninguno de estos casos se reenvía el aviso ni se reintenta. Una falla SMTP no ambigua conserva `ERROR`/`SMTP_FALLO`. El turno sigue intacto; no hay outbox, atomicidad entre SMTP y PostgreSQL ni garantía de entrega exactamente una vez frente a fallas del proceso.
+**P6 — Escritura fallida o resultado SMTP ambiguo.** Si SMTP acepta el correo pero falla la escritura, emití solo un diagnóstico sanitizado, sin afirmar que se guardó una fila ni intentar otra escritura. Si un timeout deja incierta la aceptación SMTP de un aviso admitido con destinatario válido, intentá guardar `ERROR`/`SMTP_FALLO` en una transacción independiente `REQUIRES_NEW`. Puede quedar una fila `ERROR` aunque Gmail haya aceptado el correo: `enviado_en` es el instante UTC del intento, tomado del `Clock` inyectado según P5, no una confirmación de entrega. En ninguno de estos casos se reenvía el aviso ni se reintenta. Una falla SMTP no ambigua conserva `ERROR`/`SMTP_FALLO`. El turno sigue intacto; no hay outbox, atomicidad entre SMTP y PostgreSQL ni garantía de entrega exactamente una vez frente a fallas del proceso.
 
 ## Risks / Trade-offs
 
-- Caída entre commit y procesamiento → puede existir una reserva sin correo, como advierte D9 de C-07. El rechazo del ejecutor (P1) también puede dejar una reserva sin correo, y una escritura fallida o un timeout ambiguo (P6) pueden dejar un correo sin fila. No hay outbox, reintentos durables ni reenvío.
+- Caída entre commit y procesamiento → puede existir una reserva sin correo, como advierte D9 de C-07. El rechazo del ejecutor (P1) también puede dejar una reserva sin correo, y una escritura fallida (P6) puede dejar un correo sin fila. No hay outbox, reintentos durables ni reenvío.
 - Cuota gratuita de Gmail (referencia DD-06: aprox. 500 envíos/día, dependiente de la cuenta y sujeto a cambios), spam o bloqueo → documentar el límite y separar aceptación SMTP de entrega; el turno no se revierte.
 - Mensajes engañosos o fuga de token/PII → usar snapshots, datos dinámicos escapados, base controlada y categorías cerradas de error; el link sale solo en el correo correspondiente.
 

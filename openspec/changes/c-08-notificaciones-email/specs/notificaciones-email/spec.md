@@ -88,9 +88,9 @@ En `demo`, si falta o es inválida cualquiera de `MAIL_HOST`, `MAIL_PORT`, `MAIL
 
 ### Requirement: Registro independiente del intento y confidencialidad
 
-El consumidor MUST registrar por separado del turno el resultado de un aviso admitido con destinatario válido: `ENVIADO` con error nulo si el transporte acepta el mensaje y `ERROR` si el intento falla de forma no ambigua (RN-NO-04). Las únicas categorías persistidas son `CONFIG_SMTP`, `URL_INVALIDA`, `RENDER` y `SMTP_FALLO`. La fila MUST identificar el turno, tipo, destinatario, instante UTC y estado. En `ERROR`, `enviado_en` MUST ser el instante de inicio del intento, tomado del `Clock` inyectado, no una confirmación de envío. El destinatario MUST ser el único dato personal directo de la fila. El texto de excepción, el token en claro, el link completo y el cuerpo MUST NOT persistirse ni loguearse; los logs MUST NOT incluir datos personales, secretos SMTP ni representaciones de los eventos.
+El consumidor MUST registrar por separado del turno el resultado de un aviso admitido con destinatario válido: `ENVIADO` con error nulo si el transporte confirma que aceptó el mensaje y `ERROR` si el intento falla, incluido un timeout SMTP de aceptación incierta (RN-NO-04). Las únicas categorías persistidas son `CONFIG_SMTP`, `URL_INVALIDA`, `RENDER` y `SMTP_FALLO`. La fila MUST identificar el turno, tipo, destinatario, instante UTC y estado. En `ERROR`, `enviado_en` MUST ser el instante de inicio del intento, tomado del `Clock` inyectado, no una confirmación de envío. El destinatario MUST ser el único dato personal directo de la fila. El texto de excepción, el token en claro, el link completo y el cuerpo MUST NOT persistirse ni loguearse; los logs MUST NOT incluir datos personales, secretos SMTP ni representaciones de los eventos.
 
-Ante un timeout que deja incierta la aceptación SMTP, el consumidor MUST emitir solo un diagnóstico sanitizado, sin intentar escribir una fila. Si falla la escritura del resultado, MUST emitir solo un diagnóstico sanitizado, sin afirmar que se guardó una fila ni intentar otra escritura. En ambos casos el consumidor MUST NOT reenviar ni reintentar el aviso; el turno confirmado queda intacto.
+Ante un timeout que deja incierta la aceptación SMTP de un aviso admitido con destinatario válido, el consumidor MUST intentar guardar `ERROR`/`SMTP_FALLO` en una transacción independiente `REQUIRES_NEW`, con el instante UTC del intento tomado del `Clock` inyectado en `enviado_en`. Si falla la escritura del resultado, MUST emitir solo un diagnóstico sanitizado, sin afirmar que se guardó una fila ni intentar otra escritura. En ambos casos el consumidor MUST NOT reenviar ni reintentar el aviso; el turno confirmado queda intacto.
 
 #### Scenario: Transporte aceptado
 - **WHEN** el transporte acepta el aviso
@@ -109,5 +109,5 @@ Ante un timeout que deja incierta la aceptación SMTP, el consumidor MUST emitir
 - **THEN** el turno sigue confirmado, solo se emite un diagnóstico sanitizado y no hay reenvío, reintento ni confirmación de fila guardada
 
 #### Scenario: Timeout SMTP con aceptación incierta
-- **WHEN** SMTP devuelve un timeout y no se sabe si aceptó el aviso
-- **THEN** el turno sigue confirmado y solo se emite un diagnóstico sanitizado, sin fila ni intento de escritura, reenvío o reintento
+- **WHEN** SMTP devuelve un timeout de aceptación incierta para un aviso admitido con destinatario válido y la base está disponible
+- **THEN** el turno sigue confirmado y se guarda `ERROR`/`SMTP_FALLO` en una transacción independiente `REQUIRES_NEW`, con el instante UTC del intento tomado del `Clock` inyectado en `enviado_en`, sin reenvío ni reintento
