@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>Mockup C-11 · Confirmar cancelación — OdontoAgenda</title>
+<link rel="icon" href="../../../../design-system/assets/logo.png">
+<link rel="stylesheet" href="../../../../design-system/tokens.css">
+<link rel="stylesheet" href="mockup.css">
+</head>
+<body>
+<header class="barra">
+  <div class="barra__inner">
+    <img src="../../../../design-system/assets/logo.svg" alt="" width="135" height="44">
+    <span class="sr-only" data-brand-name>OdontoAgenda</span>
+  </div>
+</header>
+
+<div class="pagina" aria-hidden="true">
+  <main class="pagina__main">
+    <p class="saludo">Tu turno con Ana Pérez</p>
+    <h1 class="titulo">Gestioná tu turno</h1>
+    <section class="tarjeta">
+      <div class="turno-hero">
+        <div class="turno-hero__badges"><span class="badge badge--reservado">Reservado</span></div>
+        <p class="turno-hero__fecha">Viernes 27 de noviembre</p>
+        <p class="turno-hero__hora">09:00 a 09:30</p>
+      </div>
+      <dl class="datos">
+        <dt>Prestación</dt><dd>Consulta</dd>
+        <dt>Profesional</dt><dd>Ana Pérez</dd>
+        <dt>Dirección</dt><dd>Av. Colón 1234, Córdoba</dd>
+      </dl>
+      <div class="acciones">
+        <span class="btn btn--secondary">Cambiar horario</span>
+        <span class="btn btn--danger">Cancelar turno</span>
+      </div>
+    </section>
+  </main>
+  <aside class="lateral">
+    <section class="ayuda">
+      <h2>Antes de tu turno</h2>
+      <ul>
+        <li>Podés cancelar en cualquier momento antes de que empiece.</li>
+        <li>Si cambiás el horario, el nuevo tiene que ser con al menos 24 h de anticipación.</li>
+        <li>Cada cambio te llega por email.</li>
+      </ul>
+    </section>
+  </aside>
+</div>
+
+<div class="velo"></div>
+<div class="dialogo" role="alertdialog" aria-modal="true" aria-labelledby="d-titulo" aria-describedby="d-texto">
+  <h2 id="d-titulo">¿Cancelás tu turno?</h2>
+  <div class="resumen">
+    <strong>Viernes 27 de noviembre, 09:00</strong>
+    <span>Consulta · Ana Pérez</span>
+  </div>
+  <p id="d-texto">El horario queda libre para otra persona y no se puede deshacer. Te mandamos un email con la cancelación.</p>
+  <div class="dialogo__acciones">
+    <button class="btn btn--danger-solid" type="button">Sí, cancelar turno</button>
+    <button class="btn btn--secondary" type="button" autofocus>No, volver</button>
+  </div>
+  <p class="nota-mockup">El foco arranca en “No, volver”. Escape cierra. Mientras se envía, el botón muestra “Cancelando…” con spinner y los dos quedan deshabilitados.</p>
+</div>
+<script src="../../../../design-system/brand.js"></script>
+</body>
+</html>

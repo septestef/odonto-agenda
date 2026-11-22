@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>Mockup C-11 · Carga y errores — OdontoAgenda</title>
+<link rel="icon" href="../../../../design-system/assets/logo.png">
+<link rel="stylesheet" href="../../../../design-system/tokens.css">
+<link rel="stylesheet" href="mockup.css">
+</head>
+<body>
+<header class="barra">
+  <div class="barra__inner">
+    <img src="../../../../design-system/assets/logo.svg" alt="" width="135" height="44">
+    <span class="sr-only" data-brand-name>OdontoAgenda</span>
+  </div>
+</header>
+
+<main class="pagina" style="grid-template-columns:1fr;max-width:var(--container-max)">
+  <div>
+    <h1 class="titulo">Carga y errores</h1>
+    <p class="nota-mockup" style="margin:0 0 var(--space-6)">Galería de estados para revisar. En la UI real se ve uno por vez, con el mismo layout que <code>turno-activo.html</code>.</p>
+
+    <div class="galeria">
+      <!-- 1. Carga -->
+      <section class="estado" aria-labelledby="e1">
+        <h2 id="e1" class="estado__nombre">1 · Cargando el turno</h2>
+        <div class="tarjeta" aria-busy="true" aria-label="Cargando tu turno">
+          <div class="esqueleto esqueleto--alto"></div>
+          <div class="esqueleto" style="width:60%"></div>
+          <div class="esqueleto" style="width:45%"></div>
+          <div class="esqueleto" style="width:70%;margin-bottom:0"></div>
+        </div>
+      </section>
+
+      <!-- 2. 404 -->
+      <section class="estado" aria-labelledby="e2">
+        <h2 id="e2" class="estado__nombre">2 · Link inválido · 404 NO_ENCONTRADO</h2>
+        <div class="tarjeta" style="text-align:center">
+          <h3 style="font-size:var(--text-lg);margin-bottom:var(--space-2)">No encontramos este turno</h3>
+          <p style="color:var(--color-text-muted)">Revisá que el link esté completo, tal como llegó en el email. Si cambiaste el horario, usá el link del email más reciente.</p>
+        </div>
+      </section>
+
+      <!-- 3. Conflicto al reprogramar -->
+      <section class="estado" aria-labelledby="e3">
+        <h2 id="e3" class="estado__nombre">3 · Horario tomado al confirmar · 409 RN-TU-01</h2>
+        <div class="tarjeta">
+          <div class="alert alert--error" role="alert">
+            <svg class="alert__icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 1.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zm.8 12.7H9.2v-1.6h1.6zm0-3.2H9.2V5.8h1.6z"/></svg>
+            <div><strong>Ese horario acaba de ser tomado</strong>Elegí otro; ya actualizamos los disponibles. Tu turno actual sigue igual.</div>
+          </div>
+          <p class="step" style="margin-top:0">Horarios libres el jueves 26</p>
+          <div class="slots" role="group" aria-label="Horario">
+            <button class="chip" type="button" aria-pressed="false">09:00</button>
+            <button class="chip" type="button" aria-pressed="false">09:15</button>
+            <button class="chip" type="button" aria-pressed="false">11:00</button>
+            <button class="chip" type="button" aria-pressed="false">16:00</button>
+          </div>
+          <div class="acciones acciones--una">
+            <button class="btn btn--primary btn--block" type="button" disabled>Confirmar cambio</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. Fuera de ventana -->
+      <section class="estado" aria-labelledby="e4">
+        <h2 id="e4" class="estado__nombre">4 · Horario fuera de agenda · 422 RN-TU-03 / RN-TU-11 / RN-AG-05</h2>
+        <div class="tarjeta">
+          <div class="alert alert--error" role="alert">
+            <svg class="alert__icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 1.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zm.8 12.7H9.2v-1.6h1.6zm0-3.2H9.2V5.8h1.6z"/></svg>
+            <div><strong>Ese horario ya no está disponible</strong>Elegí otro de la lista. Tu turno actual sigue igual.</div>
+          </div>
+          <p class="nota-mockup">Mismo comportamiento que el 409: se refresca la disponibilidad del día elegido y se limpia la selección.</p>
+        </div>
+      </section>
+
+      <!-- 5. El turno empezó mientras estaba abierta la página -->
+      <section class="estado" aria-labelledby="e5">
+        <h2 id="e5" class="estado__nombre">5 · Acción rechazada · 409 RN-TU-07 / RN-SE-02</h2>
+        <div class="tarjeta">
+          <div class="alert alert--warning" role="alert">
+            <svg class="alert__icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10.9 2.6a1 1 0 0 0-1.8 0L1.6 16a1 1 0 0 0 .9 1.5h15a1 1 0 0 0 .9-1.5zM10.8 15H9.2v-1.6h1.6zm0-3.2H9.2V7.4h1.6z"/></svg>
+            <div><strong>No pudimos hacer el cambio</strong>Este turno ya no se puede modificar. Te mostramos cómo quedó.</div>
+          </div>
+          <p class="nota-mockup">La página vuelve a pedir el turno y pasa a la vista de solo lectura (<code>solo-lectura.html</code>), con este aviso arriba.</p>
+        </div>
+      </section>
+
+      <!-- 6. Reprogramación no permitida -->
+      <section class="estado" aria-labelledby="e6">
+        <h2 id="e6" class="estado__nombre">6 · No se puede cambiar desde el link · 409 RN-SE-04</h2>
+        <div class="tarjeta">
+          <div class="alert alert--info" role="alert">
+            <svg class="alert__icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 1.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zm.8 13H9.2V9h1.6zm0-7H9.2V5.9h1.6z"/></svg>
+            <div>Este turno no se puede cambiar desde el link. Si necesitás otro horario, cancelalo y <a class="link" href="#">reservá uno nuevo</a>.</div>
+          </div>
+          <p class="nota-mockup">Normalmente no se llega acá: si <code>puedeReprogramar</code> es false, el botón no se muestra (variante en <code>turno-activo.html</code>). Se vuelve a pedir el turno.</p>
+        </div>
+      </section>
+
+      <!-- 7. Red / 500 -->
+      <section class="estado" aria-labelledby="e7">
+        <h2 id="e7" class="estado__nombre">7 · Sin conexión o error inesperado · 500</h2>
+        <div class="tarjeta">
+          <div class="alert alert--error" role="alert">
+            <svg class="alert__icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 1.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zm.8 12.7H9.2v-1.6h1.6zm0-3.2H9.2V5.8h1.6z"/></svg>
+            <div><strong>No pudimos conectarnos</strong>Probá de nuevo en unos segundos. Tu turno no cambió.</div>
+          </div>
+          <button class="btn btn--secondary" type="button">Reintentar</button>
+        </div>
+      </section>
+
+      <!-- 8. Enviando -->
+      <section class="estado" aria-labelledby="e8">
+        <h2 id="e8" class="estado__nombre">8 · Enviando el cambio</h2>
+        <div class="tarjeta">
+          <button class="btn btn--primary btn--block" type="button" aria-busy="true" disabled style="opacity:1"><span class="spinner" aria-hidden="true"></span>Cambiando tu turno…</button>
+          <p class="nota-mockup">Durante el envío se deshabilitan día, horarios y botones para evitar doble envío.</p>
+        </div>
+      </section>
+    </div>
+  </div>
+</main>
+<script src="../../../../design-system/brand.js"></script>
+</body>
+</html>
