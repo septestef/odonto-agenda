@@ -27,4 +27,22 @@ public interface TurnoRepository extends JpaRepository<Turno, Long> {
               and t.estado = ar.turnotarde.turno.EstadoTurno.RESERVADO and t.inicio > :ahora""")
     long contarReservadosFuturos(@Param("odontologoId") Long odontologoId, @Param("pacienteId") Long pacienteId,
             @Param("ahora") Instant ahora);
+
+    /**
+     * C-05: turnos afectados por un bloqueo. Mismo predicado semiabierto que
+     * {@link #intervalosActivosQueCruzan(Long, Instant, Instant)}, pero trayendo solo los datos
+     * que la UI necesita para decidir si cancela (nunca DNI, email, teléfono ni token).
+     */
+    @Query("""
+            select new ar.turnotarde.agenda.TurnoAfectadoProyeccion(t.id, t.inicio, t.fin, t.estado,
+                    p.nombre, p.apellido, pr.nombre) from Turno t
+            join t.paciente p join t.prestacion pr
+            where t.odontologoId = :odontologoId
+              and t.estado in (ar.turnotarde.turno.EstadoTurno.RESERVADO,
+                               ar.turnotarde.turno.EstadoTurno.ATENDIDO,
+                               ar.turnotarde.turno.EstadoTurno.AUSENTE)
+              and t.inicio < :fin and t.fin > :inicio
+            order by t.inicio""")
+    List<ar.turnotarde.agenda.TurnoAfectadoProyeccion> turnosAfectados(
+            @Param("odontologoId") Long odontologoId, @Param("inicio") Instant inicio, @Param("fin") Instant fin);
 }
