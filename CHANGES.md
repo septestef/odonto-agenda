@@ -282,7 +282,7 @@ Camino crítico post-demo: `C-16 → C-17 → C-18` (C-20 cierra el camino hacia
   - `knowledge-base/09_decisiones_y_supuestos.md` §DD-06, §DD-09
 
 ### [C-09] `gestion-turno-token-api`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado (archivado 2026-11-22 como `2026-11-22-c-09-gestion-turno-token-api`; 277 tests unitarios y 316 de integración en `main`). Contrato del GET, tabla de errores y orden de locks en `openspec/changes/archive/2026-11-22-c-09-gestion-turno-token-api/design.md` (D1–D3). Agrega `turno.email_gestion` (V9) y la regla `RN-SE-04`.
 - **Scope**:
   - `GET /api/public/turnos/{token}` (busca por `sha256(token)`; turno pasado o cancelado en solo lectura), `POST /api/public/turnos/{token}/cancelar` y `POST /api/public/turnos/{token}/reprogramar {inicio}` (US-008, US-009).
   - Cancelación en cualquier momento antes del inicio (RN-TU-05, IN-01); no se cancela ni reprograma un turno pasado → 409 `RN-TU-07`; token inexistente → 404.
@@ -318,7 +318,9 @@ Camino crítico post-demo: `C-16 → C-17 → C-18` (C-20 cierra el camino hacia
 - **Estado**: `[ ]` pendiente
 - **Scope**:
   - `features/turno`: página `/turno/{token}` con detalle del turno, cancelación con confirmación previa, reprogramación con selector de horarios de la misma prestación (reutiliza el componente de C-10) y vista en solo lectura para turnos cancelados o pasados (US-008, US-009).
-  - Errores 404 (token inválido), 409 `RN-TU-07` y 409 `RN-TU-01`; el link nuevo de la reprogramación llega por email.
+  - Errores del contrato de C-09 (todos `{codigo, mensaje}`): 404 `NO_ENCONTRADO` (token inválido o desconocido, o consultorio/prestación inactivos al reprogramar); 409 `RN-TU-07` (el turno ya empezó), 409 `RN-SE-02` (turno futuro ya no reservado: solo lectura), 409 `RN-SE-04` (no se puede reprogramar desde el link; cancelar sí) y 409 `RN-TU-01` (horario tomado: refrescar disponibilidad); 422 `RN-TU-03`, `RN-TU-11` y `RN-AG-05` (horario fuera de 24 h, horizonte o agenda); 400 `VALIDACION`/`SOLICITUD_INVALIDA`.
+  - Usar `puedeCancelar` y `puedeReprogramar` del GET para mostrar las acciones. Cancelar y reprogramar responden 204 sin cuerpo: después de cada acción, volver a pedir el turno con el mismo token. El link nuevo de la reprogramación llega solo por email; la página no lo recibe ni redirige al turno nuevo.
+  - Los horarios para reprogramar salen de `GET /api/public/{odontologo.slug}/disponibilidad?prestacionId=&fecha=` de C-07, con los datos del GET de gestión.
   - Tests Vitest del flujo de estados.
   - **Mockup aprobado requerido antes de apply** (turno activo, confirmación de cancelación, reprogramación, solo lectura).
 - **Dependencias**: `C-09`, `C-10`

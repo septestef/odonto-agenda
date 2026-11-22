@@ -6,7 +6,7 @@ Define el esquema relacional del negocio de OdontoAgenda, las restricciones de i
 ## Requirements
 
 ### Requirement: Tablas del modelo de negocio
-Después de aplicar las migraciones, la base MUST tener las tablas `odontologo`, `horario_atencion`, `bloqueo`, `prestacion`, `paciente`, `turno` y `notificacion`, con las columnas, tipos y claves de `04_modelo_de_datos.md`. Toda tabla de negocio salvo `odontologo` y `notificacion` MUST referenciar a su odontólogo; `notificacion` MUST referenciar a su turno.
+Después de aplicar las migraciones, la base MUST tener las tablas `odontologo`, `horario_atencion`, `bloqueo`, `prestacion`, `paciente`, `turno` y `notificacion`, con las columnas, tipos y claves de `04_modelo_de_datos.md`. Toda tabla de negocio salvo `odontologo` y `notificacion` MUST referenciar a su odontólogo; `notificacion` MUST referenciar a su turno. Además, `turno` MUST tener `email_gestion varchar(255)` nullable para conservar el destinatario de gestión del turno, separado de `paciente.email`. La migración MUST dejar nulo el valor de turnos legados, sin reconstruirlo a partir del paciente ni de notificaciones.
 
 #### Scenario: Esquema completo tras migrar
 - **WHEN** las migraciones se aplican sobre una base vacía
@@ -15,6 +15,10 @@ Después de aplicar las migraciones, la base MUST tener las tablas `odontologo`,
 #### Scenario: Referencia a un odontólogo inexistente
 - **WHEN** se inserta una prestación, un paciente, un bloqueo, un horario o un turno que referencia un odontólogo que no existe
 - **THEN** la base rechaza la inserción
+
+#### Scenario: Migración con turnos existentes
+- **WHEN** se migra una base con turnos legados, pacientes con email y con o sin filas de notificación
+- **THEN** los turnos conservan estado, hash y vínculos, y todos esos `email_gestion` siguen nulos; no se crea ni se altera ningún destinatario histórico
 
 ### Requirement: Fechas y horas en UTC
 Los instantes del negocio (inicio y fin de turnos y bloqueos, cancelación, envíos, auditoría) MUST persistirse como fecha y hora con zona, normalizados a UTC. Las franjas de atención MUST persistirse como hora local sin fecha.
