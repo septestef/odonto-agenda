@@ -86,6 +86,27 @@ SPRING_PROFILES_ACTIVE=demo ./gradlew bootRun -PskipFrontend
 
 Flyway aplica `V2` y `V900` (odontólogo `demo`, horario, prestaciones y turnos del 23 al 27/11/2026); al arrancar, la app guarda el hash BCrypt de `DEMO_PASSWORD`. La contraseña nunca se versiona.
 
+### Correo de confirmación y avisos
+
+Para correo real en `demo`, completá `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD` y `MAIL_FROM_NAME`
+en el entorno o `.env` ignorado. Para Gmail usá `smtp.gmail.com:587` y una contraseña de aplicación. El transporte
+exige STARTTLS, verifica el servidor y limita a 5 segundos cada espera de conexión, lectura y escritura.
+El arranque de `demo` valida la configuración local sin abrir una conexión SMTP; no comprueba las credenciales.
+En `dev` y `test`, la configuración incompleta no impide reservar: el aviso admitido con destinatario válido
+queda como `ERROR`/`CONFIG_SMTP`. Los tests usan un doble sin red.
+
+Verificá el correo de demo por separado, solo con autorización: reservá con datos sintéticos y un buzón controlado,
+confirmá la aceptación de SMTP, revisá también spam y probá el acceso a `APP_BASE_URL` desde el dispositivo receptor.
+`localhost` solo sirve en la máquina anfitriona; para otro dispositivo usá una base HTTPS alcanzable desde ese equipo.
+No copies credenciales, links ni tokens a logs o tickets. Gmail tiene una cuota orientativa de 500 envíos diarios,
+según la cuenta y sujeta a cambios; aceptación no significa llegada a la bandeja.
+
+El turno se confirma antes del correo. El despacho usa dos workers y una cola en memoria de 32: si no hay cupo,
+no se envía ni se registra el aviso. Una caída después del commit puede perder el aviso; no hay outbox, reintentos
+durables ni reenvío. Un timeout puede dejar `ERROR`/`SMTP_FALLO` aunque SMTP haya aceptado; `enviado_en` representa
+el inicio del intento. Si SMTP acepta pero la auditoría falla, el turno sigue confirmado y solo queda un diagnóstico
+sanitizado. No habilites el logging de parámetros JDBC ni la depuración del protocolo SMTP.
+
 ## Formato de error de la API
 
 Todo error bajo `/api/**` es JSON con la forma `{ "codigo", "mensaje", "detalles"? }` (`detalles` solo aparece si aporta información). No se usa `application/problem+json`. Además de los códigos de reglas de negocio `RN-XX-NN` (ver `knowledge-base/05_reglas_de_negocio.md`), hay códigos técnicos:
