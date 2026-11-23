@@ -78,5 +78,11 @@
 **Riesgo si es falso**: que la demo necesite mostrar el alta de un odontólogo. En ese caso sería una historia nueva.
 
 ### SU-06 — El odontólogo puede cargar turnos manuales sin la regla de 24 h
-**Origen**: la regla de 24 h se definió para la reserva online del paciente.
-**Cómo validar**: confirmarlo con el usuario.
+**Origen**: la regla de 24 h se definió para la reserva online del paciente. **Confirmado por el usuario el 2026-11-23 (PA-02 cerrado)**: el alta manual alcanza cualquier horario futuro dentro de la agenda, sin importar la anticipación.
+**Riesgo si es falso**: no aplica; decisión confirmada.
+**Cómo validar**: PA-02 quedó resuelta; verificar en la demo que un turno de hoy se cargue y se vea en la agenda.
+
+### SU-07 — El límite de RN-PA-03 no aplica al alta manual, pero esos turnos cuentan después
+**Origen**: decisión del equipo del 2026-11-23. El odontólogo conoce al paciente y carga el turno por teléfono, así que no necesita la protección anti-abuso de RN-PA-03. El conteo de `contarReservadosFuturos` no filtra por origen, con lo cual un turno manual `RESERVADO` futuro sí se suma si ese mismo DNI intenta reservar online después.
+**Riesgo si es falso**: un DNI con dos turnos cargados por el odontólogo no podría reservar online; se acepta porque refleja la agenda real del paciente.
+**Cómo validar**: tests de integración del alta manual con dos turnos previos y del bloqueo online posterior.

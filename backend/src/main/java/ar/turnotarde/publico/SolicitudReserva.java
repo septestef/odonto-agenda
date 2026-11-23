@@ -36,6 +36,6 @@ public record SolicitudReserva(
      * pila). La regex anterior ({@code [^@\s]+@[^@\s]+\.[^@\s]+}) retrocedía de forma cuadrática con entradas
      * largas y bloqueaba un hilo del endpoint público (ReDoS).
      */
-    static final String EMAIL =
+    public static final String EMAIL =
             "^(?=[^\\s]{6,255}$)[^@\\s]{1,64}@(?!.*\\.\\.)[^@\\s.][^@\\s]*\\.[^@\\s.]+$";
 }

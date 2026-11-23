@@ -19,7 +19,6 @@
 | ID | Prioridad | Pregunta | Bloquea | Decisor |
 |---|---|---|---|---|
 | PA-01 | Media | ¿Cuántos días hacia adelante se puede reservar? (60 por defecto, configurable) | Ajuste de configuración | Usuario / producto |
-| PA-02 | Media | ¿Los turnos manuales del odontólogo quedan exentos de la regla de 24 h? (SU-06) | US-011 | Usuario |
 | PA-03 | Media | ¿Pasos de 15 minutos y duraciones múltiplo de 15 están bien? (SU-02) | US-003, US-005 | Usuario |
 | PA-04 | Media | ¿Hay Docker en la notebook? Si hay, los tests de integración pueden usar Testcontainers en lugar de una base local de test | Setup de tests | Equipo técnico |
 | PA-05 | Baja | ¿Un DNI repetido sobrescribe los datos de contacto o se alerta al odontólogo? (SU-03) | Producción | Producto |
@@ -27,3 +26,9 @@
 | PA-07 | Baja | ¿Cómo se validan el problema y el precio con odontólogos reales? (SU-01) | Comercialización | Producto |
 | PA-08 | Baja | ¿Dónde se aloja el producto en producción y con qué proveedor de email? | Producción | Equipo técnico |
 | PA-09 | Baja | ¿Alta self-service de odontólogos y cobro de la suscripción? ¿Con qué medio de pago? | Comercialización | Producto |
+
+## Preguntas resueltas
+
+| ID | Respuesta | Resolución |
+|---|---|---|
+| PA-02 | Sí: los turnos manuales están exentos de la regla de 24 h (RN-TU-08). Pueden cargarse en cualquier horario futuro dentro de la agenda; sí aplican RN-TU-01, RN-TU-11 y RN-TU-12. | Confirmada por el usuario el 2026-11-23 durante C-15. Ver SU-06 en `09_decisiones_y_supuestos.md`. |

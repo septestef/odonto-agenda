@@ -24,6 +24,9 @@ public class DisponibilidadService {
     /** RN-TU-03: la reserva online exige 24 horas absolutas de anticipación. */
     public static final Duration ANTICIPACION_ONLINE = Duration.ofHours(24);
 
+    /** RN-TU-08: el alta manual no exige anticipación; el límite estricto de "futuro" lo aplica el servicio. */
+    public static final Duration ANTICIPACION_MANUAL = Duration.ZERO;
+
     private final HorarioAtencionRepository horarios;
     private final BloqueoRepository bloqueos;
     private final TurnoRepository turnos;
@@ -39,10 +42,23 @@ public class DisponibilidadService {
         this.propiedades = propiedades;
     }
 
-    /** Inicios libres de {@code fecha} para la prestación, ordenados. */
+    /** Inicios libres de {@code fecha} para la reserva online, ordenados. */
     public List<Instant> horariosLibres(Long odontologoId, Prestacion prestacion, LocalDate fecha) {
+        Instant ahora = zonaNegocio.ahora();
         return CalculadoraDisponibilidad.horariosLibres(agendaDelDia(odontologoId, fecha), duracion(prestacion),
-                zonaNegocio.ahora(), ANTICIPACION_ONLINE, zonaNegocio.hoy(), propiedades.reservaMaxDias());
+                ahora, ANTICIPACION_ONLINE, zonaNegocio.hoy(), propiedades.reservaMaxDias());
+    }
+
+    /**
+     * C-15: inicios libres para el alta manual. Comparte franjas, bloqueos y turnos con la ventanilla pública,
+     * pero sin la anticipación de 24 h: el odontólogo ve los horarios futuros de hoy (RN-TU-08).
+     */
+    public List<Instant> horariosLibresManual(Long odontologoId, Prestacion prestacion, LocalDate fecha) {
+        Instant ahora = zonaNegocio.ahora();
+        return CalculadoraDisponibilidad.horariosLibres(agendaDelDia(odontologoId, fecha), duracion(prestacion),
+                ahora, ANTICIPACION_MANUAL, zonaNegocio.hoy(), propiedades.reservaMaxDias()).stream()
+                .filter(inicio -> inicio.isAfter(ahora))
+                .toList();
     }
 
     /**
@@ -53,24 +69,43 @@ public class DisponibilidadService {
      */
     public void validarInicio(Long odontologoId, Prestacion prestacion, Instant inicio) {
         LocalDate fecha = LocalDate.ofInstant(inicio, zonaNegocio.zona());
-        validarInicio(inicio, agendaDelDia(odontologoId, fecha), duracion(prestacion), zonaNegocio.ahora(),
-                zonaNegocio.hoy());
+        // C-07: agendaDelDia se resuelve antes de las dos lecturas del reloj (cruce de medianoche).
+        validarInicio(inicio, agendaDelDia(odontologoId, fecha), duracion(prestacion),
+                zonaNegocio.ahora(), zonaNegocio.hoy(), ANTICIPACION_ONLINE);
     }
 
     /** C-09: reusa el instante fijado tras adquirir los locks, sin leer nuevamente el reloj. */
     public void validarInicio(Long odontologoId, Prestacion prestacion, Instant inicio, Instant ahora) {
-        var zona = zonaNegocio.zona();
-        LocalDate fecha = LocalDate.ofInstant(inicio, zona);
-        validarInicio(inicio, agendaDelDia(odontologoId, fecha), duracion(prestacion), ahora,
-                LocalDate.ofInstant(ahora, zona));
+        validarInicio(odontologoId, prestacion, inicio, ahora,
+                LocalDate.ofInstant(ahora, zonaNegocio.zona()), ANTICIPACION_ONLINE);
     }
 
-    private void validarInicio(Instant inicio, AgendaDelDia agenda, Duration duracion, Instant ahora, LocalDate hoy) {
-        MotivoRechazo motivo = CalculadoraDisponibilidad.evaluar(inicio, agenda, duracion, ahora, ANTICIPACION_ONLINE, hoy,
+    /**
+     * C-15: aplicación manual sin 24 h, pero con inicio estrictamente futuro (RN-TU-12), horizonte y agenda.
+     */
+    public void validarInicioManual(Long odontologoId, Prestacion prestacion, Instant inicio) {
+        Instant ahora = zonaNegocio.ahora();
+        if (!inicio.isAfter(ahora)) {
+            throw ReglasTurno.inicioPasado();
+        }
+        validarInicio(odontologoId, prestacion, inicio, ahora,
+                LocalDate.ofInstant(ahora, zonaNegocio.zona()), ANTICIPACION_MANUAL);
+    }
+
+    private void validarInicio(Long odontologoId, Prestacion prestacion, Instant inicio, Instant ahora,
+            LocalDate hoy, Duration anticipacion) {
+        LocalDate fecha = LocalDate.ofInstant(inicio, zonaNegocio.zona());
+        validarInicio(inicio, agendaDelDia(odontologoId, fecha), duracion(prestacion), ahora, hoy, anticipacion);
+    }
+
+    private void validarInicio(Instant inicio, AgendaDelDia agenda, Duration duracion, Instant ahora, LocalDate hoy,
+            Duration anticipacion) {
+        MotivoRechazo motivo = CalculadoraDisponibilidad.evaluar(inicio, agenda, duracion, ahora, anticipacion, hoy,
                 propiedades.reservaMaxDias());
         switch (motivo) {
             case NINGUNO -> { }
-            case ANTICIPACION -> throw ReglasTurno.anticipacionInsuficiente();
+            case ANTICIPACION -> throw anticipacion.isZero() ? ReglasTurno.inicioPasado()
+                    : ReglasTurno.anticipacionInsuficiente();
             case HORIZONTE -> throw ReglasTurno.fueraDeHorizonte(propiedades.reservaMaxDias());
             case FUERA_DE_AGENDA -> throw ReglasTurno.fueraDeAgenda();
             case OCUPADO -> throw ReglasTurno.horarioTomado();

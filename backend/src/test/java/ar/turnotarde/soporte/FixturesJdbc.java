@@ -1,5 +1,6 @@
 package ar.turnotarde.soporte;
 
+import ar.turnotarde.turno.OrigenTurno;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Objects;
@@ -98,11 +99,22 @@ public final class FixturesJdbc {
 
     public long turno(long odontologoId, long pacienteId, long prestacionId, Instant inicio, Instant fin,
             String estado, String tokenHash) {
+        return turno(odontologoId, pacienteId, prestacionId, inicio, fin, estado, tokenHash, OrigenTurno.ONLINE);
+    }
+
+    /** C-15: variante para sembrar turnos manuales sin cambiar los llamadores existentes. */
+    public long turno(long odontologoId, long pacienteId, long prestacionId, Instant inicio, Instant fin,
+            String estado, OrigenTurno origen) {
+        return turno(odontologoId, pacienteId, prestacionId, inicio, fin, estado, tokenHashAleatorio(), origen);
+    }
+
+    public long turno(long odontologoId, long pacienteId, long prestacionId, Instant inicio, Instant fin,
+            String estado, String tokenHash, OrigenTurno origen) {
         return insertar("""
                 INSERT INTO turno (odontologo_id, paciente_id, prestacion_id, inicio, fin, estado, origen,
                                    token_hash, creado_en, actualizado_en)
-                VALUES (?, ?, ?, ?, ?, ?, 'ONLINE', ?, ?, ?)""",
-                odontologoId, pacienteId, prestacionId, inicio, fin, estado, tokenHash,
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                odontologoId, pacienteId, prestacionId, inicio, fin, estado, origen.name(), tokenHash,
                 ts(INSTANTE_FIJO), ts(INSTANTE_FIJO));
     }
 

@@ -11,6 +11,7 @@ public final class ReglasTurno {
     public static final String LIMITE_DE_TURNOS = "RN-PA-03";
     public static final String ANTICIPACION = "RN-TU-03";
     public static final String HORIZONTE = "RN-TU-11";
+    public static final String INICIO_PASADO = "RN-TU-12";
     public static final String FUERA_DE_AGENDA = "RN-AG-05";
 
     private ReglasTurno() {
@@ -47,6 +48,13 @@ public final class ReglasTurno {
         return new ReglaNegocioException(HORIZONTE,
                 "Todavía no se puede reservar para esa fecha. Elegí un día dentro de los próximos " + maxDias
                         + " días.",
+                HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
+    /** RN-TU-12: el alta manual exige un inicio estrictamente futuro (RN-GL-02). */
+    public static ReglaNegocioException inicioPasado() {
+        return new ReglaNegocioException(INICIO_PASADO,
+                "No se puede cargar un turno que ya empezó. Elegí un horario futuro.",
                 HttpStatus.UNPROCESSABLE_ENTITY);
     }
 

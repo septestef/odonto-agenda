@@ -61,16 +61,36 @@ public class ReservaService {
     @Transactional
     public ResumenTurno reservar(Odontologo odontologo, Prestacion prestacion, Instant inicio,
             DatosPaciente datos) {
-        // 1. Validación de agenda (solo lecturas): mismas reglas que la disponibilidad.
-        disponibilidad.validarInicio(odontologo.getId(), prestacion, inicio);
+        return reservar(odontologo, prestacion, inicio, datos, OrigenTurno.ONLINE, true);
+    }
+
+    /**
+     * C-15: alta manual. Comparte el núcleo transaccional, el orden de locks y la exclusion constraint con la
+     * reserva online; no aplica RN-TU-03 ni RN-PA-03 (RN-TU-08, SU-07).
+     */
+    @Transactional
+    public ResumenTurno reservarManual(Odontologo odontologo, Prestacion prestacion, Instant inicio,
+            DatosPaciente datos) {
+        return reservar(odontologo, prestacion, inicio, datos, OrigenTurno.MANUAL, false);
+    }
+
+    private ResumenTurno reservar(Odontologo odontologo, Prestacion prestacion, Instant inicio, DatosPaciente datos,
+            OrigenTurno origen, boolean aplicarLimitePaciente) {
+        // 1. Validación de agenda (solo lecturas): mismas reglas que su disponibilidad, según el origen.
+        if (origen == OrigenTurno.MANUAL) {
+            disponibilidad.validarInicioManual(odontologo.getId(), prestacion, inicio);
+        } else {
+            disponibilidad.validarInicio(odontologo.getId(), prestacion, inicio);
+        }
 
         // 2. Upsert del paciente: deja la fila bloqueada hasta el commit y serializa reservas del mismo DNI.
         long pacienteId = registroPacientes.registrar(odontologo.getId(), datos.dni(), datos.nombre(),
                 datos.apellido(), datos.telefono(), datos.email());
 
-        // 3. Límite RN-PA-03, contado con la instantánea posterior al lock del paciente.
-        if (turnos.contarReservadosFuturos(odontologo.getId(), pacienteId, zonaNegocio.ahora())
-                >= MAX_TURNOS_FUTUROS) {
+        // 3. Límite RN-PA-03 solo online; el odontólogo conoce al paciente (C-15).
+        if (aplicarLimitePaciente
+                && turnos.contarReservadosFuturos(odontologo.getId(), pacienteId, zonaNegocio.ahora())
+                        >= MAX_TURNOS_FUTUROS) {
             throw ReglasTurno.limiteDeTurnos();
         }
 
@@ -79,15 +99,14 @@ public class ReservaService {
         Paciente paciente = pacientes.getReferenceById(pacienteId);
         Instant fin = inicio.plus(Duration.ofMinutes(prestacion.getDuracionMinutos()));
         Turno turno = guardia.ejecutar(() -> turnos.saveAndFlush(new Turno(odontologo.getId(), paciente,
-                prestaciones.getReferenceById(prestacion.getId()), inicio, fin, OrigenTurno.ONLINE, token.hash(),
-                datos.email())));
+                prestaciones.getReferenceById(prestacion.getId()), inicio, fin, origen, token.hash(), datos.email())));
 
         // 5. Evento dentro de la transacción: los consumidores AFTER_COMMIT lo reciben solo si se confirmó.
         ResumenTurno resumen = new ResumenTurno(turno.getId(), odontologo.getId(), inicio, fin, prestacion.getId(),
                 prestacion.getNombre(), prestacion.getDuracionMinutos(), datos.nombre(), datos.apellido(),
                 datos.email(), datos.telefono(), odontologo.getNombre(), odontologo.getApellido(),
                 odontologo.getDireccionConsultorio());
-        publicador.publishEvent(new TurnoReservado(resumen, OrigenTurno.ONLINE, token.plano()));
+        publicador.publishEvent(new TurnoReservado(resumen, origen, token.plano()));
         return resumen;
     }
 }

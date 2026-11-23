@@ -1,4 +1,8 @@
 import type { ErrorApi } from '../../shared/error-api'
+import type { DatosPaciente, ErroresPaciente } from '../../shared/formulario-paciente'
+
+export type { CampoPaciente, DatosPaciente, ErroresPaciente } from '../../shared/formulario-paciente'
+export { DATOS_PACIENTE_VACIOS } from '../../shared/formulario-paciente'
 
 export interface PrestacionReserva {
   id: number
@@ -28,18 +32,6 @@ export interface DisponibilidadPublica {
   duracionMinutos: number
   horarios: readonly HorarioOpcion[]
 }
-
-export interface DatosPaciente {
-  dni: string
-  nombre: string
-  apellido: string
-  telefono: string
-  email: string
-}
-
-export type CampoPaciente = keyof DatosPaciente
-
-export type ErroresPaciente = Partial<Record<CampoPaciente, string>>
 
 export interface SolicitudReserva {
   prestacionId: number
@@ -115,11 +107,3 @@ export type AccionReserva =
   | { tipo: 'error-envio'; error: ErrorApi }
   | { tipo: 'reintentar-envio' }
   | { tipo: 'reiniciar' }
-
-export const DATOS_PACIENTE_VACIOS: DatosPaciente = {
-  dni: '',
-  nombre: '',
-  apellido: '',
-  telefono: '',
-  email: '',
-}
