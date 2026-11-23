@@ -815,7 +815,7 @@ describe('regresiones de rutas públicas y cliente compartido', () => {
     detener()
   })
 
-  it('muestra el marcador de /turno/{token} sin sesión y sin consultar /me', async () => {
+  it('un /turno/{token} mal formado muestra "No encontramos este turno" sin pedir nada', async () => {
     const pedidos: string[] = []
     const fetchSinSesion: FetchLike = async (url, init) => {
       pedidos.push(`${init?.method ?? 'GET'} ${url}`)
@@ -831,9 +831,40 @@ describe('regresiones de rutas públicas y cliente compartido', () => {
     })
     await estabilizar()
 
-    expect(ultimo()?.descriptor.clase).toBe('marcador')
-    expect(ultimo()?.descriptor.texto).toBe('Acá vas a gestionar tu turno.')
+    expect(ultimo()?.descriptor.clase).toBe('reserva-publica gestion-turno')
+    expect(textosDe(ultimo()?.descriptor)).toContain('No encontramos este turno')
     expect(pedidos).toEqual([])
+    detener()
+  })
+
+  it('monta la gestión de /turno/{token} sin sesión y solo consulta la API del turno', async () => {
+    const token = 'AbCdEfGhIjKlMnOpQrStUvWxYz0123456789_-AbCdE'
+    const pedidos: string[] = []
+    const fetchPublico: FetchLike = async (url, init) => {
+      pedidos.push(`${init?.method ?? 'GET'} ${url}`)
+      return respuesta(
+        {
+          inicio: '2026-11-27T09:00:00-03:00',
+          fin: '2026-11-27T09:30:00-03:00',
+          estado: 'RESERVADO',
+          prestacion: { id: 1, nombre: 'Consulta' },
+          odontologo: { slug: 'demo', nombre: 'Ana', apellido: 'Pérez', direccionConsultorio: null },
+          puedeCancelar: true,
+          puedeReprogramar: true,
+        },
+        200,
+      )
+    }
+    const { adaptador, ultimo } = adaptadorFalso()
+    const detener = arrancar({}, adaptador, {
+      historial: historialFalso(`/turno/${token}`).historial,
+      fetch: fetchPublico,
+    })
+    await estabilizar()
+
+    expect(textosDe(ultimo()?.descriptor)).toContain('Gestioná tu turno')
+    expect(textosDe(ultimo()?.descriptor)).toContain('Consulta')
+    expect(pedidos).toEqual([`GET /api/public/turnos/${token}`])
     detener()
   })
 

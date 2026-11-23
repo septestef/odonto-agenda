@@ -39,6 +39,8 @@ export interface Descriptor {
   hijos?: readonly Descriptor[]
   accion?: string
   enfocar?: boolean
+  /** Teclas que disparan una acción con `keydown` en este nodo (por ejemplo `{ Escape: 'cerrar' }`). */
+  teclas?: Readonly<Record<string, string>>
 }
 
 export interface OpcionesBoton {

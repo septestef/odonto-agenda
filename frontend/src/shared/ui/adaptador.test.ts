@@ -263,4 +263,28 @@ describe('adaptador a nodos con document falso', () => {
       'debe ser un nodo',
     )
   })
+
+  it('dispara la acción de una tecla con keydown y previene el default solo si hay manejador', () => {
+    const { creados, documento } = documentoFalso()
+    const cerrar = vi.fn()
+    const destino = new NodoFalso('main')
+
+    crearAdaptadorNodos(documento).montar(
+      destino,
+      { etiqueta: 'div', teclas: { Escape: 'cerrar' } },
+      { cerrar },
+    )
+
+    const nodo = creados[0]
+    const escucha = nodo?.escuchas['keydown']?.[0]
+    const conManejador = { preventDefault: vi.fn(), key: 'Escape' }
+    const otraTecla = { preventDefault: vi.fn(), key: 'Enter' }
+    escucha?.(conManejador)
+    escucha?.(otraTecla)
+
+    expect(cerrar).toHaveBeenCalledTimes(1)
+    expect(cerrar).toHaveBeenCalledWith(nodo)
+    expect(conManejador.preventDefault).toHaveBeenCalled()
+    expect(otraTecla.preventDefault).not.toHaveBeenCalled()
+  })
 })
