@@ -8,7 +8,7 @@ La demo necesita un arranque reproducible en localhost y un ensayo integrado de 
 
 - Preparar arranque desde cero con PostgreSQL local, perfil `demo`, Flyway, frontend empaquetado y login en `http://localhost:8080`.
 - Completar `.env.example` y documentar en README `Correr la demo en la notebook`, con pasos verificados y checklist.
-- Verificar los turnos y huecos del seed; agregar una migración 9xx en `db/demo` solo si hace falta, sin editar V900 mergeada.
+- Agregar una nueva migración 9xx en `db/demo` con tres o cuatro turnos sintéticos adicionales, repartidos entre mañana y tarde, con prestaciones distintas y al menos uno manual; conservar V900 y los huecos de los días siguientes.
 - Ejecutar suites completas y ensayo Gmail con datos sintéticos; guardar los resultados en `evidencias/` del change.
 - Preparar guion, smoke, verificación a 360 px y comparación con mockups aprobados; declarar ejecución manual cuando corresponda.
 - Congelar alcance: incluir WhatsApp y turno manual; excluir US-014/C-21, US-013 y funcionalidades post-demo. Las diferencias visuales se reportan para revisión.

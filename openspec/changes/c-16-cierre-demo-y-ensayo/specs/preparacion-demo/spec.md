@@ -43,18 +43,15 @@ El seed MUST proporcionar turnos sintéticos para mostrar la agenda y huecos par
 - **THEN** se muestran los turnos de ejemplo y las reservas online usan huecos que cumplen la anticipación mínima de 24 horas
 
 ### Requirement: Migraciones aplicadas inmutables
-Los ajustes del seed MUST incorporarse mediante una nueva migración exclusiva de demo, sin modificar migraciones mergeadas.
+La ampliación del seed MUST incorporarse mediante una nueva migración exclusiva de demo, sin modificar migraciones mergeadas.
 
-#### Scenario: Seed insuficiente
-- **WHEN** los datos existentes no cubren el recorrido o los huecos necesarios
-- **THEN** una migración nueva completa los datos sin alterar las migraciones aplicadas ni las reglas del producto
-
-#### Scenario: Seed suficiente
-- **WHEN** los datos existentes cubren el recorrido y los huecos necesarios
-- **THEN** se conservan sin agregar una migración innecesaria
+#### Scenario: Ampliación de la agenda de ejemplo
+- **WHEN** se aplican las migraciones de demo sobre una base limpia
+- **THEN** una nueva migración agrega tres o cuatro turnos sintéticos de mañana y tarde, con prestaciones distintas y al menos uno manual, sin solaparse entre sí ni con los datos existentes, y conserva huecos elegibles en días siguientes
 
 ### Requirement: Verificación automatizada completa
 La verificación MUST incluir unitarios, integración contra PostgreSQL real y frontend, junto con lint, tests y build propios del frontend, conservando comandos, revisión, cantidades y resultados como evidencia.
+La suite MUST incluir el test concurrente existente `ReservasConcurrentesApiIT`.
 
 #### Scenario: Verificaciones exitosas
 - **WHEN** se ejecutan todas las verificaciones sobre la revisión candidata
@@ -63,13 +60,6 @@ La verificación MUST incluir unitarios, integración contra PostgreSQL real y f
 #### Scenario: Verificación fallida
 - **WHEN** una verificación falla
 - **THEN** el fallo queda registrado y no se declara la suite en verde
-
-### Requirement: Una sola reserva concurrente ganadora
-Dos reservas concurrentes del mismo horario MUST producir exactamente una reserva confirmada y un conflicto por solapamiento.
-
-#### Scenario: Competencia por el mismo horario
-- **WHEN** dos pacientes distintos reservan simultáneamente el mismo horario elegible
-- **THEN** una respuesta es exitosa, la otra informa RN-TU-01 y existe una sola reserva en la agenda
 
 ### Requirement: Correo y gestión verificables
 El ensayo de correo MUST usar datos sintéticos y un buzón controlado, comprobar entrega o spam y verificar el acceso al enlace de gestión.

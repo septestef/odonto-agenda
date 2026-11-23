@@ -10,8 +10,9 @@ Alcance: README, `.env.example`, `backend/**` (seed/configuración y tests neces
   Si falla, reportar el fallo preexistente y detener esa modificación para decidir cómo resolverlo.
 - [ ] 1.2 Completar `.env.example` con todas las variables enumeradas en design D3 y verificar la herencia de `TEST_DB_PASSWORD`.
 - [ ] 1.3 Ejecutar el reset local de `public` siguiendo design D2; comprobar que Flyway reconstruye el esquema y registrar el destino verificado.
-- [ ] 1.4 Verificar turnos del 25/11 y huecos elegibles según las 24 h. Si V900 no alcanza, agregar una nueva 9xx en `db/demo`.
-  Validarla con un IT de perfil demo sobre base limpia y huecos esperados con `Clock` fijo; conservar V900 inmutable.
+- [ ] 1.4 Agregar una nueva V9xx libre en `backend/src/main/resources/db/demo` con tres o cuatro turnos sintéticos adicionales el 25/11, de mañana y tarde.
+  Usar prestaciones distintas y al menos un `MANUAL`, sin solaparse entre sí ni con V900; conservar V900 inmutable y huecos libres el 26/27 para reservar en vivo.
+  Validar carga limpia, turnos adicionales y huecos esperados mediante el IT de perfil demo con `Clock` fijo de design D4.
 - [ ] 1.5 Arrancar desde cero con perfil demo y frontend incluido; confirmar Flyway, SPA y login en `http://localhost:8080`.
 - [ ] 1.6 Ejecutar `./gradlew build` desde `backend/`; verificar unitarios, integración PostgreSQL real y frontend.
   Registrar comandos, revisión, cantidades y resultados en `evidencias/`, incluido `ReservasConcurrentesApiIT` con exactamente una ganadora.

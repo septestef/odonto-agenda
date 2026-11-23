@@ -41,9 +41,9 @@ La plantilla enumera `DB_URL`, `DB_USER`, `DB_PASSWORD`, `TEST_DB_URL`, `TEST_DB
 
 ### D4. Seed y elegibilidad temporal
 
-V900 ya incluye turnos el 25/11 a 09:00 y 09:30 y uno cancelado a 11:00; el 26 tiene uno a 17:00 y el 27 está libre. Verificar suficiencia contra el guion antes de agregar datos. Si hace falta, crear una nueva versión 9xx libre en `backend/src/main/resources/db/demo`; V900 y las migraciones mergeadas permanecen inmutables.
+V900 ya incluye turnos el 25/11 a 09:00 y 09:30 y uno cancelado a 11:00; el 26 tiene uno a 17:00 y el 27 está libre. Crear obligatoriamente una nueva versión 9xx libre en `backend/src/main/resources/db/demo` con tres o cuatro turnos sintéticos adicionales el 25/11, repartidos entre mañana y tarde, con prestaciones distintas y al menos uno de origen `MANUAL`. No deben solaparse entre sí ni con V900; conservar huecos libres el 26/27 para reservar en vivo. V900 y las migraciones mergeadas permanecen inmutables.
 
-Mostrar la agenda del 25/11 y elegir reservas online/reprogramaciones que respeten ahora + 24 h (26 o 27 según el momento). El turno manual puede mostrar altas del mismo día si siguen siendo futuras. No alterar reloj ni reglas de producción. Para una nueva migración 9xx basta un IT de perfil demo contra PostgreSQL real que compruebe carga desde una base limpia y huecos esperados con `Clock` fijo; no exigir RED/GREEN ni triangulación para el seed.
+Mostrar la agenda del 25/11 y elegir reservas online/reprogramaciones que respeten ahora + 24 h (26 o 27 según el momento). El turno manual puede mostrar altas del mismo día si siguen siendo futuras. No alterar reloj ni reglas de producción. Validar la nueva migración 9xx con un IT de perfil demo contra PostgreSQL real que compruebe carga desde una base limpia, turnos adicionales y huecos esperados con `Clock` fijo; no exigir RED/GREEN ni triangulación para el seed.
 
 ### D5. Suites y evidencia
 
