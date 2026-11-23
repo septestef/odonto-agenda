@@ -193,22 +193,45 @@ export function descriptorDetalle(opciones: OpcionesDetalle): Descriptor {
   }
 }
 
-function contenedorDe(vista: VistaAgenda, ancho: number): string {
+/**
+ * Forma del detalle según el mockup aprobado de C-13: hoja desde abajo en
+ * celular, panel lateral en el flujo en la vista Día de escritorio (columna de
+ * 380 px junto a la lista, sin tapar la cabecera) y cajón de 420 px en el resto.
+ */
+export type FormaDetalle = 'hoja' | 'panel' | 'cajon'
+
+export function formaDetalle(vista: VistaAgenda, ancho: number): FormaDetalle {
   if (ancho < 720) {
-    return 'detalle--hoja'
+    return 'hoja'
   }
-  return vista === 'dia' && ancho >= 1100 ? 'detalle--panel' : 'detalle--cajon'
+  return vista === 'dia' && ancho >= 1100 ? 'panel' : 'cajon'
+}
+
+/** Solo la hoja y el cajón se superponen a la vista; el panel no es modal. */
+export function detalleSuperpuesto(forma: FormaDetalle): boolean {
+  return forma !== 'panel'
+}
+
+/** Fondo atenuado bajo la hoja o el cajón (`.velo` del mockup); tocarlo cierra el detalle. */
+export function veloDetalle(): Descriptor {
+  return {
+    etiqueta: 'div',
+    clase: 'velo velo--detalle',
+    atributos: { 'aria-hidden': 'true' },
+    accion: 'cerrar-detalle',
+  }
 }
 
 export function contenedorDetalle(opciones: OpcionesContenedorDetalle): Descriptor {
   const etiqueta: Etiqueta = 'aside'
+  const forma = formaDetalle(opciones.vista, opciones.ancho)
   return {
     etiqueta,
-    clase: `detalle ${contenedorDe(opciones.vista, opciones.ancho)}`,
+    clase: `detalle detalle--${forma}`,
     teclas: { Escape: 'cerrar-detalle' },
     atributos: {
       role: 'dialog',
-      'aria-modal': 'true',
+      ...(detalleSuperpuesto(forma) ? { 'aria-modal': 'true' } : {}),
       'aria-labelledby': 'detalle-titulo',
     },
     hijos: [descriptorDetalle(opciones)],

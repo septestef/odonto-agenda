@@ -210,6 +210,54 @@ describe('control de la agenda integrada', () => {
     expect(cambios).toBeGreaterThan(0)
   })
 
+  it('en Día a 1440 px pone el panel en una columna junto a la lista, fuera de la cabecera y sin velo', async () => {
+    const { cliente } = clienteFalso()
+    const control = crearControlAgenda({ cliente, ancho: 1440, ahora, alCambiar: () => {} })
+    await control.cargar()
+    await estabilizar()
+    control.manejadores['cambiar-vista']?.(new NodoPrueba().con('data-vista', 'dia'))
+    await estabilizar()
+    control.manejadores['ver-turno']?.(new NodoPrueba().con('data-turno-id', '3'))
+
+    const raiz = control.descriptor()
+    const cuerpo = deClase(raiz, 'agenda-cuerpo--con-panel')
+    expect(cuerpo).toHaveLength(1)
+    // La cabecera (Día/Semana y navegación) queda fuera del cuerpo: el panel no la puede tapar.
+    expect(raiz.hijos?.[0]?.clase).toBe('agenda-head')
+    expect(deClase(cuerpo[0] as Descriptor, 'agenda-head')).toHaveLength(0)
+    const [principal, panel] = cuerpo[0]?.hijos ?? []
+    expect(deClase(principal as Descriptor, 'dia')).toHaveLength(1)
+    expect((panel?.clase ?? '').split(' ')).toContain('detalle--panel')
+    expect(deClase(raiz, 'velo')).toHaveLength(0)
+  })
+
+  it('atenúa el fondo con el cajón semanal y con la hoja, y suma otro velo a la confirmación', async () => {
+    for (const ancho of [1440, 390]) {
+      const { cliente } = clienteFalso()
+      const control = crearControlAgenda({ cliente, ancho, ahora, alCambiar: () => {} })
+      await control.cargar()
+      await estabilizar()
+      control.manejadores['ver-turno']?.(new NodoPrueba().con('data-turno-id', '3'))
+
+      const conDetalle = control.descriptor()
+      expect(deClase(conDetalle, 'agenda-cuerpo')).toHaveLength(0)
+      const hijos = conDetalle.hijos ?? []
+      const indiceDetalle = hijos.findIndex((hijo) => (hijo.clase ?? '').split(' ').includes('detalle'))
+      expect((hijos[indiceDetalle - 1]?.clase ?? '').split(' ')).toContain('velo--detalle')
+
+      control.manejadores['cancelar-turno']?.(new NodoPrueba().con('data-turno-id', '3'))
+      const conConfirmacion = control.descriptor().hijos ?? []
+      const indiceDialogo = conConfirmacion.findIndex((hijo) => hijo.clase === 'dialogo-confirmacion')
+      const velo = conConfirmacion[indiceDialogo - 1]
+      expect((velo?.clase ?? '').split(' ')).toContain('velo--confirmacion')
+      expect(velo?.accion).toBeUndefined()
+      expect(velo?.atributos?.['aria-hidden']).toBe('true')
+
+      control.manejadores['cerrar-detalle']?.(new NodoPrueba())
+      expect(deClase(control.descriptor(), 'velo')).toHaveLength(0)
+    }
+  })
+
   it('muestra el aviso correspondiente al 409 RN-TU-07 y recarga', async () => {
     const { cliente, pedir } = clienteFalso({
       errorCancelar: Object.assign(new Error('empezó'), { codigo: 'RN-TU-07' }),

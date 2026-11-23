@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Descriptor } from '../../shared/ui/componentes'
-import { contenedorDetalle, descriptorDetalle } from './detalle'
+import { contenedorDetalle, descriptorDetalle, detalleSuperpuesto, formaDetalle, veloDetalle } from './detalle'
 import { descriptorSemana } from './vista-semana'
 import type { BloqueoAgenda, TurnoAgenda } from './tipos'
 
@@ -69,6 +69,30 @@ describe('contenedor del detalle del turno', () => {
     expect((hoja.clase ?? '').split(' ')).toContain('detalle--hoja')
     expect((panel.clase ?? '').split(' ')).toContain('detalle--panel')
     expect((cajon.clase ?? '').split(' ')).toContain('detalle--cajon')
+  })
+
+  it('solo la hoja y el cajón son modales; el panel Día queda en el flujo (regresión C-13)', () => {
+    expect(formaDetalle('dia', 390)).toBe('hoja')
+    expect(formaDetalle('semana', 390)).toBe('hoja')
+    expect(formaDetalle('dia', 1440)).toBe('panel')
+    expect(formaDetalle('dia', 900)).toBe('cajon')
+    expect(formaDetalle('semana', 1440)).toBe('cajon')
+    expect(detalleSuperpuesto('panel')).toBe(false)
+    expect(detalleSuperpuesto('hoja')).toBe(true)
+    expect(detalleSuperpuesto('cajon')).toBe(true)
+
+    const comun = { turno: turno(), ahora, bloqueo: undefined }
+    const panel = contenedorDetalle({ ...comun, vista: 'dia', ancho: 1440 })
+    expect(panel.atributos?.['role']).toBe('dialog')
+    expect(panel.atributos?.['aria-modal']).toBeUndefined()
+    expect(contenedorDetalle({ ...comun, vista: 'dia', ancho: 390 }).atributos?.['aria-modal']).toBe('true')
+  })
+
+  it('el velo atenúa el fondo, es inerte para lectores y cierra el detalle', () => {
+    const velo = veloDetalle()
+    expect((velo.clase ?? '').split(' ')).toContain('velo')
+    expect(velo.atributos?.['aria-hidden']).toBe('true')
+    expect(velo.accion).toBe('cerrar-detalle')
   })
 
   it('expone diálogo modal, cierre con foco inicial y el turno elegido con aria-current en la grilla', () => {
