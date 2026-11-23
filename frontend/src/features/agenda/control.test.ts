@@ -328,3 +328,145 @@ describe('control de la agenda integrada', () => {
     expect(textos(control.descriptor())).toContain('Todavía no cargaste tus horarios')
   })
 })
+
+describe('alta manual desde la agenda', () => {
+  const ahora = new Date('2026-11-25T10:10:00-03:00')
+
+  class NodoFormularioPrueba extends NodoPrueba {
+    querySelector(selector: string): { value: string } | null {
+      const campo = /\[data-campo="([^"]+)"\]/.exec(selector)?.[1]
+      const datos: Record<string, string> = {
+        dni: '30123456',
+        nombre: 'Luis',
+        apellido: 'Ramírez',
+        telefono: '+5493511234567',
+        email: 'luis@ejemplo.com',
+      }
+      return campo === undefined ? null : { value: datos[campo] ?? '' }
+    }
+  }
+
+  function clienteConManual(crear?: (cuerpo: unknown) => Promise<unknown>) {
+    let turnos: TurnoAgenda[] = [turno()]
+    const pedir = vi.fn(async (metodo: string, ruta: string, cuerpo?: unknown) => {
+      if (metodo === 'GET' && ruta === '/api/horarios') {
+        return { franjas }
+      }
+      if (metodo === 'GET' && ruta === '/api/bloqueos') {
+        return { bloqueos: [] }
+      }
+      if (metodo === 'GET' && ruta === '/api/prestaciones') {
+        return { prestaciones: [{ id: 1, nombre: 'Consulta', duracionMinutos: 30, activa: true }] }
+      }
+      if (metodo === 'GET' && ruta.startsWith('/api/disponibilidad?')) {
+        return {
+          fecha: '2026-11-25',
+          prestacionId: 1,
+          duracionMinutos: 30,
+          horarios: [{ inicio: '2026-11-25T11:15:00-03:00', hora: '11:15' }],
+        }
+      }
+      if (metodo === 'POST' && ruta === '/api/turnos') {
+        if (crear !== undefined) {
+          await crear(cuerpo)
+        }
+        turnos = [{ ...turno(), id: 9, origen: 'MANUAL', inicio: '2026-11-25T11:15:00-03:00' }]
+        return {
+          inicio: '2026-11-25T11:15:00-03:00',
+          fin: '2026-11-25T11:45:00-03:00',
+          prestacion: { id: 1, nombre: 'Consulta', duracionMinutos: 30 },
+          odontologo: { nombre: 'Ana', apellido: 'Gómez', direccionConsultorio: null },
+          email: 'luis@ejemplo.com',
+        }
+      }
+      if (metodo === 'GET' && ruta.startsWith('/api/turnos?')) {
+        return turnos
+      }
+      return undefined
+    })
+    return {
+      cliente: { pedir, suscribirSesionVencida: () => () => {} } as unknown as ClienteApi,
+      pedir,
+    }
+  }
+
+  async function abrirYOpcionar(cliente: ClienteApi, ancho = 1440) {
+    const control = crearControlAgenda({ cliente, ancho, ahora, alCambiar: () => {} })
+    await control.cargar()
+    await estabilizar()
+
+    expect(textos(control.descriptor())).toContain('Nuevo turno')
+    control.manejadores['abrir-manual']?.(new NodoPrueba())
+    await estabilizar()
+    expect(deClase(control.descriptor(), 'overlay-manual')).toHaveLength(1)
+
+    control.manejadores['prestacion:1']?.(new NodoPrueba())
+    await estabilizar()
+    control.manejadores['horario-0']?.(new NodoPrueba())
+    control.manejadores['ir-datos']?.(new NodoPrueba())
+    return control
+  }
+
+  it('abre el formulario sin recargar ni cambiar el rango visible', async () => {
+    const { cliente, pedir } = clienteConManual()
+    const control = crearControlAgenda({ cliente, ancho: 390, ahora, alCambiar: () => {} })
+    await control.cargar()
+    await estabilizar()
+    const pedidosAntes = pedir.mock.calls.length
+    const tituloAntes = tituloDe(control.descriptor())
+
+    control.manejadores['abrir-manual']?.(new NodoPrueba())
+    await estabilizar()
+
+    expect(deClase(control.descriptor(), 'overlay-manual')).toHaveLength(1)
+    expect(tituloDe(control.descriptor())).toBe(tituloAntes)
+    expect(pedir.mock.calls.length).toBe(pedidosAntes + 1)
+    expect(pedir).toHaveBeenLastCalledWith('GET', '/api/prestaciones')
+    expect(textos(control.descriptor())).toContain('Cargar un turno')
+  })
+
+  it('cierra el diálogo, recarga el rango y muestra el toast con el turno MANUAL', async () => {
+    const { cliente, pedir } = clienteConManual()
+    const control = await abrirYOpcionar(cliente, 390)
+    const rangoAntes = pedir.mock.calls.filter((llamada) => llamada[1]?.toString().startsWith('/api/turnos?')).length
+
+    await control.manejadores['confirmar']?.(new NodoFormularioPrueba())
+    await estabilizar()
+
+    const pedidosTurnos = pedir.mock.calls.filter((llamada) => llamada[1]?.toString().startsWith('/api/turnos?'))
+    expect(pedir).toHaveBeenCalledWith('POST', '/api/turnos', expect.objectContaining({ dni: expect.any(String) }))
+    expect(pedidosTurnos.length).toBe(rangoAntes + 1)
+    expect(deClase(control.descriptor(), 'overlay-manual')).toHaveLength(0)
+    expect(textos(control.descriptor())).toContain('Turno cargado')
+    expect(textos(control.descriptor())).toContain('Manual')
+    expect(deClase(control.descriptor(), 'badge--manual')).toHaveLength(1)
+  })
+
+  it('conserva los datos del paciente ante un conflicto del servidor', async () => {
+    const { cliente } = clienteConManual(async () => {
+      throw Object.assign(new Error('tomado'), { codigo: 'RN-TU-01', mensaje: 'tomado' })
+    })
+    const control = await abrirYOpcionar(cliente)
+
+    await control.manejadores['confirmar']?.(new NodoFormularioPrueba())
+    await estabilizar()
+
+    expect(deClase(control.descriptor(), 'overlay-manual')).toHaveLength(1)
+    expect(textos(control.descriptor()).join(' ')).toContain('Ese horario acaba de ser tomado, elegí otro')
+  })
+
+  it('cierra el diálogo sin recargar la agenda', async () => {
+    const { cliente, pedir } = clienteConManual()
+    const control = crearControlAgenda({ cliente, ancho: 1440, ahora, alCambiar: () => {} })
+    await control.cargar()
+    await estabilizar()
+    control.manejadores['abrir-manual']?.(new NodoPrueba())
+    await estabilizar()
+    const pedidosAntes = pedir.mock.calls.length
+
+    control.manejadores['cerrar-manual']?.(new NodoPrueba())
+
+    expect(deClase(control.descriptor(), 'overlay-manual')).toHaveLength(0)
+    expect(pedir.mock.calls.length).toBe(pedidosAntes)
+  })
+})
