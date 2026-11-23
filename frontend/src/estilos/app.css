@@ -1947,3 +1947,328 @@ html {
   margin-bottom: var(--space-3);
   border-radius: var(--radius-md);
 }
+
+/* ---------- Agenda del odontólogo (C-13) ----------
+   Acotado a .agenda: comparte nombres (.dia, .franja, .turno, .bloqueo, .btn, .badge…)
+   con la configuración (C-06) y la reserva pública (C-10). */
+
+/* Neutraliza lo que las reglas globales de C-06/C-10 aportan y la agenda no redefine. */
+.agenda .btn { gap: 0; }
+.agenda .dia { min-width: 0; padding: 0; border: 0; border-radius: 0; background: transparent; }
+.agenda .dia .btn { margin-top: 0; }
+.agenda .franja { margin-bottom: 0; font-size: inherit; }
+.agenda .bloqueo { border: 0; }
+.agenda .alert--info,
+.agenda .alert--warning,
+.agenda .alert--error { color: inherit; border-top-color: var(--color-border); border-right-color: var(--color-border); border-bottom-color: var(--color-border); }
+.agenda .empty { text-align: left; color: inherit; }
+/* Escalas propias de la agenda: derivadas de los tokens, sin valores de marca nuevos. */
+:root {
+  --agenda-borde: 1px;
+  --min: 2px;
+  --semana-col: calc(var(--control-height) * 2);
+}
+
+
+.agenda .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--control-height);
+  padding: var(--space-2) var(--space-4);
+  border: var(--agenda-borde) solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+.agenda .btn:hover:not(:disabled) { background: var(--color-surface-alt); }
+.agenda .btn:disabled { opacity: 0.6; cursor: default; }
+.agenda .btn--primaria { background: var(--color-primary-600); border-color: var(--color-primary-600); color: var(--color-text-inverse); }
+.agenda .btn--primaria:hover:not(:disabled) { background: var(--color-primary-700); }
+.agenda .btn--secondary { background: var(--color-surface); }
+.agenda .btn--ghost { background: transparent; border-color: transparent; }
+.agenda .btn--danger { color: var(--color-danger-600); border-color: var(--color-danger-600); }
+.agenda .btn--danger-solid { background: var(--color-danger-600); border-color: var(--color-danger-600); color: var(--color-text-inverse); }
+.agenda .btn--danger-solid:hover:not(:disabled) { background: var(--color-danger-700); }
+.agenda .btn--sm { min-height: var(--space-8); padding: var(--space-1) var(--space-3); font-size: var(--text-xs); }
+.agenda .btn--icono { width: var(--control-height); padding: var(--space-2); font-size: var(--text-lg); }
+
+.agenda .badge {
+  display: inline-block;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-alt);
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+}
+.agenda .badge::before { content: none; }
+.agenda .badge--reservado { background: var(--turno-reservado-bg); color: var(--color-primary-700); }
+.agenda .badge--atendido { background: var(--turno-atendido-bg); color: var(--color-success-600); }
+.agenda .badge--ausente { background: var(--turno-ausente-bg); color: var(--color-warning-600); }
+.agenda .badge--cancelado { background: var(--turno-cancelado-bg); color: var(--color-text-muted); }
+.agenda .badge--online { background: var(--color-info-50); color: var(--color-info-600); }
+.agenda .badge--manual { background: var(--color-surface-alt); color: var(--color-text-muted); }
+.agenda .badge--bloqueo { background: var(--color-warning-50); color: var(--color-warning-600); }
+
+.agenda .alert {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: var(--space-4) var(--space-4) 0;
+  padding: var(--space-3) var(--space-4);
+  border: var(--agenda-borde) solid var(--color-border);
+  border-left: var(--space-1) solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+}
+.agenda .alert--error { background: var(--color-danger-50); border-left-color: var(--color-danger-600); }
+.agenda .alert--warning { background: var(--color-warning-50); border-left-color: var(--color-warning-600); }
+.agenda .alert--info { background: var(--color-info-50); border-left-color: var(--color-info-600); }
+.agenda .alert .btn { align-self: flex-start; margin-top: var(--space-2); }
+
+.agenda .empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+  margin: var(--space-6) 0;
+  padding: var(--space-8);
+  border: var(--agenda-borde) dashed var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.agenda .empty h3 { margin: 0; font-size: var(--text-lg); }
+.agenda .empty p { margin: 0; color: var(--color-text-muted); font-size: var(--text-sm); }
+
+.agenda .toast {
+  position: fixed;
+  right: var(--space-4);
+  bottom: var(--space-4);
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-primary-700);
+  color: var(--color-text-inverse);
+  box-shadow: var(--shadow-lg);
+  font-size: var(--text-sm);
+}
+
+/* Agenda */
+.agenda { display: flex; flex-direction: column; gap: var(--space-4); }
+.agenda .agenda-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.agenda .agenda-head__titulo h1 { margin: 0; font-size: var(--text-2xl); line-height: var(--leading-tight); }
+.agenda .agenda-head__titulo p { margin: var(--space-1) 0 0; color: var(--color-text-muted); font-size: var(--text-sm); }
+
+.agenda .seg {
+  display: inline-flex;
+  padding: var(--space-1);
+  border: var(--agenda-borde) solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+}
+.agenda .seg button {
+  min-height: var(--control-height);
+  padding: var(--space-2) var(--space-4);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--color-text-muted);
+  font: inherit;
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+.agenda .seg button[aria-pressed='true'] { background: var(--color-primary-600); color: var(--color-text-inverse); font-weight: var(--weight-semibold); }
+
+.agenda .navfecha { display: inline-flex; align-items: center; gap: var(--space-2); }
+
+.agenda .dia { display: flex; flex-direction: column; gap: var(--space-4); }
+.agenda .franja {
+  padding: var(--space-4);
+  border: var(--agenda-borde) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+.agenda .franja__titulo {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin: 0 0 var(--space-3);
+  font-size: var(--text-lg);
+}
+.agenda .franja__titulo span { color: var(--color-text-muted); font-size: var(--text-sm); font-weight: var(--weight-regular); }
+.agenda .fuera-horario { margin: 0; color: var(--color-text-subtle); font-size: var(--text-xs); text-align: center; }
+
+.agenda .turno {
+  display: block;
+  margin-top: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border: var(--agenda-borde) solid var(--color-border);
+  border-left: var(--space-1) solid var(--turno-reservado-bar);
+  border-radius: var(--radius-md);
+  background: var(--turno-reservado-bg);
+  cursor: pointer;
+}
+.agenda .turno--atendido { border-left-color: var(--turno-atendido-bar); background: var(--turno-atendido-bg); }
+.agenda .turno--ausente { border-left-color: var(--turno-ausente-bar); background: var(--turno-ausente-bg); }
+.agenda .turno--cancelado { border-left-color: var(--turno-cancelado-bar); background: var(--turno-cancelado-bg); }
+.agenda .turno--cancelado .turno__quien { text-decoration: line-through; color: var(--color-text-muted); }
+.agenda .turno--pasado { opacity: 0.72; }
+.agenda .turno--seleccionado { box-shadow: var(--focus-ring); }
+.agenda .turno__fila { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+.agenda .turno__hora { font-family: var(--font-mono); font-size: var(--text-sm); font-weight: var(--weight-semibold); }
+.agenda .turno__quien { margin-top: var(--space-1); font-weight: var(--weight-semibold); }
+.agenda .turno__meta { margin-top: var(--space-1); color: var(--color-text-muted); font-size: var(--text-sm); }
+.agenda .turno__acciones { display: flex; gap: var(--space-2); margin-top: var(--space-2); }
+.agenda .libre { margin-top: var(--space-2); padding: var(--space-2) var(--space-4); color: var(--color-text-subtle); font-size: var(--text-sm); }
+.agenda .ahora {
+  margin: var(--space-2) 0;
+  padding: var(--space-1) var(--space-3);
+  border-top: var(--agenda-borde) dashed var(--color-primary-600);
+  color: var(--color-primary-700);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+}
+
+.agenda .bloqueo { margin-top: var(--space-2); padding: var(--space-3); border-radius: var(--radius-md); background: var(--bloqueo-bg); }
+.agenda .bloqueo__fila { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+.agenda .bloqueo__titulo { font-size: var(--text-sm); font-weight: var(--weight-semibold); }
+.agenda .bloqueo__afectados { margin-top: var(--space-2); display: flex; flex-direction: column; gap: var(--space-2); }
+.agenda .bloqueo__aviso { display: flex; gap: var(--space-2); margin: 0; color: var(--color-warning-600); font-size: var(--text-sm); }
+.agenda .bloqueo__aviso svg { width: var(--space-5); height: var(--space-5); flex: none; }
+.agenda .afectado { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2); padding: var(--space-2); border-radius: var(--radius-sm); background: var(--color-surface); font-size: var(--text-sm); }
+
+/* Grilla semanal */
+.agenda .semana-contenedor { display: flex; flex-direction: column; gap: var(--space-3); }
+.agenda .semana { --min: 2px; overflow-x: auto; scroll-snap-type: x proximity; padding-bottom: var(--space-2); }
+.agenda .semana__grid {
+  display: grid;
+  grid-template-columns: var(--space-10) repeat(auto-fit, minmax(var(--semana-col), 1fr));
+  position: relative;
+  min-width: max-content;
+  border: var(--agenda-borde) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.agenda .semana__cab {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2);
+  background: var(--color-surface);
+  border-bottom: var(--agenda-borde) solid var(--color-border);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+.agenda .semana__cab small { color: var(--color-text-muted); font-size: var(--text-xs); font-weight: var(--weight-regular); }
+.agenda .semana__cab--hoy { background: var(--color-primary-50); color: var(--color-primary-700); }
+.agenda .semana__horas { position: relative; border-right: var(--agenda-borde) solid var(--color-border); }
+.agenda .semana__horas span { position: absolute; right: var(--space-1); transform: translateY(-50%); color: var(--color-text-subtle); font-family: var(--font-mono); font-size: var(--text-xs); }
+.agenda .semana__col { position: relative; min-height: var(--space-10); border-right: var(--agenda-borde) solid var(--color-border); scroll-snap-align: start; }
+.agenda .semana__col--hoy { background: var(--color-primary-50); }
+.agenda .cerrado { position: absolute; left: 0; right: 0; display: grid; place-items: center; background: repeating-linear-gradient(135deg, var(--color-bg) 0 var(--space-2), var(--color-surface-alt) var(--space-2) var(--space-4)); color: var(--color-text-subtle); font-size: var(--text-xs); }
+.agenda .ev {
+  position: absolute;
+  left: var(--space-1);
+  right: var(--space-1);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  overflow: hidden;
+  padding: var(--space-1);
+  border: 0;
+  border-left: var(--space-1) solid var(--turno-reservado-bar);
+  border-radius: var(--radius-sm);
+  background: var(--turno-reservado-bg);
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--text-xs);
+  text-align: left;
+  cursor: pointer;
+}
+.agenda .ev--cancelado { border-left-color: var(--turno-cancelado-bar); background: var(--turno-cancelado-bg); text-decoration: line-through; }
+.agenda .ev--afectado { box-shadow: inset 0 0 0 2px var(--color-warning-600); }
+.agenda .ev--sel { outline: var(--agenda-borde) solid var(--color-primary-700); }
+.agenda .bloq {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: grid;
+  place-items: center;
+  background: var(--bloqueo-bg);
+  color: var(--color-warning-600);
+  font-size: var(--text-xs);
+  text-align: center;
+}
+.agenda .linea-ahora { position: absolute; left: 0; right: 0; height: var(--agenda-borde); background: var(--color-danger-600); }
+.agenda .leyenda { display: flex; flex-wrap: wrap; gap: var(--space-4); color: var(--color-text-muted); font-size: var(--text-xs); }
+.agenda .leyenda > span { display: inline-flex; align-items: center; gap: var(--space-2); }
+.agenda .leyenda i { display: inline-block; width: var(--space-4); height: var(--space-4); border-radius: var(--radius-sm); }
+
+/* Detalle, confirmación y estados */
+.agenda .detalle {
+  position: fixed;
+  z-index: 20;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-lg);
+}
+.agenda .detalle--hoja { left: 0; right: 0; bottom: 0; max-height: 85vh; overflow-y: auto; border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
+.agenda .detalle--panel { top: var(--space-10); right: var(--space-8); width: calc(var(--container-narrow) + var(--space-8)); max-height: 80vh; overflow-y: auto; border: var(--agenda-borde) solid var(--color-border); border-radius: var(--radius-lg); }
+.agenda .detalle--cajon { top: 0; right: 0; bottom: 0; width: var(--container-narrow); max-width: 90vw; overflow-y: auto; border-left: var(--agenda-borde) solid var(--color-border); }
+.agenda .detalle__contenido { padding: var(--space-4); }
+.agenda .panel__cab { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); }
+.agenda .panel__cab h2 { margin: 0; font-size: var(--text-xl); }
+.agenda .panel__cab p { margin: var(--space-1) 0 0; color: var(--color-text-muted); font-size: var(--text-sm); }
+.agenda .panel__badges { display: flex; gap: var(--space-2); margin: var(--space-3) 0; }
+.agenda .panel__acciones, .agenda .dialogo__acciones { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-4); }
+.agenda .datos { margin: var(--space-4) 0; }
+.agenda .dato { display: grid; grid-template-columns: calc(var(--container-narrow) / 4) 1fr; gap: var(--space-2); padding: var(--space-2) 0; border-top: var(--agenda-borde) solid var(--color-border); font-size: var(--text-sm); }
+.agenda .dato dt { color: var(--color-text-muted); }
+.agenda .dato dd { margin: 0; overflow-wrap: anywhere; }
+.agenda .dato a { color: var(--color-primary-600); }
+
+.agenda .dialogo-confirmacion {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: 40;
+  width: min(var(--container-narrow), calc(100vw - var(--space-8)));
+  padding: var(--space-6);
+  transform: translate(-50%, -50%);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-lg);
+}
+.agenda .dialogo-confirmacion h2 { margin: 0; font-size: var(--text-xl); }
+.agenda .resumen { display: flex; flex-direction: column; gap: var(--space-1); margin: var(--space-3) 0; padding: var(--space-3); border-radius: var(--radius-md); background: var(--color-surface-alt); font-size: var(--text-sm); }
+.agenda .dialogo-confirmacion p { margin: 0; color: var(--color-text-muted); font-size: var(--text-sm); }
+
+.agenda .esqueleto { height: var(--control-height); margin-top: var(--space-2); border-radius: var(--radius-sm); background: linear-gradient(90deg, var(--color-surface-alt), var(--color-border), var(--color-surface-alt)); }
+
+@media (max-width: 719px) {
+  .agenda .agenda-head { align-items: flex-start; }
+  .agenda .agenda-head__titulo h1 { font-size: var(--text-xl); }
+  .agenda .seg, .agenda .navfecha { width: 100%; justify-content: center; }
+  .agenda .franja { padding: var(--space-3); }
+  .agenda .alert { margin-left: 0; margin-right: 0; }
+  .agenda .dialogo-confirmacion { padding: var(--space-4); }
+}

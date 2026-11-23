@@ -2,7 +2,10 @@ import { describe, expect, it, vi } from 'vitest'
 // @ts-expect-error: este proyecto no declara tipos de Node; readFileSync se usa solo en el test.
 import { readFileSync } from 'node:fs'
 import { arrancar } from './main'
+import { tituloRango } from './features/agenda/formato'
+import { rangoDeVista } from './features/agenda/navegacion'
 import type { HistorialNavegacion } from './router'
+import { fechaLocalArgentina } from './shared/fechas'
 import type { FetchLike } from './shared/api-client'
 import type { AdaptadorNodos, ManejadoresUI, NodoUI } from './shared/ui/adaptador'
 import type { Descriptor } from './shared/ui/componentes'
@@ -95,8 +98,29 @@ function fetchConSesion(pedidos: string[]): FetchLike {
     if (url === '/api/auth/me' || url === '/api/auth/login') {
       return respuesta(ODONTOLOGO, 200)
     }
-    return new Response(null, { status: 204 })
+    return respuestaAgenda(url)
   }
+}
+
+function respuestaAgenda(url: string): Response {
+  if (url.startsWith('/api/turnos?')) {
+    return respuesta([], 200)
+  }
+  if (url === '/api/horarios') {
+    return respuesta({ franjas: [] }, 200)
+  }
+  if (url === '/api/bloqueos') {
+    return respuesta({ bloqueos: [] }, 200)
+  }
+  return new Response(null, { status: 204 })
+}
+
+function pedidosDeAgenda(pedidos: readonly string[]): string[] {
+  return pedidos.filter((pedido) =>
+    pedido.startsWith('GET /api/turnos?') ||
+    pedido === 'GET /api/horarios' ||
+    pedido === 'GET /api/bloqueos',
+  )
 }
 
 async function estabilizar(): Promise<void> {
@@ -188,9 +212,63 @@ describe('arranque de la aplicación', () => {
     await estabilizar()
 
     expect(ultimo()?.descriptor.clase).toBe('layout')
-    expect(ultimo()?.descriptor.hijos?.[2]?.hijos?.[0]?.clase).toBe('marcador')
-    expect(pedidos).toEqual(['GET /api/auth/me'])
+    expect(ultimo()?.descriptor.hijos?.[2]?.hijos?.[0]?.clase).toBe('agenda')
+    expect(pedidos[0]).toBe('GET /api/auth/me')
+    expect(pedidosDeAgenda(pedidos)).toHaveLength(3)
     expect(historial.replace).toEqual([])
+    detener()
+  })
+
+  it('renderiza en /agenda los turnos, horarios y bloqueos de los contratos C-12 y C-05', async () => {
+    const fecha = fechaLocalArgentina(new Date())
+    const inicio = new Date(`${fecha}T10:30:00-03:00`)
+    const inicioIso = inicio.toISOString()
+    const finIso = new Date(inicio.getTime() + 30 * 60 * 1000).toISOString()
+    const fetchAgenda: FetchLike = async (url) => {
+      if (url === '/api/auth/me') {
+        return respuesta(ODONTOLOGO, 200)
+      }
+      if (url.startsWith('/api/turnos?')) {
+        return respuesta([{
+          id: 7,
+          inicio: inicioIso,
+          fin: finIso,
+          estado: 'RESERVADO',
+          origen: 'ONLINE',
+          paciente: { id: 9, dni: '30.123.456', nombre: 'Ana', apellido: 'Pérez' },
+          prestacion: { id: 2, nombre: 'Limpieza', duracionMinutos: 30 },
+          canceladoPor: null,
+          canceladoEn: null,
+        }], 200)
+      }
+      if (url === '/api/horarios') {
+        return respuesta({
+          franjas: [1, 2, 3, 4, 5, 6, 7].map((diaSemana) => ({ diaSemana, inicio: '09:00', fin: '18:00' })),
+        }, 200)
+      }
+      if (url === '/api/bloqueos') {
+        return respuesta({ bloqueos: [] }, 200)
+      }
+      return new Response(null, { status: 204 })
+    }
+    const { adaptador, ultimo } = adaptadorFalso()
+    const detener = arrancar({}, adaptador, {
+      historial: historialFalso('/agenda').historial,
+      fetch: fetchAgenda,
+    })
+    await estabilizar()
+
+    const nodos = nodosDe(ultimo()?.descriptor)
+    expect(nodos.some((nodo) => nodo.clase === 'agenda')).toBe(true)
+    expect(nodos.some((nodo) => nodo.atributos?.['data-turno-id'] === '7')).toBe(true)
+    expect(textosDe(ultimo()?.descriptor)).toContain('Limpieza')
+
+    // En /agenda con ancho de escritorio el h1 es el rango de la semana, nunca un día suelto.
+    const titulo = nodos.find((nodo) => nodo.etiqueta === 'h1')?.texto
+    expect(titulo).toMatch(/^\d{1,2} al \d{1,2} de [a-záéíóú]+$/)
+    expect(titulo).not.toMatch(/^(Domingo|Lunes|Martes|Miércoles|Jueves|Viernes|Sábado)\b/)
+    const rangoSemana = rangoDeVista('semana', fecha)
+    expect(titulo).toBe(tituloRango(rangoSemana.desde, rangoSemana.hasta))
     detener()
   })
 
@@ -222,7 +300,10 @@ describe('arranque de la aplicación', () => {
       if (fallar) {
         throw new TypeError('Failed to fetch')
       }
-      return respuesta(ODONTOLOGO, 200)
+      if (url === '/api/auth/me') {
+        return respuesta(ODONTOLOGO, 200)
+      }
+      return respuestaAgenda(url)
     }
     const { adaptador, ultimo } = adaptadorFalso()
     const historial = historialFalso('/agenda')
@@ -237,7 +318,8 @@ describe('arranque de la aplicación', () => {
     await estabilizar()
 
     expect(ultimo()?.descriptor.clase).toBe('layout')
-    expect(pedidos).toEqual(['GET /api/auth/me', 'GET /api/auth/me'])
+    expect(pedidos.filter((pedido) => pedido === 'GET /api/auth/me')).toHaveLength(2)
+    expect(pedidosDeAgenda(pedidos)).toHaveLength(3)
     expect(historial.push).toEqual([])
     expect(historial.replace).toEqual([])
     detener()
@@ -305,7 +387,8 @@ describe('arranque de la aplicación', () => {
     ultimo()?.manejadores?.['cerrar-sesion']?.(new NodoInteractivo())
     await estabilizar()
 
-    expect(pedidos).toEqual(['GET /api/auth/me', 'POST /api/auth/logout'])
+    expect(pedidos.filter((pedido) => pedido === 'GET /api/auth/me')).toHaveLength(1)
+    expect(pedidos.filter((pedido) => pedido === 'POST /api/auth/logout')).toHaveLength(1)
     expect(historial.push).toEqual(['/login'])
     expect(ultimo()?.descriptor.clase).toBe('login')
     detener()
@@ -470,8 +553,11 @@ describe('arranque de la aplicación', () => {
     await estabilizar()
 
     expect(montajes.at(-1)?.descriptor.clase).toBe('layout')
-    expect(pedidos).toEqual([
-      'GET /api/auth/me',
+    expect(pedidos.filter((pedido) => pedido === 'GET /api/auth/me')).toHaveLength(1)
+    // Primero carga la agenda (C-13) y, tras el popstate, la configuración (C-06).
+    const inicioConfig = pedidos.length - 3
+    expect(pedidosDeAgenda(pedidos.slice(0, inicioConfig))).toHaveLength(3)
+    expect(pedidos.slice(inicioConfig)).toEqual([
       'GET /api/horarios',
       'GET /api/prestaciones',
       'GET /api/bloqueos',
@@ -913,7 +999,7 @@ describe('cableamiento del botón Ingresar', () => {
     await ultimo()?.manejadores?.['ingresar']?.(new BotonIngresar(formularioCon('ana@consultorio.com', 'secreto')))
     await estabilizar()
 
-    expect(pedidos).toEqual([
+    expect(pedidos.filter((pedido) => pedido.url === '/api/auth/login')).toEqual([
       {
         url: '/api/auth/login',
         metodo: 'POST',
@@ -935,7 +1021,7 @@ describe('cableamiento del botón Ingresar', () => {
     await ultimo()?.manejadores?.['ingresar']?.(formularioCon('otra@consultorio.com', 'otra-clave'))
     await estabilizar()
 
-    expect(pedidos).toEqual([
+    expect(pedidos.filter((pedido) => pedido.url === '/api/auth/login')).toEqual([
       {
         url: '/api/auth/login',
         metodo: 'POST',
@@ -977,7 +1063,7 @@ describe('cableamiento del botón Ingresar', () => {
     await ultimo()?.manejadores?.['ingresar']?.(boton)
     await estabilizar()
 
-    expect(pedidos).toEqual([
+    expect(pedidos.filter((pedido) => pedido.url === '/api/auth/login')).toEqual([
       {
         url: '/api/auth/login',
         metodo: 'POST',

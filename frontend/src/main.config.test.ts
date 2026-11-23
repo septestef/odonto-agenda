@@ -139,7 +139,7 @@ describe('cableado de /config en el shell', () => {
     detener()
   })
 
-  it('deja /agenda con el marcador y sin pedidos de configuración', async () => {
+  it('monta la agenda (C-13) en /agenda sin cargar el control de configuración', async () => {
     const pedidos: string[] = []
     const { adaptador, ultimo } = adaptadorFalso()
     const detener = arrancar({}, adaptador, {
@@ -148,8 +148,10 @@ describe('cableado de /config en el shell', () => {
     })
     await estabilizar()
 
-    expect(ultimo()?.descriptor.hijos?.[2]?.hijos?.[0]?.clase).toBe('marcador')
-    expect(pedidos).toEqual(['GET /api/auth/me'])
+    expect(ultimo()?.descriptor.hijos?.[2]?.hijos?.[0]?.clase).toBe('agenda')
+    expect(pedidos[0]).toBe('GET /api/auth/me')
+    // La agenda lee horarios y bloqueos, pero nunca las prestaciones de /config.
+    expect(pedidos).not.toContain('GET /api/prestaciones')
     detener()
   })
 })
