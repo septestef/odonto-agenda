@@ -315,7 +315,7 @@ Camino crítico post-demo: `C-16 → C-17 → C-18` (C-20 cierra el camino hacia
   - `knowledge-base/05_reglas_de_negocio.md` §Pacientes (RN-PA-03, RN-PA-04)
 
 ### [C-11] `gestion-turno-ui` **[UI]**
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado (archivado 2026-11-23 como `2026-11-23-c-11-gestion-turno-ui`; consulta, cancelación, cambio de horario y solo lectura por link; navegación de días compartida con C-10 en `shared/navegador-dias.ts`; recorrido E2E con backend `demo` y emails reales). Spec vigente nueva: `gestion-turno-ui`.
 - **Scope**:
   - `features/turno`: página `/turno/{token}` con detalle del turno, cancelación con confirmación previa, reprogramación con selector de horarios de la misma prestación (reutiliza el componente de C-10) y vista en solo lectura para turnos cancelados o pasados (US-008, US-009).
   - Errores del contrato de C-09 (todos `{codigo, mensaje}`): 404 `NO_ENCONTRADO` (token inválido o desconocido, o consultorio/prestación inactivos al reprogramar); 409 `RN-TU-07` (el turno ya empezó), 409 `RN-SE-02` (turno futuro ya no reservado: solo lectura), 409 `RN-SE-04` (no se puede reprogramar desde el link; cancelar sí) y 409 `RN-TU-01` (horario tomado: refrescar disponibilidad); 422 `RN-TU-03`, `RN-TU-11` y `RN-AG-05` (horario fuera de 24 h, horizonte o agenda); 400 `VALIDACION`/`SOLICITUD_INVALIDA`.
