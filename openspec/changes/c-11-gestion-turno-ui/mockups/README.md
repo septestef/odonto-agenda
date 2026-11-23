@@ -2,7 +2,7 @@
 
 - **Design system**: revisión 2 (`design-system/tokens.css`, `brand.js`, `components.html`).
 - **Decision**: yes (2026-11-22)
-- **Approval**: approved (2026-11-22, by user)
+- **Approval**: approved (2026-11-22, by user) — incluye la revisión 2 de `reprogramar.html`, con la navegación de días alineada con C-10.
 - **Preview**: rendered (2026-11-22, 390×844 y 1440×900, capturas en `previews/`)
 
 > Al crear `design.md` con `/opsx:propose`, copiar estos campos en su sección `## UI Mockups` y enlazar los mockups y las capturas desde `design.md` y `tasks.md` como criterios de aceptación. Los mockups aprobados no se editan. Si cambia el selector de C-10, la aprobación vuelve a `pending`.
@@ -27,7 +27,7 @@ Los recuadros punteados amarillos (`.nota-mockup`) son notas para quien revisa y
 
 ## Decisiones para revisar
 
-1. **Selector de horarios provisorio.** Se copió el de `components.html` porque el mockup de C-10 todavía no estaba disponible. En el apply se reutiliza el componente de C-10, y si ese mockup se aprueba distinto, este se alinea con él (cambio visual: se vuelve a pedir aprobación).
+1. **Selector alineado con C-10 (revisión 2).** La primera versión copiaba la tira de días de `components.html`. C-10 se aprobó con "Semana anterior/siguiente", "Ir a una fecha", rango de la semana e indicación de scroll a 390 px, así que `reprogramar.html` los incorpora (estilos al final de `mockup.css`, script `dias.js` copiado del mockup de C-10) y conserva el punto "Día de tu turno actual". En el apply se reutilizan `shared/selector-horarios.ts` y la navegación de días de C-10.
 2. **Piezas nuevas derivadas de los tokens**, porque `components.html` no las define: diálogo o hoja inferior, botón de peligro relleno (`btn--danger-solid`, solo para la confirmación destructiva), skeleton de carga, punto "día de tu turno actual" y badge "Pasado".
 3. **Textos propios de la UI por `codigo`**, sin mostrar el `mensaje` crudo del backend, excepto en el 409 `RN-TU-01`, que repite el texto de C-07/C-09.
 4. **Después de reprogramar** la página no redirige: vuelve a pedir el turno original (ahora cancelado) y confirma la hora elegida con los datos que ya tenía la pantalla. El link nuevo llega solo por email (D1 de C-09).
