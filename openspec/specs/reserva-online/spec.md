@@ -145,3 +145,19 @@ Las respuestas de reserva, exitosas o de error, MUST contener solo datos de la r
 - **GIVEN** un turno `RESERVADO` de otro paciente el viernes 2026-11-27 a las 09:00
 - **WHEN** se reserva ese horario y se recibe 409
 - **THEN** el cuerpo contiene solo `codigo` y `mensaje`, sin nombre, DNI ni email del otro paciente
+
+### Requirement: Los turnos manuales cuentan para el límite online
+
+El conteo de turnos `RESERVADO` futuros por DNI y odontólogo (RN-PA-03) MUST incluir los turnos creados manualmente por el odontólogo, con independencia de su `origen`. El alta manual sigue sin estar sujeta a ese límite; el límite solo se aplica a la reserva online.
+
+#### Scenario: Dos turnos manuales bloquean una reserva online
+
+- **GIVEN** un DNI con dos turnos manuales `RESERVADO` futuros con `demo`
+- **WHEN** ese DNI intenta reservar online un tercer horario libre con `demo`
+- **THEN** la API responde 409 con código `RN-PA-03` y no se crea el turno
+
+#### Scenario: Un turno manual y uno online alcanzan el límite
+
+- **GIVEN** un DNI con un turno manual y un turno online `RESERVADO` futuros con `demo`
+- **WHEN** ese DNI intenta reservar online un tercer horario libre con `demo`
+- **THEN** la API responde 409 con código `RN-PA-03`
