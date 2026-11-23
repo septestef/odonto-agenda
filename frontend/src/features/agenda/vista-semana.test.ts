@@ -205,5 +205,24 @@ describe('columnas de la vista semanal', () => {
       'Vie 27',
     ])
     expect(deClase(vista, 'semana__col')).toHaveLength(3)
+    expect(deClase(vista, 'semana__grid')[0]?.atributos?.['style']).toContain('--dias: 3')
+  })
+
+  it('declara en la grilla cuántos días y minutos dibuja, para que el CSS fije columnas y alto', () => {
+    const vista = descriptorSemana({
+      fecha: '2026-11-25',
+      ahora,
+      franjas: [1, 2, 3, 4, 5].flatMap((diaSemana) => [
+        { diaSemana, inicio: '09:00', fin: '13:00' },
+        { diaSemana, inicio: '16:00', fin: '19:00' },
+      ]),
+      turnos: [],
+      bloqueos: [],
+      seleccionadoId: undefined,
+    })
+
+    const estilo = deClase(vista, 'semana__grid')[0]?.atributos?.['style'] ?? ''
+    expect(estilo).toContain('--dias: 5')
+    expect(estilo).toContain('--minutos: 600')
   })
 })
