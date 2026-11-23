@@ -41,4 +41,11 @@ describe('configuración del design system', () => {
   it('app.css importa los tokens desde el alias del design system', () => {
     expect(estilos).toContain("@import '@design-system/tokens.css';")
   })
+
+  it('las horas de cada franja ocupan el ancho de su día y no se salen de la columna', () => {
+    const regla = /\.franja input\s*\{([^}]*)\}/.exec(estilos)?.[1] ?? ''
+
+    expect(regla).toContain('width: 100%')
+    expect(regla).toContain('min-width: 0')
+  })
 })
