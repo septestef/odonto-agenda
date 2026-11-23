@@ -348,7 +348,7 @@ Camino crítico post-demo: `C-16 → C-17 → C-18` (C-20 cierra el camino hacia
   - `knowledge-base/03_actores_y_roles.md` §RBAC
 
 ### [C-13] `agenda-odontologo-ui` **[UI]**
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado (archivado 2026-11-22 como `2026-11-22-c-13-agenda-odontologo-ui`; vista de día y semana, detalle y cancelación; 479 tests frontend en verde)
 - **Scope**:
   - `features/agenda`: vistas diaria y semanal con navegación anterior/siguiente y botón "hoy"; cada turno muestra paciente, prestación, horario, estado y origen; se ven los bloqueos y el horario de atención (consume C-05 y C-12).
   - Acción de cancelar turno con confirmación (US-012) y listado de turnos afectados por un bloqueo.
