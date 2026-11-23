@@ -4,7 +4,7 @@
 > Cada change es atómico: un agente puede implementarlo en una sesión (~4-6 horas).
 > **Leer este archivo antes de ejecutar cualquier `/opsx:propose`.**
 
-**Fechas duras**: hoy es 2026-11-17; **demo funcional en localhost el miércoles 2026-11-25**. Los changes C-01 a C-16 son **pre-demo**; C-17 a C-20 son **post-demo** (no se tocan antes del 25/11).
+**Fechas duras**: hoy es 2026-11-17; **demo funcional en localhost el miércoles 2026-11-25**. Los changes C-01 a C-16 son **pre-demo**; C-17 a C-21 son **post-demo** (no se tocan antes del 25/11).
 
 **Reglas del proyecto que rigen todos los changes**:
 - La mantenibilidad manda sobre el alcance (DD-08): si falta tiempo se **recortan historias S/C, nunca los tests**.
@@ -56,6 +56,8 @@ C-16
       └── C-20 preparacion-produccion         (+ C-19)
 C-16
  └── C-19 [UI] marcar-atendido-ausente
+C-14
+ └── C-21 recordatorio-email-automatico      ← US-014 diferida de C-14
 ```
 
 ### Paralelismo por fase
@@ -371,7 +373,7 @@ Camino crítico post-demo: `C-16 → C-17 → C-18` (C-20 cierra el camino hacia
 > Si el calendario se atrasa, se recortan primero C-15 y después C-14. Los tests de los changes anteriores no se recortan.
 
 ### [C-14] `recordatorios-y-whatsapp` **[UI]**
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado con recorte (archivado 2026-11-23 como `2026-11-23-c-14-recordatorios-y-whatsapp`). Entró US-015: `GET /api/turnos/{id}/whatsapp` (RN-NO-05..07) y acción WhatsApp en el detalle Día/Semana, en la PR #21. **US-014 se difirió a C-21** por decisión de Estefi, sin recortar pruebas. El scope de abajo es el original.
 - **Scope**:
   - US-014: job `@Scheduled` cada 15 min que busca turnos `RESERVADO` con inicio entre `ahora + 23h45m` y `ahora + 24h` y `recordatorio_enviado_en IS NULL`, envía el email con el link de gestión, marca `recordatorio_enviado_en` y registra la notificación; idempotente ante reinicios (RN-NO-03, RN-NO-04). Usa el `Clock` inyectado.
   - US-015: `GET /api/turnos/{id}/whatsapp` devuelve `https://wa.me/{telefono}?text={mensaje}` con fecha, hora, prestación y dirección (RN-NO-05); botón "WhatsApp" en la agenda que abre una pestaña nueva.
@@ -490,6 +492,19 @@ Camino crítico post-demo: `C-16 → C-17 → C-18` (C-20 cierra el camino hacia
   - `knowledge-base/09_decisiones_y_supuestos.md` §SU-01, §SU-05
   - `knowledge-base/01_vision_y_objetivos.md`
 
+### [C-21] `recordatorio-email-automatico`
+- **Estado**: `[ ]` pendiente (propuesto en `openspec/changes/c-21-recordatorio-email-automatico`)
+- **Scope**:
+  - US-014, diferida de C-14 el 2026-11-23: job con cron cada 15 min alineado a los cuartos de hora y ventana `[t + 23h45m, t + 24h]` desde el tick nominal; recordatorio al snapshot `email_gestion` con un link válido de gestión, como máximo un recordatorio aceptado por turno y auditoría (RN-NO-03, RN-NO-04).
+  - **Gate bloqueante de Estefi** antes de codear: credencial del link del recordatorio (D2: el token original solo se guarda como hash y no se puede reenviar) y semántica de toma y fallas (D3).
+  - Tests: ventana con `Clock` fijo y corridas demoradas, corridas concurrentes en PostgreSQL real, carreras con cancelación/reprogramación, SMTP falso, compatibilidad de los links de C-09/C-11.
+- **Dependencias**: `C-08`, `C-14`
+- **Governance**: CRITICO (credencial de gestión: análisis y aprobación humana explícita antes de escribir código)
+- **Leer antes**:
+  - `openspec/changes/c-21-recordatorio-email-automatico/design.md` (D1–D3)
+  - `knowledge-base/07_flujos_principales.md` §Flujo 5
+  - `knowledge-base/05_reglas_de_negocio.md` §Notificaciones (RN-NO-03, RN-NO-04), §Seguridad (RN-SE-02)
+
 ---
 
 ## Resumen
@@ -516,5 +531,6 @@ Camino crítico post-demo: `C-16 → C-17 → C-18` (C-20 cierra el camino hacia
 | C-18 | odontograma | 7 | Post-demo | sí | ALTO | C-17 |
 | C-19 | marcar-atendido-ausente (C) | 7 | Post-demo | sí | BAJO | C-13, C-16 |
 | C-20 | preparacion-produccion | 7 | Post-demo | no | CRITICO | C-17, C-19 |
+| C-21 | recordatorio-email-automatico (S, US-014 diferida de C-14) | 7 | Post-demo | no | CRITICO | C-08, C-14 |
 
 **Primer change recomendado**: `C-01` (foundation-setup). Para arrancar: `/opsx:propose C-01-foundation-setup`. En paralelo, diseñar y aprobar en lote los mockups de C-04, C-06, C-10, C-11 y C-13.

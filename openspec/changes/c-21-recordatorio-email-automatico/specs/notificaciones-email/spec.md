@@ -40,7 +40,7 @@ El recordatorio MUST usar exclusivamente `turno.email_gestion` si es un único b
 
 ### Requirement: US-014 — Un solo recordatorio y resultado independiente del turno
 
-Para un turno elegible, el sistema MUST NOT despachar más de un recordatorio aceptado por SMTP, aun con corridas concurrentes o reinicios (RN-NO-03), y MUST NOT prometer entrega. Antes de despachar MUST comprobar nuevamente la elegibilidad con datos confirmados. El SMTP MUST ocurrir después de liberar los locks de base. Con un resultado observable, MUST registrar `RECORDATORIO` con `ENVIADO` y marcar `recordatorio_enviado_en` si SMTP acepta, o `ERROR` con categoría sanitizada si falla (RN-NO-04). Ningún resultado de transporte o auditoría MUST revertir el turno ni cambiar su ocupación. La exclusión entre corridas y la política ante fallas o timeouts quedan para el gate 4.1.
+Para un turno elegible, el sistema MUST NOT despachar más de un recordatorio aceptado por SMTP, aun con corridas concurrentes o reinicios (RN-NO-03), y MUST NOT prometer entrega. Antes de despachar MUST comprobar nuevamente la elegibilidad con datos confirmados. El SMTP MUST ocurrir después de liberar los locks de base. Con un resultado observable, MUST registrar `RECORDATORIO` con `ENVIADO` y marcar `recordatorio_enviado_en` si SMTP acepta, o `ERROR` con categoría sanitizada si falla (RN-NO-04). Ningún resultado de transporte o auditoría MUST revertir el turno ni cambiar su ocupación. La exclusión entre corridas y la política ante fallas o timeouts quedan para el gate 1.1.
 
 #### Scenario: Doble corrida y reinicio
 - **WHEN** dos corridas con conexiones distintas compiten por el mismo turno y luego se reinicia la aplicación dentro de la ventana

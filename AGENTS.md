@@ -73,7 +73,7 @@ Cargá la skill que corresponde al contexto ANTES de escribir código.
 
 El plan completo está en [CHANGES.md](CHANGES.md). Resumen:
 
-- **Total**: 20 changes en 8 fases. **Pre-demo**: C-01..C-16. **Post-demo**: C-17..C-20 (no se tocan antes del 25/11).
+- **Total**: 21 changes en 8 fases. **Pre-demo**: C-01..C-16. **Post-demo**: C-17..C-21 (no se tocan antes del 25/11; C-21 es US-014 diferida de C-14).
 - **Camino crítico pre-demo** (7): `C-01 → C-02 → C-07 → C-08 → C-09 → C-11 → C-16`.
 - **Recortables si hay atraso**: primero C-15 (turno manual) y después C-14 (recordatorios y WhatsApp).
 - **Primer change**: `C-01 foundation-setup`.
