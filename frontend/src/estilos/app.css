@@ -2246,7 +2246,15 @@ html {
 .agenda .leyenda > span { display: inline-flex; align-items: center; gap: var(--space-2); }
 .agenda .leyenda i { display: inline-block; width: var(--space-4); height: var(--space-4); border-radius: var(--radius-sm); }
 
-/* Detalle, confirmación y estados */
+/* Detalle, confirmación y estados (geometría del mockup aprobado de C-13) */
+.agenda {
+  /* 380 px de panel Día y 420 px de cajón, derivados de la escala de espaciado. */
+  --agenda-panel-ancho: calc(var(--space-10) * 9.5);
+  --agenda-cajon-ancho: calc(var(--space-10) * 10.5);
+}
+/* Fondo atenuado bajo la hoja/cajón y bajo la confirmación (`.velo` y `.velo--alto`). */
+.agenda .velo { position: fixed; inset: 0; z-index: 19; background: var(--color-text); opacity: 0.45; }
+.agenda .velo--confirmacion { z-index: 39; }
 .agenda .detalle {
   position: fixed;
   z-index: 20;
@@ -2254,8 +2262,11 @@ html {
   box-shadow: var(--shadow-lg);
 }
 .agenda .detalle--hoja { left: 0; right: 0; bottom: 0; max-height: 85vh; overflow-y: auto; border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
-.agenda .detalle--panel { top: var(--space-10); right: var(--space-8); width: calc(var(--container-narrow) + var(--space-8)); max-height: 80vh; overflow-y: auto; border: var(--agenda-borde) solid var(--color-border); border-radius: var(--radius-lg); }
-.agenda .detalle--cajon { top: 0; right: 0; bottom: 0; width: var(--container-narrow); max-width: 90vw; overflow-y: auto; border-left: var(--agenda-borde) solid var(--color-border); }
+.agenda .detalle--cajon { top: 0; right: 0; bottom: 0; width: var(--agenda-cajon-ancho); max-width: 90vw; overflow-y: auto; border-left: var(--agenda-borde) solid var(--color-border); }
+/* Panel Día de escritorio: columna en el flujo, sticky, sin tapar la cabecera. */
+.agenda .agenda-cuerpo--con-panel { display: grid; grid-template-columns: minmax(0, 1fr) var(--agenda-panel-ancho); gap: var(--space-6); align-items: start; }
+.agenda .agenda-cuerpo__principal { display: flex; flex-direction: column; gap: var(--space-4); min-width: 0; }
+.agenda .detalle--panel { position: sticky; top: var(--space-4); z-index: auto; max-height: calc(100vh - var(--space-8)); overflow-y: auto; border: var(--agenda-borde) solid var(--color-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); }
 .agenda .detalle__contenido { padding: var(--space-4); }
 .agenda .panel__cab { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); }
 .agenda .panel__cab h2 { margin: 0; font-size: var(--text-xl); }
@@ -2293,4 +2304,18 @@ html {
   .agenda .franja { padding: var(--space-3); }
   .agenda .alert { margin-left: 0; margin-right: 0; }
   .agenda .dialogo-confirmacion { padding: var(--space-4); }
+}
+
+/* Confirmación en celular: hoja anclada abajo, igual que el mockup y que C-11. */
+@media (max-width: 559px) {
+  .agenda .dialogo-confirmacion {
+    top: auto;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    transform: none;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    padding: var(--space-6) var(--space-5) var(--space-5);
+  }
 }

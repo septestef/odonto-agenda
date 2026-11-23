@@ -5,8 +5,8 @@ import { toast } from '../../shared/ui/componentes'
 import type { Descriptor } from '../../shared/ui/componentes'
 import { consultarAgenda, consultarBloqueos, consultarHorarios, consultarWhatsApp } from './api'
 import { cancelarTurno, interpretarCancelacion } from './cancelar'
-import { descriptorConfirmacion } from './confirmacion'
-import { contenedorDetalle } from './detalle'
+import { descriptorConfirmacion, veloConfirmacion } from './confirmacion'
+import { contenedorDetalle, detalleSuperpuesto, formaDetalle, veloDetalle } from './detalle'
 import { descriptorAviso, descriptorEstado, seleccionarEstado } from './estados'
 import { diaSemanaDe, tituloFecha, tituloRango } from './formato'
 import { crearControlNavegacion, rangoDeVista } from './navegacion'
@@ -317,7 +317,7 @@ export function crearControlAgenda(opciones: OpcionesControlAgenda): ControlAgen
 
     const turno = turnoDe(seleccionadoId)
     if (turno !== undefined) {
-      contenido.push(contenedorDetalle({
+      const detalle = contenedorDetalle({
         turno,
         ahora,
         bloqueo: bloqueoDe(turno.id),
@@ -325,13 +325,24 @@ export function crearControlAgenda(opciones: OpcionesControlAgenda): ControlAgen
         ancho: opciones.ancho,
         whatsapp,
         foco: focoDetalle,
-      }))
+      })
+      if (detalleSuperpuesto(formaDetalle(estado.vista, opciones.ancho))) {
+        contenido.push(veloDetalle(), detalle)
+      } else {
+        // Panel Día en escritorio: columna propia junto a la lista, en el flujo (mockup C-13).
+        const principal = contenido.splice(0, contenido.length)
+        contenido.push({
+          etiqueta: 'div',
+          clase: 'agenda-cuerpo agenda-cuerpo--con-panel',
+          hijos: [{ etiqueta: 'div', clase: 'agenda-cuerpo__principal', hijos: principal }, detalle],
+        })
+      }
     }
 
     if (confirmacionId !== undefined) {
       const confirmado = turnoDe(confirmacionId)
       if (confirmado !== undefined) {
-        contenido.push(descriptorConfirmacion({
+        contenido.push(veloConfirmacion(), descriptorConfirmacion({
           turno: confirmado,
           ahora,
           enBloqueo: bloqueoDe(confirmado.id) !== undefined,

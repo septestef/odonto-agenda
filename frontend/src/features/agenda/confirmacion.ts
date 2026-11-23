@@ -24,6 +24,14 @@ function resumenDe(turno: TurnoAgenda): Descriptor {
   }
 }
 
+/**
+ * Fondo atenuado del diálogo (`.velo--alto` del mockup). Es inerte, como en
+ * C-11: la confirmación solo se cierra con "No, volver" o Escape.
+ */
+export function veloConfirmacion(): Descriptor {
+  return { etiqueta: 'div', clase: 'velo velo--confirmacion', atributos: { 'aria-hidden': 'true' } }
+}
+
 /** Diálogo derivado de la copia aprobada en `mockups/cancelar-confirmacion.html`. */
 export function descriptorConfirmacion(opciones: OpcionesConfirmacion): Descriptor {
   const { turno, enBloqueo } = opciones
