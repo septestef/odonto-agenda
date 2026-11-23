@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup C-14 · WhatsApp en el detalle — OdontoAgenda</title>
+<link rel="icon" href="../../../../design-system/assets/logo.png">
+<link rel="stylesheet" href="../../../../design-system/tokens.css">
+<link rel="stylesheet" href="../../archive/2026-11-22-c-13-agenda-odontologo-ui/mockups/mockup.css">
+<style>
+  [hidden] { display: none !important; }
+  .seg button { min-height: var(--control-height); }
+  .appbar__sesion .btn { white-space: nowrap; }
+  .dia { grid-template-columns: minmax(0, 1fr); }
+  @media (min-width: 1100px) {
+    .dia:has(.panel--fijo:not([hidden])) { grid-template-columns: minmax(0, 1fr) 380px; }
+  }
+  dialog.cajon, dialog.dialogo { border: 0; color: var(--color-text); }
+  dialog:not([open]) { display: none; }
+  dialog::backdrop { background: color-mix(in srgb, var(--color-text) 45%, transparent); }
+  dialog.cajon { top: auto; width: 100%; max-width: 100%; margin: 0; max-height: 92dvh; }
+  @media (min-width: 720px) {
+    dialog.cajon { top: 0; width: 420px; max-height: none; height: 100%; margin-left: auto; }
+  }
+  dialog.dialogo { max-height: 92dvh; overflow-y: auto; }
+  @media (max-width: 559px) { dialog.dialogo { top: auto; width: 100%; max-width: 100%; } }
+  .semana .ev { min-height: var(--control-height); border: 0; border-left: 3px solid var(--color-primary-600);
+                font-family: inherit; text-align: left; cursor: pointer; }
+  .detalle__whatsapp { display: grid; gap: var(--space-2); }
+  .btn--whatsapp { background: var(--color-surface);
+                   color: color-mix(in srgb, var(--color-success-600) 80%, var(--color-text));
+                   border-color: color-mix(in srgb, var(--color-success-600) 35%, var(--color-surface)); }
+  .btn--whatsapp:hover:not([aria-disabled="true"]) { background: var(--color-success-50); }
+  .btn--whatsapp[aria-disabled="true"] { cursor: not-allowed; transform: none; }
+  .whatsapp__icono, .whatsapp__carga { flex: none; width: var(--text-lg); height: var(--text-lg); }
+  .whatsapp__carga { border: 2px solid color-mix(in srgb, currentColor 25%, transparent);
+                     border-top-color: currentColor; border-radius: var(--radius-pill);
+                     animation: girar calc(var(--duration-base) * 4) linear infinite; }
+  @keyframes girar { to { transform: rotate(360deg); } }
+  .detalle__whatsapp .alert { margin: 0; }
+  .detalle__whatsapp .alert__icon { width: var(--space-5); height: var(--space-5); }
+</style>
+</head>
+<body>
+<!-- Solo presentación. Marcadores: #dia/disponible o #semana/disponible;
+     reemplazá disponible por no-disponible, preparando, error o apertura-bloqueada. -->
+<a class="skip" href="#contenido">Saltar al contenido</a>
+<header class="appbar">
+  <div class="container appbar__inner">
+    <div class="appbar__marca">
+      <img src="../../../../design-system/assets/logo.svg" alt="" width="135" height="44">
+      <span class="sr-only" data-brand-name>OdontoAgenda</span>
+    </div>
+    <nav class="nav" aria-label="Secciones de la aplicación">
+      <span class="nav__link" aria-current="page">Agenda</span>
+      <span class="nav__link">Configuración</span>
+    </nav>
+    <div class="appbar__espacio"></div>
+    <div class="appbar__sesion"><span>Dra. Sol Ejemplo</span><span class="btn btn--ghost btn--sm">Cerrar sesión</span></div>
+  </div>
+</header>
+
+<main id="contenido" tabindex="-1">
+  <div class="container">
+    <div class="agenda-head">
+      <div class="agenda-head__titulo">
+        <h1 id="titulo-agenda">Miércoles 25 de noviembre</h1>
+        <p id="subtitulo-agenda">Hoy · horarios en hora de Argentina</p>
+      </div>
+      <div class="seg" role="group" aria-label="Vista">
+        <button id="vista-dia" type="button" aria-pressed="true">Día</button>
+        <button id="vista-semana" type="button" aria-pressed="false">Semana</button>
+      </div>
+      <div class="navfecha" aria-hidden="true">
+        <span class="btn btn--secondary btn--icono">‹</span>
+        <span class="btn btn--secondary btn--sm">Hoy</span>
+        <span class="btn btn--secondary btn--icono">›</span>
+      </div>
+    </div>
+
+    <div id="agenda-dia">
+      <p class="resumen-dia"><span><strong>2</strong> turnos</span></p>
+      <div class="dia">
+        <div>
+          <section class="franja" aria-labelledby="franja-manana">
+            <h2 id="franja-manana" class="franja__titulo">Mañana <span>09:00 – 13:00</span></h2>
+            <article class="turno turno--atendido turno--pasado">
+              <div class="turno__fila"><span class="turno__hora">09:00–09:45</span><span class="badge badge--atendido">Atendido</span><span class="badge badge--online">Online</span></div>
+              <div class="turno__quien">Juli Ejemplo</div>
+              <div class="turno__meta">Limpieza</div>
+            </article>
+            <div class="ahora" role="note">Ahora · 10:10</div>
+            <div class="libre">09:45–10:30 · libre</div>
+            <article id="turno-dia" class="turno turno--reservado">
+              <div class="turno__fila"><span class="turno__hora">10:30–11:15</span><span class="badge badge--reservado">Reservado</span><span class="badge badge--online">Online</span></div>
+              <div class="turno__quien">Luna Ejemplo</div>
+              <div class="turno__meta">Limpieza</div>
+              <div class="turno__acciones">
+                <button class="btn btn--secondary btn--sm" id="abrir-dia" type="button" aria-label="Ver el turno de Luna Ejemplo">Ver</button>
+                <button class="btn btn--danger btn--sm" id="cancelar-dia" type="button" aria-label="Cancelar el turno de Luna Ejemplo">Cancelar</button>
+              </div>
+            </article>
+            <div class="libre">11:15–13:00 · libre</div>
+          </section>
+        </div>
+        <aside id="panel" class="panel panel--fijo" aria-labelledby="detalle-titulo" hidden></aside>
+      </div>
+    </div>
+
+    <div id="agenda-semana" hidden>
+      <div class="semana" tabindex="0" aria-label="Agenda semanal, desplazable">
+        <div class="semana__grid">
+          <div class="semana__cab"></div>
+          <div class="semana__cab">Lun <small>23</small></div>
+          <div class="semana__cab">Mar <small>24</small></div>
+          <div class="semana__cab semana__cab--hoy">Mié <small>25 · hoy</small></div>
+          <div class="semana__cab">Jue <small>26</small></div>
+          <div class="semana__cab">Vie <small>27</small></div>
+          <div class="semana__horas" aria-hidden="true">
+            <span style="top:0">09:00</span><span style="top:calc(var(--min) * 60)">10:00</span>
+            <span style="top:calc(var(--min) * 120)">11:00</span><span style="top:calc(var(--min) * 180)">12:00</span>
+            <span style="top:calc(var(--min) * 240)">13:00</span><span style="top:calc(var(--min) * 300)">14:00</span>
+            <span style="top:calc(var(--min) * 360)">15:00</span><span style="top:calc(var(--min) * 420)">16:00</span>
+            <span style="top:calc(var(--min) * 480)">17:00</span><span style="top:calc(var(--min) * 540)">18:00</span>
+          </div>
+          <div class="semana__col"><div class="cerrado" style="top:calc(var(--min) * 240);height:calc(var(--min) * 180)">Fuera de horario</div></div>
+          <div class="semana__col"><div class="cerrado" style="top:calc(var(--min) * 240);height:calc(var(--min) * 180)">Fuera de horario</div></div>
+          <div class="semana__col semana__col--hoy">
+            <div class="cerrado" style="top:calc(var(--min) * 240);height:calc(var(--min) * 180)">Fuera de horario</div>
+            <div class="ev" style="top:0;height:calc(var(--min) * 45);background:var(--turno-atendido-bg);color:var(--color-success-600)"><b>09:00</b> Juli Ejemplo<br>Atendido · Limpieza</div>
+            <div class="linea-ahora" style="top:calc(var(--min) * 70)" aria-label="Ahora 10:10"></div>
+            <button class="ev ev--reservado" id="abrir-semana" type="button" style="top:calc(var(--min) * 90);height:calc(var(--min) * 45)" aria-label="Ver el turno reservado de Luna Ejemplo a las 10:30"><b>10:30</b> Luna Ejemplo<br>Limpieza</button>
+          </div>
+          <div class="semana__col"><div class="cerrado" style="top:calc(var(--min) * 240);height:calc(var(--min) * 180)">Fuera de horario</div></div>
+          <div class="semana__col"><div class="cerrado" style="top:calc(var(--min) * 240);height:calc(var(--min) * 180)">Fuera de horario</div></div>
+        </div>
+      </div>
+      <div class="leyenda">
+        <span><i style="background:var(--color-primary-100)"></i>Reservado</span>
+        <span><i style="background:var(--turno-atendido-bg)"></i>Atendido</span>
+        <span><i style="background:var(--color-bg)"></i>Fuera de horario</span>
+      </div>
+    </div>
+  </div>
+</main>
+
+<dialog id="cajon" class="cajon" aria-labelledby="detalle-titulo"></dialog>
+<dialog id="confirmacion" class="dialogo" role="alertdialog" aria-labelledby="confirmacion-titulo" aria-describedby="confirmacion-texto">
+  <h2 id="confirmacion-titulo">¿Cancelás el turno de Luna Ejemplo?</h2>
+  <div class="resumen">
+    <strong>Miércoles 25 de noviembre, 10:30</strong>
+    <span>Limpieza · reservado online</span>
+  </div>
+  <p id="confirmacion-texto">Le avisamos por email a la paciente y el horario vuelve a quedar libre para reservas. No se puede deshacer.</p>
+  <div class="dialogo__acciones">
+    <button id="volver" class="btn btn--secondary" type="button" autofocus>No, volver</button>
+    <button id="confirmar" class="btn btn--danger-solid" type="button">Sí, cancelar turno</button>
+  </div>
+</dialog>
+
+<template id="plantilla-detalle">
+  <div id="detalle">
+    <header class="panel__cab">
+      <div><h2 id="detalle-titulo">Luna Ejemplo</h2><p>Miércoles 25/11 · 10:30 a 11:15</p></div>
+      <button class="btn btn--ghost btn--icono" id="cerrar-detalle" type="button" aria-label="Cerrar el detalle" autofocus>✕</button>
+    </header>
+    <div class="panel__badges"><span class="badge badge--reservado">Reservado</span><span class="badge badge--online">Online</span></div>
+    <dl class="datos">
+      <dt>Prestación</dt><dd>Limpieza (45 min)</dd>
+      <dt id="telefono-etiqueta">Teléfono</dt><dd id="telefono-ejemplo">+1 202 555 0142</dd>
+      <dt>Email</dt><dd>luna@example.invalid</dd>
+      <dt>Origen</dt><dd>Lo reservó el paciente online</dd>
+    </dl>
+    <div class="panel__acciones">
+      <div class="detalle__whatsapp">
+        <button class="btn btn--whatsapp" id="whatsapp" type="button">
+          <svg class="whatsapp__icono" id="whatsapp-icono" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.8 11.9 11.9 0 0 0 4.6 4c1.7.7 2.4.8 3.2.6a2.8 2.8 0 0 0 1.8-1.3 2.3 2.3 0 0 0 .2-1.3c-.1-.1-.3-.2-.5-.3z"/></svg>
+          <span id="whatsapp-carga" class="whatsapp__carga" aria-hidden="true" hidden></span>
+          <span id="whatsapp-etiqueta">WhatsApp</span>
+        </button>
+        <div id="whatsapp-aviso" class="alert" hidden>
+          <svg class="alert__icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path d="M10 1.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zm.8 13H9.2V9h1.6zm0-7H9.2V5.9h1.6z"/>
+          </svg>
+          <p id="whatsapp-aviso-texto"></p>
+        </div>
+        <span class="sr-only" id="whatsapp-estado" role="status"></span>
+        <a class="btn btn--whatsapp" id="abrir-whatsapp" href="#abrir-whatsapp" hidden>Abrir WhatsApp</a>
+      </div>
+      <button class="btn btn--danger" id="cancelar-detalle" type="button">Cancelar turno</button>
+    </div>
+  </div>
+</template>
+
+<script src="../../../../design-system/brand.js"></script>
+<script>
+  // El fragmento selecciona una maqueta. No hay red, temporizadores, aperturas ni mutaciones del turno.
+  const porId = (id) => document.getElementById(id);
+  const panel = porId('panel');
+  const cajon = porId('cajon');
+  const confirmacion = porId('confirmacion');
+  const escritorioDia = matchMedia('(min-width: 1100px)');
+  const estados = ['disponible', 'no-disponible', 'preparando', 'error', 'apertura-bloqueada'];
+  const detalle = porId('plantilla-detalle').content.firstElementChild.cloneNode(true);
+  panel.append(detalle);
+
+  let vista = 'dia';
+  let estado = 'disponible';
+  let abierto = false;
+  let retornoConfirmacion;
+
+  function pintarEstado() {
+    const preparando = estado === 'preparando';
+    const sinTelefono = estado === 'no-disponible';
+    const bloqueada = estado === 'apertura-bloqueada';
+    const error = estado === 'error';
+    const aviso = sinTelefono ? 'El paciente no tiene un teléfono internacional válido.'
+      : error ? 'No pudimos preparar WhatsApp. Volvé a intentar.'
+      : bloqueada ? 'El navegador bloqueó la apertura. Abrí WhatsApp desde el enlace.' : '';
+    const boton = porId('whatsapp');
+    porId('telefono-etiqueta').hidden = sinTelefono;
+    porId('telefono-ejemplo').hidden = sinTelefono;
+    boton.disabled = sinTelefono;
+    boton.removeAttribute('aria-busy');
+    boton.removeAttribute('aria-disabled');
+    if (preparando) {
+      boton.setAttribute('aria-busy', 'true');
+      boton.setAttribute('aria-disabled', 'true');
+    }
+    if (aviso) boton.setAttribute('aria-describedby', 'whatsapp-aviso-texto');
+    else boton.removeAttribute('aria-describedby');
+    porId('whatsapp-icono').toggleAttribute('hidden', preparando);
+    porId('whatsapp-carga').hidden = !preparando;
+    porId('whatsapp-etiqueta').textContent = preparando ? 'Preparando…' : 'WhatsApp';
+    porId('whatsapp-aviso').className = 'alert ' + (error ? 'alert--error' : 'alert--info');
+    porId('whatsapp-aviso').hidden = !aviso;
+    porId('whatsapp-aviso-texto').textContent = aviso;
+    porId('whatsapp-estado').textContent = preparando ? 'Preparando WhatsApp…' : aviso;
+    porId('abrir-whatsapp').hidden = !bloqueada;
+  }
+
+  function mostrarDetalle(enfocar = false) {
+    const diario = vista === 'dia' && escritorioDia.matches;
+    const destino = diario ? panel : cajon;
+    if (detalle.parentElement !== destino) {
+      if (cajon.open) cajon.close();
+      destino.append(detalle);
+    }
+    panel.hidden = !diario;
+    if (!diario && !cajon.open) cajon.showModal();
+    abierto = true;
+    porId('turno-dia').classList.add('turno--seleccionado');
+    porId('abrir-semana').classList.add('ev--sel');
+    if (enfocar) porId('cerrar-detalle').focus();
+  }
+
+  function cerrarDetalle() {
+    if (cajon.open) cajon.close();
+    panel.hidden = true;
+    abierto = false;
+    porId('turno-dia').classList.remove('turno--seleccionado');
+    porId('abrir-semana').classList.remove('ev--sel');
+    porId(vista === 'dia' ? 'abrir-dia' : 'abrir-semana').focus();
+  }
+
+  function mostrarVista(nuevaVista, nuevoEstado) {
+    if (confirmacion.open) confirmacion.close();
+    vista = nuevaVista;
+    estado = nuevoEstado;
+    const semana = vista === 'semana';
+    porId('agenda-dia').hidden = semana;
+    porId('agenda-semana').hidden = !semana;
+    porId('vista-dia').setAttribute('aria-pressed', String(!semana));
+    porId('vista-semana').setAttribute('aria-pressed', String(semana));
+    porId('titulo-agenda').textContent = semana ? '23 al 27 de noviembre' : 'Miércoles 25 de noviembre';
+    porId('subtitulo-agenda').textContent = (semana ? 'Esta semana' : 'Hoy') + ' · horarios en hora de Argentina';
+    if (semana) {
+      const grilla = porId('agenda-semana').querySelector('.semana');
+      const hoy = grilla.querySelector('.semana__cab--hoy');
+      if (grilla.scrollWidth > grilla.clientWidth) grilla.scrollLeft = hoy.offsetLeft - grilla.querySelector('.semana__cab').offsetLeft - hoy.clientWidth;
+    }
+    pintarEstado();
+    mostrarDetalle();
+  }
+
+  function leerFragmento() {
+    if (location.hash === '#contenido') return;
+    const [vistaPedida, estadoPedido] = location.hash.slice(1).split('/');
+    mostrarVista(vistaPedida === 'semana' ? 'semana' : 'dia',
+      estados.includes(estadoPedido) ? estadoPedido : 'disponible');
+  }
+
+  function elegirVista(nuevaVista) {
+    const fragmento = '#' + nuevaVista + '/' + estado;
+    if (location.hash === fragmento) mostrarDetalle();
+    else location.hash = fragmento;
+  }
+
+  function mostrarConfirmacion(evento) {
+    retornoConfirmacion = evento.currentTarget;
+    confirmacion.showModal();
+    porId('volver').focus();
+  }
+
+  porId('vista-dia').addEventListener('click', () => elegirVista('dia'));
+  porId('vista-semana').addEventListener('click', () => elegirVista('semana'));
+  porId('abrir-dia').addEventListener('click', () => mostrarDetalle(true));
+  porId('abrir-semana').addEventListener('click', () => mostrarDetalle(true));
+  porId('cerrar-detalle').addEventListener('click', cerrarDetalle);
+  cajon.addEventListener('cancel', (evento) => { evento.preventDefault(); cerrarDetalle(); });
+  porId('cancelar-dia').addEventListener('click', mostrarConfirmacion);
+  porId('cancelar-detalle').addEventListener('click', mostrarConfirmacion);
+  porId('volver').addEventListener('click', () => confirmacion.close());
+  porId('confirmar').addEventListener('click', () => confirmacion.close());
+  confirmacion.addEventListener('close', () => retornoConfirmacion?.focus());
+  porId('whatsapp').addEventListener('click', () => {
+    if (estado !== 'preparando' && estado !== 'no-disponible') location.hash = '#' + vista + '/preparando';
+  });
+  porId('abrir-whatsapp').addEventListener('click', (evento) => evento.preventDefault());
+  window.addEventListener('hashchange', leerFragmento);
+  escritorioDia.addEventListener('change', () => {
+    if (abierto && vista === 'dia') {
+      const restaurarConfirmacion = confirmacion.open;
+      if (restaurarConfirmacion) confirmacion.close();
+      mostrarDetalle();
+      if (restaurarConfirmacion) confirmacion.showModal();
+    }
+  });
+  leerFragmento();
+</script>
+</body>
+</html>
