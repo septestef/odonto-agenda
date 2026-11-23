@@ -1,6 +1,8 @@
 export type Etiqueta =
   | 'a'
   | 'article'
+  | 'aside'
+  | 'b'
   | 'button'
   | 'dd'
   | 'dialog'
@@ -13,6 +15,7 @@ export type Etiqueta =
   | 'h2'
   | 'h3'
   | 'header'
+  | 'i'
   | 'img'
   | 'input'
   | 'label'
@@ -26,6 +29,7 @@ export type Etiqueta =
   | 'small'
   | 'span'
   | 'strong'
+  | 'ul'
 
 export interface Descriptor {
   etiqueta: Etiqueta
