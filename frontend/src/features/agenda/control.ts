@@ -17,12 +17,15 @@ import type { BloqueoAgenda, FranjaHorario, TurnoAgenda } from './tipos'
 import { disponibilidadWhatsApp } from './whatsapp-detalle'
 import type { EstadoWhatsApp } from './whatsapp-detalle'
 import { cerrarPestanaPendiente, navegarPestanaWhatsApp, reservarPestanaWhatsApp } from './whatsapp-popup'
+import { crearApiManual } from '../turno-manual/api'
+import { crearControlManual } from '../turno-manual/pantalla'
 
 export interface OpcionesControlAgenda {
   cliente: ClienteApi
   ancho: number
   ahora: Date | (() => Date)
   alCambiar?: (rango: RangoAgenda) => void
+  nombreOdontologo?: string
 }
 
 type Aviso = 'ya-empezo' | 'cambio' | 'error'
@@ -99,6 +102,7 @@ export function crearControlAgenda(opciones: OpcionesControlAgenda): ControlAgen
   let confirmacionId: number | undefined
   let aviso: Aviso | undefined
   let mensajeToast: string | undefined
+  let manualAbierto = false
   let generacion = 0
   let desmontado = false
   let whatsapp: EstadoWhatsApp | undefined
@@ -163,6 +167,24 @@ export function crearControlAgenda(opciones: OpcionesControlAgenda): ControlAgen
     },
   })
   datos = { ...datos, rango: rangoDeVista(navegacion.estado().vista, navegacion.estado().fecha) }
+
+  const controlManual = crearControlManual({
+    api: crearApiManual(opciones.cliente, instante),
+    ...(opciones.nombreOdontologo === undefined ? {} : { nombreOdontologo: opciones.nombreOdontologo }),
+    alCambiar: () => {
+      Object.assign(manejadores, controlManual.manejadores())
+      notificar(datos.rango)
+    },
+    alCerrar: () => {
+      manualAbierto = false
+      notificar(datos.rango)
+    },
+    alExito: () => {
+      manualAbierto = false
+      mensajeToast = 'Turno cargado'
+      void recargar(datos.rango)
+    },
+  })
 
   function bloqueoDe(id: number): BloqueoAgenda | undefined {
     return datos.bloqueos.find((bloqueo) => bloqueo.turnosAfectados.some((turno) => turno.id === id))
@@ -240,6 +262,13 @@ export function crearControlAgenda(opciones: OpcionesControlAgenda): ControlAgen
               texto: fecha === hoy ? 'Hoy · horarios en hora de Argentina' : 'Horarios en hora de Argentina',
             },
           ],
+        },
+        {
+          etiqueta: 'button',
+          texto: 'Nuevo turno',
+          clase: 'btn btn--primary btn--sm agenda-head__nuevo',
+          atributos: { type: 'button' },
+          accion: 'abrir-manual',
         },
         {
           etiqueta: 'div',
@@ -356,6 +385,9 @@ export function crearControlAgenda(opciones: OpcionesControlAgenda): ControlAgen
     if (mensajeToast !== undefined) {
       contenido.push(toast({ mensaje: mensajeToast }))
     }
+    if (manualAbierto) {
+      contenido.push(controlManual.descriptor())
+    }
 
     retorno = undefined
     focoDetalle = undefined
@@ -363,6 +395,12 @@ export function crearControlAgenda(opciones: OpcionesControlAgenda): ControlAgen
   }
 
   const manejadores: ManejadoresUI = {
+    ...controlManual.manejadores(),
+    'abrir-manual': () => {
+      manualAbierto = true
+      notificar(datos.rango)
+      void controlManual.iniciar()
+    },
     anterior: () => navegacion.anterior(),
     siguiente: () => navegacion.siguiente(),
     hoy: () => navegacion.hoy(),
@@ -448,7 +486,7 @@ export function crearControlAgenda(opciones: OpcionesControlAgenda): ControlAgen
     'reintentar-agenda': () => {
       void recargar(datos.rango)
     },
-  }
+  };
 
   return {
     descriptor,

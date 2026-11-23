@@ -3,6 +3,7 @@ import { NOMBRE_MARCA } from '../../shared/brand'
 import { interpretarErrorApi } from '../../shared/error-api'
 import type { ErrorApi } from '../../shared/error-api'
 import { esFechaValida, sumarDias } from '../../shared/fechas'
+import { camposPaciente, leerDatosDe } from '../../shared/formulario-paciente'
 import { fechaDeInicio, formatearFechaLarga, horaDeInicio } from '../../shared/formato-fechas'
 import { manejadoresNavegadorDias, moverSemana, navegadorDias, semanaDe } from '../../shared/navegador-dias'
 import { selectorHorarios } from '../../shared/selector-horarios'
@@ -12,7 +13,6 @@ import type { Descriptor } from '../../shared/ui/componentes'
 import type { ApiPublica } from './api-publica'
 import { esConflictoDeReserva, estadoInicialReserva, reducir } from './estado'
 import type {
-  CampoPaciente,
   DatosPaciente,
   EstadoReserva,
   PerfilReserva,
@@ -63,43 +63,6 @@ function iniciales(nombre: string, apellido: string): string {
   const primeraApellido = apellido.trim().charAt(0)
 
   return `${primeraNombre}${primeraApellido}`.toUpperCase()
-}
-
-interface NodoFormulario extends NodoUI {
-  querySelector(selector: string): { value: string } | null
-  closest?(selector: string): NodoUI | null
-}
-
-function esNodoFormulario(nodo: NodoUI): nodo is NodoFormulario {
-  const candidato = nodo as unknown as Record<string, unknown>
-  return typeof candidato['querySelector'] === 'function'
-}
-
-function formularioDe(nodo: NodoUI): NodoUI {
-  const conCercania = nodo as NodoUI & { closest?: (selector: string) => NodoUI | null }
-  return conCercania.closest?.('form') ?? nodo
-}
-
-function valorCampo(nodo: NodoUI, nombre: CampoPaciente): string {
-  if (!esNodoFormulario(nodo)) {
-    return ''
-  }
-  return nodo.querySelector(`[data-campo="${nombre}"]`)?.value ?? ''
-}
-
-function leerDatosDe(nodo: NodoUI): DatosPaciente | undefined {
-  const formulario = formularioDe(nodo)
-  if (!esNodoFormulario(formulario)) {
-    return undefined
-  }
-
-  return {
-    dni: valorCampo(formulario, 'dni'),
-    nombre: valorCampo(formulario, 'nombre'),
-    apellido: valorCampo(formulario, 'apellido'),
-    telefono: valorCampo(formulario, 'telefono'),
-    email: valorCampo(formulario, 'email'),
-  }
 }
 
 function appbar(): Descriptor {
@@ -493,148 +456,16 @@ function contenidoSeleccion(estado: EstadoReserva): Descriptor[] {
   return hijos
 }
 
-interface OpcionesCampoReserva {
-  etiqueta: string
-  nombre: CampoPaciente
-  tipo: 'text' | 'tel' | 'email'
-  valor: string
-  autocompletado?: string
-  inputmode?: string
-  hint?: string
-  error?: string
-  deshabilitado?: boolean
-  enfocar?: boolean
-}
-
-function campoReserva(opciones: OpcionesCampoReserva): Descriptor {
-  const id = `campo-${opciones.nombre}`
-  const idHint = `${id}-hint`
-  const idError = `${id}-error`
-  const descritos = [
-    ...(opciones.hint === undefined ? [] : [idHint]),
-    ...(opciones.error === undefined ? [] : [idError]),
-  ]
-
-  return {
-    etiqueta: 'div',
-    clase: 'field',
-    hijos: [
-      { etiqueta: 'label', texto: opciones.etiqueta, atributos: { for: id } },
-      {
-        etiqueta: 'input',
-        clase: 'input',
-        enfocar: opciones.enfocar,
-        atributos: {
-          id,
-          name: opciones.nombre,
-          type: opciones.tipo,
-          'data-campo': opciones.nombre,
-          value: opciones.valor,
-          ...(opciones.autocompletado === undefined ? {} : { autocomplete: opciones.autocompletado }),
-          ...(opciones.inputmode === undefined ? {} : { inputmode: opciones.inputmode }),
-          ...(descritos.length === 0 ? {} : { 'aria-describedby': descritos.join(' ') }),
-          ...(opciones.error === undefined ? {} : { 'aria-invalid': 'true' }),
-          ...(opciones.deshabilitado === true ? { disabled: '' } : {}),
-        },
-      },
-      ...(opciones.hint === undefined
-        ? []
-        : [{ etiqueta: 'span' as const, texto: opciones.hint, clase: 'hint', atributos: { id: idHint } }]),
-      ...(opciones.error === undefined
-        ? []
-        : [
-            {
-              etiqueta: 'span' as const,
-              texto: opciones.error,
-              clase: 'error',
-              atributos: { id: idError, role: 'alert' },
-            },
-          ]),
-    ],
-  }
-}
-
 function formularioDescriptor(estado: EstadoReserva): Descriptor {
   const enviando = estado.paso === 'enviando'
   const errores = estado.errores
-  const ordenCampos: readonly CampoPaciente[] = ['dni', 'telefono', 'nombre', 'apellido', 'email']
-  const primerError = ordenCampos.find((campo) => errores[campo] !== undefined)
   const resumen = resumenSeleccion(estado)
   const errorServidor =
     estado.error?.codigo === 'VALIDACION'
       ? alerta({ texto: 'Revisá estos datos', detalle: estado.error.mensaje, tipo: 'error' })
       : undefined
 
-  const campos: Descriptor[] = [
-    {
-      etiqueta: 'div',
-      clase: 'field-row',
-      hijos: [
-        campoReserva({
-          etiqueta: 'DNI',
-          nombre: 'dni',
-          tipo: 'text',
-          valor: estado.datos.dni,
-          inputmode: 'numeric',
-          autocompletado: 'off',
-          hint: 'Sin puntos.',
-          error: errores.dni,
-          deshabilitado: enviando,
-          enfocar: primerError === 'dni',
-        }),
-        campoReserva({
-          etiqueta: 'Teléfono',
-          nombre: 'telefono',
-          tipo: 'tel',
-          valor: estado.datos.telefono,
-          inputmode: 'tel',
-          autocompletado: 'tel',
-          hint: 'Con código de país, por ejemplo +5493511234567.',
-          error: errores.telefono,
-          deshabilitado: enviando,
-          enfocar: primerError === 'telefono',
-        }),
-      ],
-    },
-    {
-      etiqueta: 'div',
-      clase: 'field-row',
-      hijos: [
-        campoReserva({
-          etiqueta: 'Nombre',
-          nombre: 'nombre',
-          tipo: 'text',
-          valor: estado.datos.nombre,
-          autocompletado: 'given-name',
-          error: errores.nombre,
-          deshabilitado: enviando,
-          enfocar: primerError === 'nombre',
-        }),
-        campoReserva({
-          etiqueta: 'Apellido',
-          nombre: 'apellido',
-          tipo: 'text',
-          valor: estado.datos.apellido,
-          autocompletado: 'family-name',
-          error: errores.apellido,
-          deshabilitado: enviando,
-          enfocar: primerError === 'apellido',
-        }),
-      ],
-    },
-    campoReserva({
-      etiqueta: 'Email',
-      nombre: 'email',
-      tipo: 'email',
-      valor: estado.datos.email,
-      inputmode: 'email',
-      autocompletado: 'email',
-      hint: 'Te mandamos ahí el link para gestionar tu turno.',
-      error: errores.email,
-      deshabilitado: enviando,
-      enfocar: primerError === 'email',
-    }),
-  ]
+  const campos = camposPaciente({ datos: estado.datos, errores, enviando })
 
   return pagina('Confirmá tu turno', 'Revisá tus datos. Te vamos a enviar el link de gestión al email que ingreses.', [
     tarjeta([

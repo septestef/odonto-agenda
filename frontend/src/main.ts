@@ -130,14 +130,16 @@ export function arrancar(
 
   function crearAgenda(ruta: string, odontologo: OdontologoDto): ControlVista {
     const referencia: { actual?: ControlAgenda } = {}
-    let manejadores: ManejadoresUI = {}
 
     const montar = (): void => {
       const control = referencia.actual
       if (control === undefined || router.rutaActual() !== ruta) {
         return
       }
-      adaptador.montar(destino, layout({ odontologo, ruta, contenido: control.descriptor() }), manejadores)
+      adaptador.montar(destino, layout({ odontologo, ruta, contenido: control.descriptor() }), {
+        ...control.manejadores,
+        ...manejadoresComunes(),
+      })
     }
 
     const instancia = crearControlAgenda({
@@ -145,13 +147,13 @@ export function arrancar(
       ancho: anchoDelNavegador(),
       ahora: () => new Date(),
       alCambiar: montar,
+      nombreOdontologo: `${odontologo.nombre} ${odontologo.apellido}`.trim(),
     })
     referencia.actual = instancia
-    manejadores = { ...instancia.manejadores, ...manejadoresComunes() }
 
     return {
       descriptor: layout({ odontologo, ruta, contenido: instancia.descriptor() }),
-      manejadores,
+      manejadores: { ...instancia.manejadores, ...manejadoresComunes() },
       alMontar: () => instancia.cargar(),
       desmontar: instancia.desmontar,
       cancelarWhatsAppAlOcultar: instancia.cancelarWhatsAppAlOcultar,

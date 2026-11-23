@@ -156,7 +156,7 @@ public class Turno extends EntidadAuditada {
     }
 
     Turno sucesor(Instant nuevoInicio, Instant nuevoFin, String nuevoHash) {
-        var nuevo = new Turno(odontologoId, paciente, prestacion, nuevoInicio, nuevoFin, OrigenTurno.ONLINE,
+        var nuevo = new Turno(odontologoId, paciente, prestacion, nuevoInicio, nuevoFin, origen,
                 nuevoHash, emailGestion);
         nuevo.reprogramadoDesdeId = id;
         return nuevo;

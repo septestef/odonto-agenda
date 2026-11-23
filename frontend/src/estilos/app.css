@@ -2319,3 +2319,58 @@ html {
     padding: var(--space-6) var(--space-5) var(--space-5);
   }
 }
+
+/* ---------- C-15 · Alta manual de turno ---------- */
+
+.overlay-manual {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: var(--space-4);
+  overflow-y: auto;
+  background: var(--color-surface-alt);
+}
+
+.modal--manual {
+  position: static;
+  width: min(var(--container-narrow), 100%);
+  max-height: none;
+  margin: auto 0;
+  padding: var(--space-5);
+}
+
+.modal__cab {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+.modal__cab h2 { margin: 0; font-size: var(--text-xl); }
+.modal__cab p { margin: var(--space-1) 0 0; color: var(--color-text-muted); font-size: var(--text-sm); }
+
+.progreso { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-5); }
+.progreso span {
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+}
+.progreso span[aria-current='step'] {
+  border-color: var(--color-primary-600);
+  background: var(--color-primary-600);
+  color: var(--color-text-inverse);
+}
+
+.agenda-head__nuevo { margin-left: auto; }
+
+@media (max-width: 719px) {
+  .overlay-manual { padding: 0; align-items: stretch; }
+  .modal--manual { width: 100%; max-width: none; min-height: 100%; margin: 0; border: 0; border-radius: 0; padding: var(--space-4); }
+  .agenda-head__nuevo { margin-left: 0; width: 100%; }
+}
