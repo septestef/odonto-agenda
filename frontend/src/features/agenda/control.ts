@@ -3,7 +3,7 @@ import { fechaLocalArgentina, sumarDias } from '../../shared/fechas'
 import type { ManejadoresUI, NodoUI } from '../../shared/ui/adaptador'
 import { toast } from '../../shared/ui/componentes'
 import type { Descriptor } from '../../shared/ui/componentes'
-import { consultarAgenda, consultarBloqueos, consultarHorarios } from './api'
+import { consultarAgenda, consultarBloqueos, consultarHorarios, consultarWhatsApp } from './api'
 import { cancelarTurno, interpretarCancelacion } from './cancelar'
 import { descriptorConfirmacion } from './confirmacion'
 import { contenedorDetalle } from './detalle'
@@ -14,6 +14,9 @@ import type { RangoAgenda } from './navegacion'
 import { descriptorDia } from './vista-dia'
 import { descriptorSemana } from './vista-semana'
 import type { BloqueoAgenda, FranjaHorario, TurnoAgenda } from './tipos'
+import { disponibilidadWhatsApp } from './whatsapp-detalle'
+import type { EstadoWhatsApp } from './whatsapp-detalle'
+import { cerrarPestanaPendiente, navegarPestanaWhatsApp, reservarPestanaWhatsApp } from './whatsapp-popup'
 
 export interface OpcionesControlAgenda {
   cliente: ClienteApi
@@ -37,6 +40,14 @@ export interface ControlAgenda {
   descriptor(): Descriptor
   manejadores: ManejadoresUI
   cargar(): Promise<void>
+  desmontar(): void
+  cancelarWhatsAppAlOcultar(persistido: boolean): void
+}
+
+interface DisparadorAgenda {
+  id: number
+  etiqueta: 'article' | 'button'
+  accion: 'ver-turno' | 'cancelar-turno'
 }
 
 interface NodoConAtributos extends NodoUI {
@@ -89,6 +100,13 @@ export function crearControlAgenda(opciones: OpcionesControlAgenda): ControlAgen
   let aviso: Aviso | undefined
   let mensajeToast: string | undefined
   let generacion = 0
+  let desmontado = false
+  let whatsapp: EstadoWhatsApp | undefined
+  let preparacion: { pestana: Window | undefined } | undefined
+  let focoDetalle: 'cerrar' | 'whatsapp' | 'cancelar' | undefined
+  let disparador: DisparadorAgenda | undefined
+  let retorno: DisparadorAgenda | undefined
+  let cancelacionDesdeDetalle = false
   let datos: DatosAgenda = {
     rango: rangoDeVista('dia', fechaLocalArgentina(instante())),
     franjas: [],
@@ -99,10 +117,19 @@ export function crearControlAgenda(opciones: OpcionesControlAgenda): ControlAgen
   }
 
   const notificar = (rango: RangoAgenda): void => {
-    opciones.alCambiar?.(rango)
+    if (!desmontado) opciones.alCambiar?.(rango)
+  }
+
+  function descartarWhatsApp(): void {
+    const anterior = preparacion
+    preparacion = undefined
+    whatsapp = undefined
+    cerrarPestanaPendiente(anterior?.pestana)
   }
 
   async function recargar(rango: RangoAgenda): Promise<void> {
+    if (desmontado) return
+    descartarWhatsApp()
     const actual = ++generacion
     datos = { ...datos, rango, cargando: true, error: undefined }
     notificar(rango)
@@ -131,6 +158,7 @@ export function crearControlAgenda(opciones: OpcionesControlAgenda): ControlAgen
     alCambiar: (rango) => {
       seleccionadoId = undefined
       confirmacionId = undefined
+      retorno = undefined
       void recargar(rango)
     },
   })
@@ -142,6 +170,41 @@ export function crearControlAgenda(opciones: OpcionesControlAgenda): ControlAgen
 
   function turnoDe(id: number | undefined): TurnoAgenda | undefined {
     return id === undefined ? undefined : datos.turnos.find((turno) => turno.id === id)
+  }
+
+  async function prepararWhatsApp(nodo: NodoUI): Promise<void> {
+    const id = idDe(nodo)
+    const turno = turnoDe(id)
+    if (desmontado || turno === undefined || id !== seleccionadoId || preparacion !== undefined ||
+      confirmacionId !== undefined || disponibilidadWhatsApp(turno, instante()) !== 'disponible' ||
+      (whatsapp?.tipo === 'error' && whatsapp.falla !== 'error')) return
+
+    const actual = { pestana: reservarPestanaWhatsApp() }
+    preparacion = actual
+    whatsapp = { tipo: 'preparando' }
+    focoDetalle = 'whatsapp'
+    notificar(datos.rango)
+    const resultado = await consultarWhatsApp(opciones.cliente, turno.id)
+    if (preparacion !== actual) return
+
+    preparacion = undefined
+    if (resultado.tipo !== 'lista') {
+      cerrarPestanaPendiente(actual.pestana)
+      whatsapp = { tipo: 'error', falla: resultado.tipo }
+    } else if (navegarPestanaWhatsApp(actual.pestana, resultado.url)) {
+      whatsapp = undefined
+    } else {
+      cerrarPestanaPendiente(actual.pestana)
+      whatsapp = { tipo: 'apertura-bloqueada', url: resultado.url }
+    }
+    focoDetalle = 'whatsapp'
+    notificar(datos.rango)
+  }
+
+  function devolverFoco(nodo: Descriptor, destino: DisparadorAgenda): Descriptor {
+    if (nodo.etiqueta === destino.etiqueta && nodo.accion === destino.accion &&
+      nodo.atributos?.['data-turno-id'] === String(destino.id)) return { ...nodo, enfocar: true }
+    return nodo.hijos === undefined ? nodo : { ...nodo, hijos: nodo.hijos.map((hijo) => devolverFoco(hijo, destino)) }
   }
 
   function cabecera(fecha: string): Descriptor {
@@ -248,7 +311,8 @@ export function crearControlAgenda(opciones: OpcionesControlAgenda): ControlAgen
         bloqueos: datos.bloqueos,
         seleccionadoId,
       }
-      contenido.push(estado.vista === 'dia' ? descriptorDia(comunes) : descriptorSemana(comunes))
+      const vista = estado.vista === 'dia' ? descriptorDia(comunes) : descriptorSemana(comunes)
+      contenido.push(retorno === undefined ? vista : devolverFoco(vista, retorno))
     }
 
     const turno = turnoDe(seleccionadoId)
@@ -259,6 +323,8 @@ export function crearControlAgenda(opciones: OpcionesControlAgenda): ControlAgen
         bloqueo: bloqueoDe(turno.id),
         vista: estado.vista,
         ancho: opciones.ancho,
+        whatsapp,
+        foco: focoDetalle,
       }))
     }
 
@@ -280,6 +346,8 @@ export function crearControlAgenda(opciones: OpcionesControlAgenda): ControlAgen
       contenido.push(toast({ mensaje: mensajeToast }))
     }
 
+    retorno = undefined
+    focoDetalle = undefined
     return { etiqueta: 'div', clase: 'agenda', hijos: [cabecera(estado.fecha), ...contenido] }
   }
 
@@ -295,25 +363,47 @@ export function crearControlAgenda(opciones: OpcionesControlAgenda): ControlAgen
     },
     'ver-turno': (nodo) => {
       const id = idDe(nodo)
-      if (turnoDe(id) !== undefined) {
+      if (!desmontado && confirmacionId === undefined && id !== undefined && id !== seleccionadoId && turnoDe(id) !== undefined) {
+        descartarWhatsApp()
+        const etiqueta = atributoDe(nodo, 'class')?.split(' ').includes('turno') === true ? 'article' : 'button'
+        disparador = { id, etiqueta, accion: 'ver-turno' }
         seleccionadoId = id
+        focoDetalle = 'cerrar'
         notificar(datos.rango)
       }
     },
     'cerrar-detalle': () => {
+      descartarWhatsApp()
+      retorno = disparador
+      disparador = undefined
       seleccionadoId = undefined
       confirmacionId = undefined
       notificar(datos.rango)
     },
+    'preparar-whatsapp': prepararWhatsApp,
+    'actualizar-agenda-whatsapp': () => {
+      if (whatsapp?.tipo === 'error' && whatsapp.falla === 'cambio') {
+        seleccionadoId = undefined
+        disparador = undefined
+        void recargar(datos.rango)
+      }
+    },
     'cancelar-turno': (nodo) => {
       const id = idDe(nodo)
-      if (turnoDe(id) !== undefined) {
+      if (id !== undefined && turnoDe(id) !== undefined) {
+        descartarWhatsApp()
         confirmacionId = id
+        cancelacionDesdeDetalle = atributoDe(nodo, 'data-origen-cancelacion') === 'detalle'
         notificar(datos.rango)
       }
     },
     'cerrar-confirmacion': () => {
+      const id = confirmacionId
       confirmacionId = undefined
+      if (id !== undefined) {
+        if (cancelacionDesdeDetalle) focoDetalle = 'cancelar'
+        else retorno = { id, etiqueta: 'button', accion: 'cancelar-turno' }
+      }
       notificar(datos.rango)
     },
     'confirmar-cancelacion': async () => {
@@ -352,6 +442,17 @@ export function crearControlAgenda(opciones: OpcionesControlAgenda): ControlAgen
   return {
     descriptor,
     manejadores,
+    desmontar: () => {
+      desmontado = true
+      generacion += 1
+      descartarWhatsApp()
+    },
+    cancelarWhatsAppAlOcultar: (persistido) => {
+      if (whatsapp === undefined) return
+      descartarWhatsApp()
+      // Si vuelve desde bfcache, la misma vista debe quedar lista para otro gesto.
+      if (persistido) notificar(datos.rango)
+    },
     cargar: async () => {
       const { vista, fecha } = navegacion.estado()
       await recargar(rangoDeVista(vista, fecha))

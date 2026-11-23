@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 // @ts-expect-error: este proyecto no declara tipos de Node; readFileSync se usa solo en el test.
 import { readFileSync } from 'node:fs'
 import { arrancar } from './main'
@@ -141,6 +141,81 @@ function nodosDe(descriptor: Descriptor | undefined): Descriptor[] {
   }
   return [descriptor, ...(descriptor.hijos ?? []).flatMap(nodosDe)]
 }
+
+describe('ciclo de vida del popup de agenda', () => {
+  afterEach(() => vi.unstubAllGlobals())
+
+  it.each(['salir', 'detener', 'pagehide', 'pagehide persistido'])('invalida el popup al %s con una preparación activa', async (modo) => {
+    const { historial } = historialFalso('/agenda')
+    const { adaptador, ultimo } = adaptadorFalso()
+    const close = vi.fn()
+    const solicitudes = vi.fn()
+    const navegador = new EventTarget()
+    const crearEnlace = vi.fn()
+    vi.stubGlobal('window', {
+      open: () => ({ opener: null, closed: false, close, location: { href: 'about:blank' }, document: { createElement: crearEnlace } }),
+    })
+    let responder: ((valor: Response) => void) | undefined
+    const fetch: FetchLike = async (ruta) => {
+      if (ruta === '/api/auth/me') return respuesta(ODONTOLOGO, 200)
+      if (ruta === '/api/turnos/3/whatsapp') {
+        solicitudes()
+        return new Promise<Response>((r) => { responder = r })
+      }
+      if (ruta.startsWith('/api/turnos?')) return respuesta([{
+        id: 3, inicio: '2099-11-25T11:15:00-03:00', fin: '2099-11-25T12:00:00-03:00',
+        estado: 'RESERVADO', origen: 'ONLINE', paciente: { telefono: '+12025550142' }, prestacion: {},
+      }], 200)
+      return respuestaAgenda(ruta)
+    }
+    const opciones = {
+      historial,
+      fetch,
+      suscribirPagehide: (callback: (persistido: boolean) => void) => {
+        const alOcultar = (evento: Event) => callback('persisted' in evento && evento.persisted === true)
+        navegador.addEventListener('pagehide', alOcultar)
+        return () => navegador.removeEventListener('pagehide', alOcultar)
+      },
+    }
+    const detener = arrancar({}, adaptador, opciones)
+    try {
+      await estabilizar()
+      const nodo = new NodoInteractivo()
+      nodo.setAttribute('data-turno-id', '3')
+      ultimo()?.manejadores?.['ver-turno']?.(nodo)
+      expect(nodosDe(ultimo()?.descriptor).some((d) => d.accion === 'preparar-whatsapp')).toBe(true)
+      const preparando = ultimo()?.manejadores?.['preparar-whatsapp']?.(nodo)
+      expect(responder).toBeDefined()
+      if (modo === 'salir') {
+        const enlace = new NodoInteractivo()
+        enlace.setAttribute('href', '/config')
+        ultimo()?.manejadores?.navegar?.(enlace)
+      } else if (modo === 'detener') {
+        detener()
+      } else {
+        const pagehide = Object.assign(new Event('pagehide'), { persisted: modo === 'pagehide persistido' })
+        navegador.dispatchEvent(pagehide)
+      }
+      expect(close).toHaveBeenCalledOnce()
+      responder?.(respuesta({ url: 'https://wa.me/12025550142?text=Mensaje%20de%20prueba' }, 200))
+      await preparando
+      expect(crearEnlace).not.toHaveBeenCalled()
+      if (modo === 'pagehide persistido') {
+        const accion = nodosDe(ultimo()?.descriptor).find((d) => d.accion === 'preparar-whatsapp')
+        expect(accion?.atributos?.['aria-busy']).toBeUndefined()
+        expect(nodosDe(ultimo()?.descriptor).some((d) => d.accion === 'cerrar-detalle')).toBe(true)
+        const nueva = ultimo()?.manejadores?.['preparar-whatsapp']?.(nodo)
+        expect(solicitudes).toHaveBeenCalledTimes(2)
+        navegador.dispatchEvent(new Event('pagehide'))
+        responder?.(respuesta({ url: 'https://wa.me/12025550142?text=Mensaje%20de%20prueba' }, 200))
+        await nueva
+        expect(crearEnlace).not.toHaveBeenCalled()
+      }
+    } finally {
+      detener()
+    }
+  })
+})
 
 function textosDe(descriptor: Descriptor | undefined): string[] {
   return nodosDe(descriptor)

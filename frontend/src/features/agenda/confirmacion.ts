@@ -34,6 +34,7 @@ export function descriptorConfirmacion(opciones: OpcionesConfirmacion): Descript
   return {
     etiqueta: 'div',
     clase: 'dialogo-confirmacion',
+    teclas: { Escape: 'cerrar-confirmacion' },
     atributos: {
       role: 'alertdialog',
       'aria-modal': 'true',
@@ -65,6 +66,7 @@ export function descriptorConfirmacion(opciones: OpcionesConfirmacion): Descript
             texto: 'No, volver',
             clase: 'btn btn--secondary confirmacion__volver',
             atributos: { type: 'button', autofocus: '' },
+            enfocar: true,
             accion: 'cerrar-confirmacion',
           },
         ],

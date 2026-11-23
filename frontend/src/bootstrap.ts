@@ -22,5 +22,10 @@ if (app) {
     historial: historialDelNavegador(),
     fetch: (url, init) => window.fetch(url, init),
     leerCookie: (nombre) => leerCookieDeCadena(document.cookie, nombre),
+    suscribirPagehide: (callback) => {
+      const alOcultar = (evento: PageTransitionEvent): void => callback(evento.persisted)
+      window.addEventListener('pagehide', alOcultar)
+      return () => window.removeEventListener('pagehide', alOcultar)
+    },
   })
 }

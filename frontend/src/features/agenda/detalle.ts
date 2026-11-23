@@ -10,6 +10,9 @@ import {
 } from './formato'
 import { puedeCancelar } from './reglas'
 import type { BloqueoAgenda, TurnoAgenda } from './tipos'
+import { descriptorWhatsApp, disponibilidadWhatsApp } from './whatsapp-detalle'
+import type { EstadoWhatsApp } from './whatsapp-detalle'
+import './whatsapp.css'
 
 export type VistaAgenda = 'dia' | 'semana'
 
@@ -17,6 +20,8 @@ export interface OpcionesDetalle {
   turno: TurnoAgenda
   ahora: Date
   bloqueo?: BloqueoAgenda | undefined
+  whatsapp?: EstadoWhatsApp | undefined
+  foco?: 'cerrar' | 'whatsapp' | 'cancelar' | undefined
 }
 
 export interface OpcionesContenedorDetalle extends OpcionesDetalle {
@@ -113,15 +118,22 @@ function panelDeAcciones(acciones: readonly Descriptor[]): Descriptor[] {
 export function descriptorDetalle(opciones: OpcionesDetalle): Descriptor {
   const { turno, ahora } = opciones
   const fecha = fechaLocalArgentina(new Date(turno.inicio))
+  const disponibilidad = disponibilidadWhatsApp(turno, ahora)
   const acciones: Descriptor[] = puedeCancelar(turno, ahora)
     ? [{
         etiqueta: 'button',
         texto: 'Cancelar turno',
         clase: 'btn btn--danger detalle__cancelar',
-        atributos: { type: 'button', 'data-turno-id': String(turno.id) },
+        enfocar: opciones.foco === 'cancelar',
+        atributos: { type: 'button', 'data-turno-id': String(turno.id), 'data-origen-cancelacion': 'detalle' },
         accion: 'cancelar-turno',
       }]
     : []
+  if (disponibilidad !== undefined) {
+    const estado = disponibilidad === 'no-disponible' ? { tipo: disponibilidad } as const
+      : opciones.whatsapp ?? { tipo: disponibilidad }
+    acciones.unshift(descriptorWhatsApp(turno.id, estado, opciones.foco === 'whatsapp'))
+  }
 
   return {
     etiqueta: 'div',
@@ -149,7 +161,11 @@ export function descriptorDetalle(opciones: OpcionesDetalle): Descriptor {
             etiqueta: 'button',
             texto: '✕',
             clase: 'btn btn--ghost btn--icono detalle__cerrar',
-            atributos: { type: 'button', 'aria-label': 'Cerrar el detalle', autofocus: '' },
+            atributos: {
+              type: 'button', 'aria-label': 'Cerrar el detalle',
+              ...(opciones.foco === undefined || opciones.foco === 'cerrar' ? { autofocus: '' } : {}),
+            },
+            enfocar: opciones.foco === 'cerrar',
             accion: 'cerrar-detalle',
           },
         ],
@@ -189,6 +205,7 @@ export function contenedorDetalle(opciones: OpcionesContenedorDetalle): Descript
   return {
     etiqueta,
     clase: `detalle ${contenedorDe(opciones.vista, opciones.ancho)}`,
+    teclas: { Escape: 'cerrar-detalle' },
     atributos: {
       role: 'dialog',
       'aria-modal': 'true',
