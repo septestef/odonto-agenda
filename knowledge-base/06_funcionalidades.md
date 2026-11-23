@@ -116,4 +116,4 @@ Organizadas por épica y luego por historia de usuario (US-NNN). Prioridad MoSCo
 **Como** odontólogo **quiero** un botón que abra WhatsApp con el recordatorio ya escrito **para** avisarle al paciente sin tipear.
 - [ ] Abre `wa.me/{telefono}?text=...` en una pestaña nueva, con los datos del turno.
 
-**Reglas**: RN-NO-05
+**Reglas**: RN-NO-05, RN-NO-06, RN-NO-07

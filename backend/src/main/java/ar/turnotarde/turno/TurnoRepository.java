@@ -20,6 +20,17 @@ public interface TurnoRepository extends JpaRepository<Turno, Long> {
     List<TurnoAgendaProyeccion> agenda(@Param("odontologoId") Long odontologoId,
             @Param("desde") Instant desde, @Param("hasta") Instant hasta);
 
+    /** Solo datos del propio consultorio, incluso si un turno tiene referencias históricas inconsistentes. */
+    @Query("""
+            select new ar.turnotarde.turno.TurnoWhatsAppProyeccion(
+                    t.estado, t.inicio, p.telefono, pr.nombre, o.direccionConsultorio)
+            from Turno t
+            join t.paciente p on p.odontologoId = t.odontologoId
+            join t.prestacion pr on pr.odontologoId = t.odontologoId
+            join Odontologo o on o.id = t.odontologoId
+            where t.id = :id and t.odontologoId = :dueno""")
+    Optional<TurnoWhatsAppProyeccion> whatsappPropio(@Param("id") long id, @Param("dueno") long dueno);
+
     Optional<Turno> findByTokenHash(String tokenHash);
 
     @Query(value = "SELECT * FROM turno WHERE token_hash = :hash FOR UPDATE", nativeQuery = true)

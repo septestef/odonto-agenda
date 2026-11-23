@@ -1,5 +1,6 @@
 package ar.turnotarde.publico;
 
+import ar.turnotarde.shared.validacion.TelefonoInternacional;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -22,7 +23,7 @@ public record SolicitudReserva(
         @NotBlank(message = "Ingresá tu apellido") @Size(max = 100, message = "El apellido es demasiado largo")
         String apellido,
         @NotNull(message = "Ingresá el teléfono con código de país, por ejemplo +5493511234567")
-        @Pattern(regexp = "^\\+[1-9][0-9]{7,14}$",
+        @Pattern(regexp = TelefonoInternacional.E164,
                 message = "Ingresá el teléfono con código de país, por ejemplo +5493511234567") String telefono,
         @NotNull(message = "Ingresá un email válido")
         @Pattern(regexp = EMAIL, message = "Ingresá un email válido") String email) {

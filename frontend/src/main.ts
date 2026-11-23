@@ -25,6 +25,7 @@ export interface OpcionesArranque {
   historial: HistorialNavegacion
   fetch: FetchLike
   leerCookie?: LectorCookie
+  suscribirPagehide?: (callback: (persistido: boolean) => void) => () => void
 }
 
 export type DetenerArranque = () => void
@@ -45,6 +46,8 @@ interface ControlVista {
   manejadores: ManejadoresUI
   alMontar?: () => Promise<void>
   iniciar?: () => void
+  desmontar?: () => void
+  cancelarWhatsAppAlOcultar?: (persistido: boolean) => void
 }
 
 interface NodoConsultable extends NodoUI {
@@ -93,6 +96,9 @@ export function arrancar(
   const guard = crearGuard(opciones.fetch, cliente.suscribirSesionVencida, cliente)
   let cola: Promise<void> = Promise.resolve()
   let controlConfig: ControlConfig | undefined
+  let desmontarVista: (() => void) | undefined
+  let cancelarWhatsAppAlOcultar: ControlVista['cancelarWhatsAppAlOcultar']
+  let detenido = false
 
   function crearLogin(ruta: string): ControlVista {
     const manejadores: ManejadoresUI = {
@@ -147,6 +153,8 @@ export function arrancar(
       descriptor: layout({ odontologo, ruta, contenido: instancia.descriptor() }),
       manejadores,
       alMontar: () => instancia.cargar(),
+      desmontar: instancia.desmontar,
+      cancelarWhatsAppAlOcultar: instancia.cancelarWhatsAppAlOcultar,
     }
   }
 
@@ -277,9 +285,12 @@ export function arrancar(
 
   function programarRenderizado(): void {
     const ruta = router.rutaActual()
+    desmontarVista?.()
+    desmontarVista = undefined
+    cancelarWhatsAppAlOcultar = undefined
     cola = cola
       .then(async () => {
-        if (router.rutaActual() !== ruta) {
+        if (detenido || router.rutaActual() !== ruta) {
           return
         }
         if (ruta !== '/config') {
@@ -287,9 +298,13 @@ export function arrancar(
         }
         const vista = resolverRuta(ruta)
         const control = await resolverVista(vista, ruta)
-        if (router.rutaActual() !== ruta || control === undefined) {
+        if (detenido || router.rutaActual() !== ruta || control === undefined) {
+          control?.desmontar?.()
           return
         }
+        desmontarVista?.()
+        desmontarVista = control.desmontar
+        cancelarWhatsAppAlOcultar = control.cancelarWhatsAppAlOcultar
         adaptador.montar(destino, control.descriptor, { ...control.manejadores, ...manejadoresComunes() })
         control.iniciar?.()
         if (control.alMontar !== undefined) {
@@ -303,9 +318,15 @@ export function arrancar(
 
   const quitarSuscripcion = router.suscribir(programarRenderizado)
   const quitarPopstate = router.iniciar()
+  const quitarPagehide = opciones.suscribirPagehide?.((persistido) => cancelarWhatsAppAlOcultar?.(persistido))
 
   return () => {
+    detenido = true
+    desmontarVista?.()
+    desmontarVista = undefined
+    cancelarWhatsAppAlOcultar = undefined
     quitarSuscripcion()
     quitarPopstate()
+    quitarPagehide?.()
   }
 }

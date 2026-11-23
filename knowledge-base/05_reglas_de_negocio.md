@@ -46,6 +46,8 @@ Cada regla tiene un código único `RN-{DOMINIO}-{NN}`. El backend devuelve ese 
 - **RN-NO-03**: Cada turno `RESERVADO` recibe un recordatorio por email una sola vez, unas 24 h antes del inicio. Un job corre cada 15 minutos y marca `recordatorio_enviado_en`.
 - **RN-NO-04**: Si el envío de un email falla, el turno **no** se revierte. El error queda en `notificacion`. Un turno vale aunque el email no llegue.
 - **RN-NO-05**: El botón de WhatsApp arma `https://wa.me/{telefono}?text={mensaje}` con fecha, hora, prestación y dirección del consultorio. El envío es manual: lo hace el odontólogo.
+- **RN-NO-06**: El mensaje de WhatsApp solo se prepara para un turno `RESERVADO` que todavía no empezó (según la hora del servidor), sea `ONLINE` o `MANUAL`. Si no, la API responde 409: «Solo podés preparar un WhatsApp para un turno reservado que todavía no empezó.»
+- **RN-NO-07**: Para preparar el mensaje de WhatsApp, el teléfono vigente del paciente tiene que cumplir el formato E.164 de la reserva y el consultorio tiene que tener dirección cargada. La API responde 422 sin inventar ni corregir el dato: «El paciente no tiene un teléfono internacional válido.» si falla el teléfono, o «Falta la dirección del consultorio.» si solo falta la dirección.
 
 ## Dominio: Seguridad (RN-SE)
 
