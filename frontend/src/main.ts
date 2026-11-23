@@ -9,6 +9,9 @@ import { alerta, boton } from './shared/ui/componentes'
 import type { Descriptor } from './shared/ui/componentes'
 import { layout } from './shared/ui/layout'
 import { crearControlLogin } from './features/auth/login'
+import { crearControlAgenda } from './features/agenda/control'
+import type { ControlAgenda } from './features/agenda/control'
+import type { OdontologoDto } from './shared/guard-sesion'
 import { vistaMarcador } from './vistas/marcador'
 
 export interface OpcionesArranque {
@@ -33,11 +36,18 @@ function descriptorError(): Descriptor {
 interface ControlVista {
   descriptor: Descriptor
   manejadores: ManejadoresUI
+  alMontar?: () => Promise<void>
 }
 
 interface NodoConsultable extends NodoUI {
   querySelector(selector: string): { value: string } | null
   getAttribute(nombre: string): string | null
+}
+
+/** En el navegador se usa el ancho real; en los tests de descriptores hay un default. */
+function anchoDelNavegador(): number {
+  const global: { innerWidth?: unknown } = globalThis as { innerWidth?: unknown }
+  return typeof global.innerWidth === 'number' ? global.innerWidth : 1024
 }
 
 function esConsultable(nodo: NodoUI): nodo is NodoConsultable {
@@ -103,6 +113,34 @@ export function arrancar(
     return { descriptor: control.descriptor(), manejadores }
   }
 
+  function crearAgenda(ruta: string, odontologo: OdontologoDto): ControlVista {
+    const referencia: { actual?: ControlAgenda } = {}
+    let manejadores: ManejadoresUI = {}
+
+    const montar = (): void => {
+      const control = referencia.actual
+      if (control === undefined || router.rutaActual() !== ruta) {
+        return
+      }
+      adaptador.montar(destino, layout({ odontologo, ruta, contenido: control.descriptor() }), manejadores)
+    }
+
+    const instancia = crearControlAgenda({
+      cliente,
+      ancho: anchoDelNavegador(),
+      ahora: () => new Date(),
+      alCambiar: montar,
+    })
+    referencia.actual = instancia
+    manejadores = { ...instancia.manejadores, ...manejadoresComunes() }
+
+    return {
+      descriptor: layout({ odontologo, ruta, contenido: instancia.descriptor() }),
+      manejadores,
+      alMontar: () => instancia.cargar(),
+    }
+  }
+
   function manejadoresComunes(): ManejadoresUI {
     return {
       async 'cerrar-sesion'() {
@@ -139,6 +177,9 @@ export function arrancar(
       // El guard no adjunta odontólogo en rutas públicas; el marcador va igual.
       return { descriptor: vistaMarcador(vista), manejadores: {} }
     }
+    if (vista.tipo === 'ruta' && vista.nombre === 'agenda' && decision.odontologo !== undefined) {
+      return crearAgenda(ruta, decision.odontologo)
+    }
     if (decision.odontologo === undefined) {
       return undefined
     }
@@ -166,6 +207,9 @@ export function arrancar(
           return
         }
         adaptador.montar(destino, control.descriptor, { ...control.manejadores, ...manejadoresComunes() })
+        if (control.alMontar !== undefined) {
+          await control.alMontar()
+        }
       })
       // El guard ya traduce las fallas de red a un estado visible; evitamos
       // que una promesa huérfana interrumpa la cadena de renderizados.
