@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>C-10 · Conflicto — OdontoAgenda</title>
+  <link rel="icon" href="../../../../design-system/assets/logo.png">
+  <link rel="stylesheet" href="../../../../design-system/tokens.css">
+  <link rel="stylesheet" href="mockup.css">
+</head>
+<body>
+  <div class="mockup-bar" role="note">
+    <span><b>C-10</b> Reserva pública</span>
+    <span>Pantalla: horario tomado y rechazos</span>
+    <span>390&times;844 &middot; 1440&times;900</span>
+  </div>
+
+  <header class="appbar">
+    <div class="appbar__inner">
+      <div class="appbar__brand">
+        <img src="../../../../design-system/assets/logo.svg" alt="" width="135" height="44">
+        <span class="sr-only" data-brand-name>OdontoAgenda</span>
+      </div>
+      <div class="appbar__spacer"></div>
+      <span class="appbar__hint">Reserva online</span>
+    </div>
+  </header>
+
+  <main class="flow">
+    <div class="page-head">
+      <h1>Elegí otro horario</h1>
+      <p>Tu turno no se reservó porque el horario se ocupó mientras completabas tus datos.</p>
+    </div>
+
+    <div class="card stack-6">
+      <div class="alert alert--error" role="alert">
+        <svg class="alert__icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 1.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zm.8 12.7H9.2v-1.6h1.6zm0-3.2H9.2V5.8h1.6z"/></svg>
+        <div><strong>Ese horario acaba de ser tomado</strong>Elegí otro; ya actualizamos los disponibles.</div>
+      </div>
+
+      <div class="alert alert--info" role="status">
+        <svg class="alert__icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 1.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zm.8 13H9.2V9h1.6zm0-7H9.2V5.9h1.6z"/></svg>
+        <div><strong>Tus datos siguen cargados</strong>DNI 30.123.456 · ana@ejemplo.com. No hace falta que los vuelvas a escribir.</div>
+      </div>
+
+      <div>
+        <p class="step">Paso 1 de 4: Prestación</p>
+        <p class="small muted">Limpieza · 45 min</p>
+
+        <p class="step" style="margin-top: var(--space-6)">Paso 2 de 4: Día</p>
+
+        <div class="day-nav">
+          <div class="week-nav" role="group" aria-label="Navegación por semana">
+            <button class="week-btn" id="semana-anterior" type="button" aria-label="Semana anterior" disabled>
+              <span aria-hidden="true">←</span><span class="week-btn__text">Semana anterior</span>
+            </button>
+            <button class="week-btn" id="semana-siguiente" type="button" aria-label="Semana siguiente">
+              <span class="week-btn__text">Semana siguiente</span><span aria-hidden="true">→</span>
+            </button>
+          </div>
+          <label class="date-jump">
+            <span>Ir a una fecha</span>
+            <input class="input" id="salto-fecha" type="date" min="2026-11-22" max="2027-01-21" value="2026-11-27">
+          </label>
+        </div>
+
+        <p class="days-range" id="rango-semana" aria-live="polite">Semana del 22 al 28 de noviembre</p>
+
+        <div class="days-wrap" id="dias-wrap">
+          <div class="days" id="dias" role="group" aria-label="Elegí el día" data-seleccionada="2026-11-27">
+            <button class="day" type="button" disabled aria-label="Domingo 22 de noviembre, sin horarios"><small>dom</small><strong>22</strong></button>
+            <button class="day" type="button" disabled aria-label="Lunes 23 de noviembre, sin horarios"><small>lun</small><strong>23</strong></button>
+            <button class="day" type="button" disabled aria-label="Martes 24 de noviembre, sin horarios"><small>mar</small><strong>24</strong></button>
+            <button class="day" type="button" disabled aria-label="Miércoles 25 de noviembre, sin horarios"><small>mié</small><strong>25</strong></button>
+            <button class="day" type="button" aria-pressed="false" aria-label="Jueves 26 de noviembre"><small>jue</small><strong>26</strong></button>
+            <button class="day" type="button" aria-pressed="true" aria-label="Viernes 27 de noviembre"><small>vie</small><strong>27</strong></button>
+            <button class="day" type="button" disabled aria-label="Sábado 28 de noviembre, sin horarios"><small>sáb</small><strong>28</strong></button>
+          </div>
+        </div>
+        <p class="scroll-hint">Deslizá para ver más días <span aria-hidden="true">→</span></p>
+
+        <p class="step" style="margin-top: var(--space-6)">Paso 3 de 4: Horario</p>
+        <div class="slots" role="group" aria-label="Elegí un horario">
+          <button class="chip" type="button" aria-pressed="false">09:00</button>
+          <button class="chip" type="button" aria-pressed="false">09:15</button>
+          <button class="chip" type="button" aria-pressed="false">09:30</button>
+          <button class="chip" type="button" disabled title="Ese horario ya está tomado">10:30</button>
+          <button class="chip" type="button" aria-pressed="false">11:00</button>
+          <button class="chip" type="button" aria-pressed="false">16:00</button>
+        </div>
+        <p class="small muted" style="margin-top: var(--space-2)">El horario de las 10:30 ya no está disponible.</p>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn--primary btn--block" type="button" disabled>Continuar con mis datos</button>
+        <button class="btn btn--ghost btn--block" type="button">Volver a empezar</button>
+      </div>
+    </div>
+  </main>
+
+  <section class="variants" aria-labelledby="estados-conflicto">
+    <h2 id="estados-conflicto">Estados de la pantalla</h2>
+    <p>Otros rechazos del servidor que se muestran en este mismo paso, sin reintentar solos.</p>
+
+    <div class="variant-grid">
+      <div class="variant" aria-label="Límite de dos turnos futuros">
+        <h3>Límite de 2 turnos futuros</h3>
+        <p class="variant__note">Código <b>RN-PA-03</b>. No se ofrece reintentar la reserva.</p>
+        <div class="alert alert--warning" role="alert">
+          <svg class="alert__icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10.9 2.6a1 1 0 0 0-1.8 0L1.6 16a1 1 0 0 0 .9 1.5h15a1 1 0 0 0 .9-1.5zM10.8 15H9.2v-1.6h1.6zm0-3.2H9.2V7.4h1.6z"/></svg>
+          <div><strong>Ya tenés 2 turnos futuros con este odontólogo</strong>Para reservar otro, cancelá uno desde el link del email de confirmación.</div>
+        </div>
+        <button class="btn btn--secondary btn--block" type="button">Entendido</button>
+      </div>
+
+      <div class="variant" aria-label="Menos de 24 horas de anticipación">
+        <h3>Menos de 24 h de anticipación</h3>
+        <p class="variant__note">Código <b>RN-TU-03</b>. Se ofrece elegir otra fecha.</p>
+        <div class="alert alert--warning" role="alert">
+          <svg class="alert__icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10.9 2.6a1 1 0 0 0-1.8 0L1.6 16a1 1 0 0 0 .9 1.5h15a1 1 0 0 0 .9-1.5zM10.8 15H9.2v-1.6h1.6zm0-3.2H9.2V7.4h1.6z"/></svg>
+          <div><strong>Los turnos se reservan con al menos 24 h de anticipación</strong>Elegí una fecha más adelante.</div>
+        </div>
+        <button class="btn btn--secondary btn--block" type="button">Elegir otra fecha</button>
+      </div>
+
+      <div class="variant" aria-label="Horario fuera de la agenda">
+        <h3>El horario dejó de estar disponible</h3>
+        <p class="variant__note">Código <b>RN-AG-05</b>. Se refresca la disponibilidad.</p>
+        <div class="alert alert--warning" role="alert">
+          <svg class="alert__icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10.9 2.6a1 1 0 0 0-1.8 0L1.6 16a1 1 0 0 0 .9 1.5h15a1 1 0 0 0 .9-1.5zM10.8 15H9.2v-1.6h1.6zm0-3.2H9.2V7.4h1.6z"/></svg>
+          <div><strong>Ese horario dejó de estar disponible</strong>Puede que el odontólogo haya cambiado su agenda. Elegí otro horario.</div>
+        </div>
+        <button class="btn btn--secondary btn--block" type="button">Actualizar horarios</button>
+      </div>
+
+      <div class="variant" aria-label="Fuera del horizonte de reserva">
+        <h3>Fuera del horizonte de reserva</h3>
+        <p class="variant__note">Código <b>RN-TU-11</b>. Solo se puede reservar hasta 60 días hacia adelante.</p>
+        <div class="alert alert--warning" role="alert">
+          <svg class="alert__icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10.9 2.6a1 1 0 0 0-1.8 0L1.6 16a1 1 0 0 0 .9 1.5h15a1 1 0 0 0 .9-1.5zM10.8 15H9.2v-1.6h1.6zm0-3.2H9.2V7.4h1.6z"/></svg>
+          <div><strong>Solo podés reservar hasta 60 días hacia adelante</strong>Elegí una fecha más cercana.</div>
+        </div>
+        <button class="btn btn--secondary btn--block" type="button">Elegir otra fecha</button>
+      </div>
+
+      <div class="variant" aria-label="Error de red al confirmar">
+        <h3>Error de red al confirmar</h3>
+        <p class="variant__note">Se conservan los datos y se puede reintentar sin volver a empezar.</p>
+        <div class="alert alert--error" role="alert">
+          <svg class="alert__icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 1.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zm.8 12.7H9.2v-1.6h1.6zm0-3.2H9.2V5.8h1.6z"/></svg>
+          <div><strong>No pudimos confirmar tu turno</strong>Revisá tu conexión y volvé a intentar. Tus datos siguen cargados.</div>
+        </div>
+        <button class="btn btn--secondary btn--block" type="button">Reintentar</button>
+      </div>
+    </div>
+  </section>
+
+  <script src="mockup.js"></script>
+  <script src="../../../../design-system/brand.js"></script>
+</body>
+</html>

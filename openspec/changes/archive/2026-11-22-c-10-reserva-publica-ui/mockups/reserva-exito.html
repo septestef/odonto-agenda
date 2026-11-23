@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>C-10 · Éxito — OdontoAgenda</title>
+  <link rel="icon" href="../../../../design-system/assets/logo.png">
+  <link rel="stylesheet" href="../../../../design-system/tokens.css">
+  <link rel="stylesheet" href="mockup.css">
+</head>
+<body>
+  <div class="mockup-bar" role="note">
+    <span><b>C-10</b> Reserva pública</span>
+    <span>Pantalla: reserva confirmada</span>
+    <span>390&times;844 &middot; 1440&times;900</span>
+  </div>
+
+  <header class="appbar">
+    <div class="appbar__inner">
+      <div class="appbar__brand">
+        <img src="../../../../design-system/assets/logo.svg" alt="" width="135" height="44">
+        <span class="sr-only" data-brand-name>OdontoAgenda</span>
+      </div>
+      <div class="appbar__spacer"></div>
+      <span class="appbar__hint">Reserva online</span>
+    </div>
+  </header>
+
+  <main class="flow">
+    <div class="card">
+      <div class="success-hero">
+        <div class="success-hero__icon" aria-hidden="true">
+          <svg width="32" height="32" viewBox="0 0 20 20" fill="currentColor"><path d="M10 1.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zm4 6.3-4.7 5a.8.8 0 0 1-1.1 0L6 10.6a.8.8 0 1 1 1.1-1.1l1.6 1.6 4.2-4.4A.8.8 0 1 1 14 7.8z"/></svg>
+        </div>
+        <h1>¡Turno reservado!</h1>
+        <p>Te esperamos el viernes 27 de noviembre a las 10:30.</p>
+      </div>
+
+      <div class="alert alert--success" role="status">
+        <svg class="alert__icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 1.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zm4 6.3-4.7 5a.8.8 0 0 1-1.1 0L6 10.6a.8.8 0 1 1 1.1-1.1l1.6 1.6 4.2-4.4A.8.8 0 1 1 14 7.8z"/></svg>
+        <div><strong>Te enviamos un email</strong>Revisá <b>ana@ejemplo.com</b>. Ahí está el link para cancelar o reprogramar tu turno.</div>
+      </div>
+
+      <div class="summary" aria-label="Detalle del turno reservado">
+        <dl>
+          <dt>Prestación</dt><dd>Limpieza · 45 min</dd>
+          <dt>Fecha</dt><dd>Viernes 27 de noviembre</dd>
+          <dt>Hora</dt><dd>10:30</dd>
+          <dt>Lugar</dt><dd>Av. Colón 1234, Córdoba</dd>
+          <dt>Email</dt><dd>ana@ejemplo.com</dd>
+        </dl>
+      </div>
+
+      <div class="alert alert--info" role="status">
+        <svg class="alert__icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 1.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zm.8 13H9.2V9h1.6zm0-7H9.2V5.9h1.6z"/></svg>
+        <div>El link es personal. Si no lo ves en unos minutos, revisá la carpeta de spam.</div>
+      </div>
+
+      <button class="btn btn--primary btn--block" type="button">Reservar otro turno</button>
+
+      <p class="small muted center" style="margin-top: var(--space-4)">¿Necesitás cambiar algo? Usá el link del email.</p>
+    </div>
+  </main>
+
+  <section class="variants" aria-labelledby="estados-exito">
+    <h2 id="estados-exito">Estados de la pantalla</h2>
+    <p>El éxito es terminal; estas variantes cubren la espera y el error de red.</p>
+
+    <div class="variant-grid">
+      <div class="variant" aria-label="Estado confirmando">
+        <h3>Confirmando la reserva</h3>
+        <p class="variant__note">Se muestra el resumen y el botón bloqueado con el estado de envío.</p>
+        <div class="summary">
+          <dl>
+            <dt>Prestación</dt><dd>Limpieza · 45 min</dd>
+            <dt>Fecha</dt><dd>Viernes 27 de noviembre, 10:30</dd>
+            <dt>Lugar</dt><dd>Av. Colón 1234, Córdoba</dd>
+          </dl>
+        </div>
+        <button class="btn btn--primary btn--block" type="button" aria-busy="true" disabled>
+          <span class="spinner" aria-hidden="true"></span>Confirmando…
+        </button>
+      </div>
+
+      <div class="variant" aria-label="Error de red al confirmar">
+        <h3>Error de red al confirmar</h3>
+        <p class="variant__note">No se pierde nada: los datos siguen cargados y se puede reintentar.</p>
+        <div class="alert alert--error" role="alert">
+          <svg class="alert__icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 1.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zm.8 12.7H9.2v-1.6h1.6zm0-3.2H9.2V5.8h1.6z"/></svg>
+          <div><strong>No pudimos confirmar tu turno</strong>Revisá tu conexión y volvé a intentar. Tus datos siguen cargados.</div>
+        </div>
+        <button class="btn btn--secondary btn--block" type="button">Reintentar</button>
+      </div>
+    </div>
+  </section>
+
+  <script src="../../../../design-system/brand.js"></script>
+</body>
+</html>

@@ -338,7 +338,12 @@ describe('arranque de la aplicación', () => {
     ultimo()?.manejadores?.['ingresar']?.(formulario)
     await estabilizar()
 
-    expect(pedidos).toEqual(['POST /api/auth/login'])
+    expect(pedidos).toEqual([
+      'POST /api/auth/login',
+      'GET /api/horarios',
+      'GET /api/prestaciones',
+      'GET /api/bloqueos',
+    ])
     expect(historial.push).toEqual(['/config'])
     expect(historial.replace).toEqual([])
     expect(ultimo()?.descriptor.clase).toBe('layout')
@@ -549,7 +554,14 @@ describe('arranque de la aplicación', () => {
 
     expect(montajes.at(-1)?.descriptor.clase).toBe('layout')
     expect(pedidos.filter((pedido) => pedido === 'GET /api/auth/me')).toHaveLength(1)
-    expect(pedidosDeAgenda(pedidos)).toHaveLength(3)
+    // Primero carga la agenda (C-13) y, tras el popstate, la configuración (C-06).
+    const inicioConfig = pedidos.length - 3
+    expect(pedidosDeAgenda(pedidos.slice(0, inicioConfig))).toHaveLength(3)
+    expect(pedidos.slice(inicioConfig)).toEqual([
+      'GET /api/horarios',
+      'GET /api/prestaciones',
+      'GET /api/bloqueos',
+    ])
     detener()
   })
 })
@@ -770,25 +782,36 @@ describe('regresiones del login integrado', () => {
 })
 
 describe('regresiones de rutas públicas y cliente compartido', () => {
-  it('muestra el marcador de /reservar/{slug} sin sesión y sin consultar /me', async () => {
+  it('monta la reserva pública de /reservar/{slug} sin sesión y sin consultar /me', async () => {
     const pedidos: string[] = []
-    const fetchSinSesion: FetchLike = async (url, init) => {
+    const perfil = {
+      slug: 'ana-gomez',
+      nombre: 'Ana',
+      apellido: 'Gómez',
+      direccionConsultorio: 'Av. Siempreviva 742',
+      zonaHoraria: 'America/Argentina/Buenos_Aires',
+      fechaMinima: '2026-11-26',
+      fechaMaxima: '2027-01-24',
+      prestaciones: [{ id: 1, nombre: 'Consulta', duracionMinutos: 30 }],
+    }
+    const fetchPublico: FetchLike = async (url, init) => {
       pedidos.push(`${init?.method ?? 'GET'} ${url}`)
-      return respuesta(
-        { codigo: 'NO_AUTENTICADO', mensaje: 'Tu sesión no está iniciada o expiró. Volvé a ingresar.' },
-        401,
-      )
+      if (url === '/api/public/ana-gomez') {
+        return respuesta(perfil, 200)
+      }
+      return new Response(null, { status: 204 })
     }
     const { adaptador, ultimo } = adaptadorFalso()
     const detener = arrancar({}, adaptador, {
       historial: historialFalso('/reservar/ana-gomez').historial,
-      fetch: fetchSinSesion,
+      fetch: fetchPublico,
     })
     await estabilizar()
 
-    expect(ultimo()?.descriptor.clase).toBe('marcador')
-    expect(ultimo()?.descriptor.texto).toBe('Acá vas a reservar tu turno.')
-    expect(pedidos).toEqual([])
+    expect(ultimo()?.descriptor.clase).toBe('reserva-publica')
+    expect(textosDe(ultimo()?.descriptor)).toContain('Ana Gómez')
+    expect(textosDe(ultimo()?.descriptor)).toContain('Consulta')
+    expect(pedidos).toEqual(['GET /api/public/ana-gomez'])
     detener()
   })
 

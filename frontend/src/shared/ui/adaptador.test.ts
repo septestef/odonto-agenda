@@ -7,6 +7,7 @@ class NodoFalso implements NodoUI {
   readonly hijos: NodoUI[] = []
   readonly atributos: Record<string, string> = {}
   readonly escuchas: Record<string, Array<(evento?: EventoUI) => void>> = {}
+  readonly focus = vi.fn()
   private texto = ''
   readonly etiqueta: string
 
@@ -239,6 +240,20 @@ describe('adaptador a nodos con document falso', () => {
     }
     expect(raiz.atributos).toMatchObject({ role: 'alert', 'aria-live': 'assertive' })
     expect(raiz.hijos.map((hijo) => hijo.textContent)).toEqual(['Atención', 'Revisá los datos.'])
+  })
+
+  it('mueve el foco al nodo marcado después del montaje', async () => {
+    const { documento, creados } = documentoFalso()
+    const destino = new NodoFalso('main')
+
+    crearAdaptadorNodos(documento).montar(destino, {
+      etiqueta: 'h1',
+      texto: 'Confirmá tu turno',
+      enfocar: true,
+    })
+    await Promise.resolve()
+
+    expect(creados[0]?.focus).toHaveBeenCalledTimes(1)
   })
 
   it('rechaza un destino que no sea un nodo', () => {
