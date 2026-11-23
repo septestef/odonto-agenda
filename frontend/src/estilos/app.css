@@ -1131,7 +1131,7 @@ html {
 }
 
 /* Formulario */
-.reserva-publica .field,
+:is(.reserva-publica, .modal--manual) .field,
 .reserva-publica .campo {
   display: flex;
   flex-direction: column;
@@ -1139,18 +1139,18 @@ html {
   margin-bottom: var(--space-4);
 }
 
-.reserva-publica .field label,
+:is(.reserva-publica, .modal--manual) .field label,
 .reserva-publica .campo label {
   font-weight: var(--weight-medium);
   font-size: var(--text-sm);
 }
 
-.reserva-publica .field .hint {
+:is(.reserva-publica, .modal--manual) .field .hint {
   font-size: var(--text-sm);
   color: var(--color-text-muted);
 }
 
-.reserva-publica .field .error {
+:is(.reserva-publica, .modal--manual) .field .error {
   font-size: var(--text-sm);
   color: var(--color-danger-600);
 }
@@ -1181,14 +1181,14 @@ html {
   color: var(--color-text-subtle);
 }
 
-.reserva-publica .field-row {
+:is(.reserva-publica, .modal--manual) .field-row {
   display: grid;
   grid-template-columns: 1fr;
   gap: 0 var(--space-4);
 }
 
 @media (min-width: 560px) {
-  .reserva-publica .field-row {
+  :is(.reserva-publica, .modal--manual) .field-row {
     grid-template-columns: 1fr 1fr;
   }
 }
@@ -1284,7 +1284,7 @@ html {
   background: var(--color-danger-50);
 }
 
-.reserva-publica .btn--block {
+:is(.reserva-publica, .modal--manual) .btn--block {
   width: 100%;
 }
 
@@ -1321,12 +1321,12 @@ html {
   gap: var(--space-3);
 }
 
-.reserva-publica .btn-row .btn--block {
+:is(.reserva-publica, .modal--manual) .btn-row .btn--block {
   flex: 1 1 100%;
 }
 
 @media (min-width: 560px) {
-  .reserva-publica .btn-row .btn--block {
+  :is(.reserva-publica, .modal--manual) .btn-row .btn--block {
     flex: 1 1 auto;
   }
 }

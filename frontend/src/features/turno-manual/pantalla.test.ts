@@ -171,6 +171,7 @@ describe('pantalla de turno manual', () => {
 
     const textos = textosDeManual(control.descriptor())
     expect(textos).toContain('Ese horario acaba de ser tomado, elegí otro')
+    expect(textos).toContain('Continuar con los datos del paciente')
     expect(textos).toContain('Los datos siguen cargados')
     expect(textos.join(' ')).toContain('30123456')
     expect(control.estado().datos).toEqual(DATOS)
@@ -257,7 +258,7 @@ describe('pantalla de turno manual', () => {
 
     expect(falsa.crear).not.toHaveBeenCalled()
     expect(control.estado().paso).toBe('completando-datos')
-    expect(control.estado().errores.dni).toBeDefined()
+    expect(control.estado().errores.dni).toBe('Ingresá el DNI del paciente sin puntos, 7 u 8 dígitos.')
   })
 
   it('cierra el diálogo con el botón de cerrar', async () => {

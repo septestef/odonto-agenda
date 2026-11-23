@@ -33,17 +33,25 @@ describe('armado de la solicitud manual', () => {
     expect(resultado.ok && resultado.solicitud).not.toHaveProperty('odontologoId')
   })
 
-  it('devuelve errores por campo sin construir la solicitud', () => {
+  it('devuelve errores por campo con el copy del paciente sin construir la solicitud', () => {
     const resultado = armarSolicitudManual(1, '2026-11-25T09:15:00-03:00', {
       ...DATOS,
       dni: '12.345.678',
+      nombre: '',
+      apellido: '',
       telefono: '3511234567',
       email: 'luis@',
     })
 
     expect(resultado.ok).toBe(false)
     if (!resultado.ok) {
-      expect(Object.keys(resultado.errores).sort()).toEqual(['dni', 'email', 'telefono'])
+      expect(resultado.errores).toEqual({
+        dni: 'Ingresá el DNI del paciente sin puntos, 7 u 8 dígitos.',
+        nombre: 'Ingresá el nombre del paciente.',
+        apellido: 'Ingresá el apellido del paciente.',
+        telefono: 'Ingresá el teléfono del paciente con código de país, por ejemplo +5493511234567.',
+        email: 'Ingresá un email válido del paciente.',
+      })
     }
   })
 

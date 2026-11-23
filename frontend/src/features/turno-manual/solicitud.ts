@@ -1,4 +1,4 @@
-import { hayErrores, validarDatosPaciente } from '../../shared/formulario-paciente'
+import { hayErrores, validarDatosPaciente } from './validaciones'
 import type { DatosPaciente, ErroresPaciente, SolicitudTurnoManual } from './modelo'
 
 export type ResultadoSolicitudManual =

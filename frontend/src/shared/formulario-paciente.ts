@@ -28,48 +28,75 @@ export const DATOS_PACIENTE_VACIOS: DatosPaciente = {
 
 export const ORDEN_CAMPOS_PACIENTE: readonly CampoPaciente[] = ['dni', 'telefono', 'nombre', 'apellido', 'email']
 
+export interface MensajesPaciente {
+  dni: string
+  nombre: string
+  apellido: string
+  telefono: string
+  email: string
+}
+
+/** Textos de la reserva pública (C-10): el paciente carga sus propios datos. */
+export const MENSAJES_PACIENTE: MensajesPaciente = {
+  dni: 'Ingresá tu DNI sin puntos, 7 u 8 dígitos.',
+  nombre: 'Ingresá tu nombre.',
+  apellido: 'Ingresá tu apellido.',
+  telefono: 'Ingresá el teléfono con código de país, por ejemplo +5493511234567.',
+  email: 'Ingresá un email válido.',
+}
+
+/** Textos del alta manual (C-15): el odontólogo carga los datos de otra persona. */
+export const MENSAJES_PACIENTE_MANUAL: MensajesPaciente = {
+  dni: 'Ingresá el DNI del paciente sin puntos, 7 u 8 dígitos.',
+  nombre: 'Ingresá el nombre del paciente.',
+  apellido: 'Ingresá el apellido del paciente.',
+  telefono: 'Ingresá el teléfono del paciente con código de país, por ejemplo +5493511234567.',
+  email: 'Ingresá un email válido del paciente.',
+}
+
 const DNI = /^[0-9]{7,8}$/
 const TELEFONO = /^\+[1-9][0-9]{7,14}$/
 const EMAIL = /^(?=[^\s]{6,255}$)[^@\s]{1,64}@(?!.*\.\.)[^@\s.][^@\s]*\.[^@\s.]+$/
 
-export function validarDni(valor: string): string | undefined {
-  return DNI.test(valor.trim()) ? undefined : 'Ingresá tu DNI sin puntos, 7 u 8 dígitos.'
+export function validarDni(valor: string, mensaje = MENSAJES_PACIENTE.dni): string | undefined {
+  return DNI.test(valor.trim()) ? undefined : mensaje
 }
 
-export function validarTelefono(valor: string): string | undefined {
-  return TELEFONO.test(valor.trim())
-    ? undefined
-    : 'Ingresá el teléfono con código de país, por ejemplo +5493511234567.'
+export function validarTelefono(valor: string, mensaje = MENSAJES_PACIENTE.telefono): string | undefined {
+  return TELEFONO.test(valor.trim()) ? undefined : mensaje
 }
 
-export function validarEmail(valor: string): string | undefined {
-  return EMAIL.test(valor.trim()) ? undefined : 'Ingresá un email válido.'
+export function validarEmail(valor: string, mensaje = MENSAJES_PACIENTE.email): string | undefined {
+  return EMAIL.test(valor.trim()) ? undefined : mensaje
 }
 
-export function validarNombre(valor: string): string | undefined {
+export function validarNombre(valor: string, mensaje = MENSAJES_PACIENTE.nombre): string | undefined {
   const texto = valor.trim()
   if (texto === '') {
-    return 'Ingresá tu nombre.'
+    return mensaje
   }
   return texto.length > 100 ? 'El nombre es demasiado largo.' : undefined
 }
 
-export function validarApellido(valor: string): string | undefined {
+export function validarApellido(valor: string, mensaje = MENSAJES_PACIENTE.apellido): string | undefined {
   const texto = valor.trim()
   if (texto === '') {
-    return 'Ingresá tu apellido.'
+    return mensaje
   }
   return texto.length > 100 ? 'El apellido es demasiado largo.' : undefined
 }
 
-export function validarDatosPaciente(datos: DatosPaciente): ErroresPaciente {
+export function validarDatosPaciente(
+  datos: DatosPaciente,
+  mensajes: MensajesPaciente = MENSAJES_PACIENTE,
+): ErroresPaciente {
   const errores: ErroresPaciente = {}
   const porCampo: Readonly<Record<CampoPaciente, string | undefined>> = {
-    dni: validarDni(datos.dni),
-    nombre: validarNombre(datos.nombre),
-    apellido: validarApellido(datos.apellido),
-    telefono: validarTelefono(datos.telefono),
-    email: validarEmail(datos.email),
+    dni: validarDni(datos.dni, mensajes.dni),
+    nombre: validarNombre(datos.nombre, mensajes.nombre),
+    apellido: validarApellido(datos.apellido, mensajes.apellido),
+    telefono: validarTelefono(datos.telefono, mensajes.telefono),
+    email: validarEmail(datos.email, mensajes.email),
   }
 
   for (const campo of ORDEN_CAMPOS_PACIENTE) {

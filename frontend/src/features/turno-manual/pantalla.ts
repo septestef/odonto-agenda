@@ -353,7 +353,7 @@ function seleccionDescriptor(estado: EstadoManual): Descriptor {
       clase: 'btn-row',
       hijos: [
         boton({
-          texto: 'Continuar con mis datos',
+          texto: 'Continuar con los datos del paciente',
           accion: 'ir-datos',
           deshabilitado: estado.horario === undefined,
           tipo: 'button',
