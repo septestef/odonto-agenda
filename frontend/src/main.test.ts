@@ -696,25 +696,36 @@ describe('regresiones del login integrado', () => {
 })
 
 describe('regresiones de rutas públicas y cliente compartido', () => {
-  it('muestra el marcador de /reservar/{slug} sin sesión y sin consultar /me', async () => {
+  it('monta la reserva pública de /reservar/{slug} sin sesión y sin consultar /me', async () => {
     const pedidos: string[] = []
-    const fetchSinSesion: FetchLike = async (url, init) => {
+    const perfil = {
+      slug: 'ana-gomez',
+      nombre: 'Ana',
+      apellido: 'Gómez',
+      direccionConsultorio: 'Av. Siempreviva 742',
+      zonaHoraria: 'America/Argentina/Buenos_Aires',
+      fechaMinima: '2026-11-26',
+      fechaMaxima: '2027-01-24',
+      prestaciones: [{ id: 1, nombre: 'Consulta', duracionMinutos: 30 }],
+    }
+    const fetchPublico: FetchLike = async (url, init) => {
       pedidos.push(`${init?.method ?? 'GET'} ${url}`)
-      return respuesta(
-        { codigo: 'NO_AUTENTICADO', mensaje: 'Tu sesión no está iniciada o expiró. Volvé a ingresar.' },
-        401,
-      )
+      if (url === '/api/public/ana-gomez') {
+        return respuesta(perfil, 200)
+      }
+      return new Response(null, { status: 204 })
     }
     const { adaptador, ultimo } = adaptadorFalso()
     const detener = arrancar({}, adaptador, {
       historial: historialFalso('/reservar/ana-gomez').historial,
-      fetch: fetchSinSesion,
+      fetch: fetchPublico,
     })
     await estabilizar()
 
-    expect(ultimo()?.descriptor.clase).toBe('marcador')
-    expect(ultimo()?.descriptor.texto).toBe('Acá vas a reservar tu turno.')
-    expect(pedidos).toEqual([])
+    expect(ultimo()?.descriptor.clase).toBe('reserva-publica')
+    expect(textosDe(ultimo()?.descriptor)).toContain('Ana Gómez')
+    expect(textosDe(ultimo()?.descriptor)).toContain('Consulta')
+    expect(pedidos).toEqual(['GET /api/public/ana-gomez'])
     detener()
   })
 
