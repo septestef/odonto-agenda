@@ -150,7 +150,7 @@ function eventosDe(
           type: 'button',
           'data-turno-id': String(turno.id),
           ...(turno.id === opciones.seleccionadoId ? { 'aria-current': 'true' } : {}),
-          style: `${estiloRango(inicio, fin, primera)};margin-top:1px`,
+          style: `${estiloRango(inicio, fin, primera)};margin-top:1px;max-height:calc(var(--min) * ${Math.max(0, fin - inicio)} - 2px)`,
         },
         accion: 'ver-turno',
         hijos: detalles,
@@ -294,7 +294,15 @@ export function descriptorSemana(opciones: OpcionesVistaSemana): Descriptor {
         etiqueta: 'div',
         clase: 'semana',
         atributos: { tabindex: '0', 'aria-label': 'Agenda semanal, desplazable' },
-        hijos: [{ etiqueta: 'div', clase: 'semana__grid', hijos: grid }],
+        hijos: [
+          {
+            etiqueta: 'div',
+            clase: 'semana__grid',
+            // El CSS fija una columna por día abierto y el alto de la grilla con estas dos variables.
+            atributos: { style: `--dias: ${columnas.length}; --minutos: ${Math.max(0, ultima - primera)}` },
+            hijos: grid,
+          },
+        ],
       },
       leyenda(),
     ],
