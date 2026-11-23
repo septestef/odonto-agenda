@@ -56,11 +56,13 @@ Una solicitud activa por detalle y sin doble apertura; asociar respuesta a turno
 
 - Design system revision: 2
 - Decision: yes (2026-11-23)
-- Mockups: `openspec/changes/c-14-recordatorios-y-whatsapp/mockups/` (pendiente de crear)
-- Approval: pending
-- Preview: pending
+- Mockups: openspec/changes/c-14-recordatorios-y-whatsapp/mockups/
+- Approval: approved (2026-11-23, by user)
+- Preview: rendered (2026-11-23, mockups/previews/)
 
-**El mockup aprobado es un gate anterior a cualquier Apply de C-14, incluido un Apply que solo empiece US-015 o tareas backend.** No se crea `.html` en este Propose. Una autorización posterior debe producir el mockup en `openspec/changes/c-14-recordatorios-y-whatsapp/mockups/`, mostrarlo y obtener aprobación explícita con referencia a la revisión. Usar `design-system/tokens.css`, `design-system/brand.js`, `components.html` y `brand.md`; acción secundaria estilo WhatsApp, no solo color, foco visible, control de 44 px y voz rioplatense. Demostrar detalle Día/Semana a 390 y 1440 px (hoja móvil, panel diario y cajón semanal de escritorio), estados disponible/no disponible, preparando, error y apertura bloqueada con alternativa; conservar confirmación de Cancelar. En código, limitar estilos a agenda; evitar `app.css` y helpers compartidos salvo necesidad comprobada.
+Estefi aprobó explícitamente la revisión 2 de [detalle-whatsapp.html](mockups/detalle-whatsapp.html) del commit `2efaed5` el 2026-11-23. Las [20 capturas originales de Edge](mockups/previews/) cubren Día y Semana en cinco estados (disponible, no disponible, preparando, error y apertura bloqueada con alternativa) a **390×844** y **1440×1000**. Se cotejaron con el ZIP original y el registro de captura del HTML aprobado; no se regeneraron. La revisión verificó hoja móvil, panel diario y cajón semanal de escritorio, foco visible y restaurado, controles de 44 px, ausencia de desborde horizontal de página y confirmación de Cancelar independiente. El mockup usa los tokens y `brand.js` del sistema de diseño. El [README](mockups/README.md) explica cómo revisar la evidencia. En código, limitar estilos a agenda; evitar `app.css` y helpers compartidos salvo necesidad comprobada.
+
+La aprobación visual satisface el gate previo a cualquier Apply. La autorización expresa de Apply se limita a **US-015, tareas 2.x y 3.x**, con Strict TDD según 1.3. Este registro no implementa ni completa esas tareas. **US-014 sigue en alcance, pero sus tareas 4.x y 5.x no quedan autorizadas y su implementación sigue bloqueada por 4.1 (Estefi, D1–D3)**. La verificación integrada 6.1 no forma parte de esta autorización.
 
 ## Risks / Trade-offs
 
