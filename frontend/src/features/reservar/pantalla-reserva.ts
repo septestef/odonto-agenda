@@ -2,7 +2,9 @@ import urlLogo from '@design-system/assets/logo.svg?url'
 import { NOMBRE_MARCA } from '../../shared/brand'
 import { interpretarErrorApi } from '../../shared/error-api'
 import type { ErrorApi } from '../../shared/error-api'
-import { esFechaValida, fechaLocalArgentina, horaArgentina, sumarDias } from '../../shared/fechas'
+import { esFechaValida, sumarDias } from '../../shared/fechas'
+import { fechaDeInicio, formatearFechaLarga, horaDeInicio } from '../../shared/formato-fechas'
+import { manejadoresNavegadorDias, moverSemana, navegadorDias, semanaDe } from '../../shared/navegador-dias'
 import { selectorHorarios } from '../../shared/selector-horarios'
 import type { ManejadoresUI, NodoUI } from '../../shared/ui/adaptador'
 import { alerta, boton } from '../../shared/ui/componentes'
@@ -21,7 +23,14 @@ import type {
 import { armarSolicitud } from './solicitud'
 import { erroresPorCampo, hayErrores, validarDatosPaciente } from './validaciones'
 
-const ZONA_ARGENTINA = 'America/Argentina/Buenos_Aires'
+export {
+  fechaDeInicio,
+  formatearDiaCorto,
+  formatearFechaLarga,
+  formatearRangoSemana,
+  horaDeInicio,
+  numeroDia,
+} from '../../shared/formato-fechas'
 
 export interface OpcionesControlReserva {
   slug: string
@@ -45,90 +54,8 @@ export interface ControlReserva {
   reiniciar(): void
 }
 
-function fechaInstante(fecha: string): Date {
-  const partes = fecha.split('-').map((parte) => Number(parte))
-  const anio = partes[0] ?? 1970
-  const mes = partes[1] ?? 1
-  const dia = partes[2] ?? 1
-
-  return new Date(Date.UTC(anio, mes - 1, dia, 12))
-}
-
-function partesFecha(fecha: string, opciones: Intl.DateTimeFormatOptions): Intl.DateTimeFormatPart[] {
-  return new Intl.DateTimeFormat('es-AR', { timeZone: ZONA_ARGENTINA, ...opciones }).formatToParts(
-    fechaInstante(fecha),
-  )
-}
-
-function parte(partes: Intl.DateTimeFormatPart[], tipo: Intl.DateTimeFormatPartTypes): string {
-  const valor = partes.find((item) => item.type === tipo)?.value
-  if (valor === undefined) {
-    throw new Error(`No se pudo formatear ${tipo}`)
-  }
-  return valor
-}
-
-function capitalizar(texto: string): string {
-  return texto.charAt(0).toUpperCase() + texto.slice(1)
-}
-
-export function formatearFechaLarga(fecha: string): string {
-  const partes = partesFecha(fecha, { weekday: 'long', day: 'numeric', month: 'long' })
-
-  return `${capitalizar(parte(partes, 'weekday'))} ${parte(partes, 'day')} de ${parte(partes, 'month')}`
-}
-
-export function formatearDiaCorto(fecha: string): string {
-  return parte(partesFecha(fecha, { weekday: 'short' }), 'weekday')
-}
-
-export function numeroDia(fecha: string): string {
-  return parte(partesFecha(fecha, { day: 'numeric' }), 'day')
-}
-
-export function formatearRangoSemana(inicio: string): string {
-  const fin = sumarDias(inicio, 6)
-  const partesInicio = partesFecha(inicio, { day: 'numeric', month: 'long' })
-  const partesFin = partesFecha(fin, { day: 'numeric', month: 'long' })
-  const diaInicio = parte(partesInicio, 'day')
-  const diaFin = parte(partesFin, 'day')
-  const mesInicio = parte(partesInicio, 'month')
-  const mesFin = parte(partesFin, 'month')
-
-  if (mesInicio === mesFin) {
-    return `Semana del ${diaInicio} al ${diaFin} de ${mesInicio}`
-  }
-
-  return `Semana del ${diaInicio} de ${mesInicio} al ${diaFin} de ${mesFin}`
-}
-
 export function formatearPrestacion(prestacion: PrestacionReserva): string {
   return `${prestacion.nombre} · ${prestacion.duracionMinutos} min`
-}
-
-export function horaDeInicio(inicio: string): string {
-  const instante = new Date(inicio)
-  if (Number.isNaN(instante.getTime())) {
-    return inicio.slice(11, 16)
-  }
-  return horaArgentina(instante)
-}
-
-export function fechaDeInicio(inicio: string): string {
-  const instante = new Date(inicio)
-  if (Number.isNaN(instante.getTime())) {
-    const fecha = inicio.slice(0, 10)
-    return esFechaValida(fecha) ? fecha : ''
-  }
-  return fechaLocalArgentina(instante)
-}
-
-function paginaDe(perfil: PerfilReserva, fecha: string): string {
-  let inicio = perfil.fechaMinima
-  while (sumarDias(inicio, 7) <= fecha && sumarDias(inicio, 7) <= perfil.fechaMaxima) {
-    inicio = sumarDias(inicio, 7)
-  }
-  return inicio
 }
 
 function iniciales(nombre: string, apellido: string): string {
@@ -351,116 +278,15 @@ function diasDescriptor(estado: EstadoReserva): Descriptor | undefined {
     return undefined
   }
 
-  const inicio = estado.inicioSemana ?? perfil.fechaMinima
-  const anteriorDeshabilitado = inicio <= perfil.fechaMinima
-  const siguienteDeshabilitado = sumarDias(inicio, 7) > perfil.fechaMaxima
-  const dias = [0, 1, 2, 3, 4, 5, 6].map((indice) => sumarDias(inicio, indice))
-
   return {
     etiqueta: 'div',
     hijos: [
       paso(2, 'Día'),
-      {
-        etiqueta: 'div',
-        clase: 'day-nav',
-        hijos: [
-          {
-            etiqueta: 'div',
-            clase: 'week-nav',
-            atributos: { role: 'group', 'aria-label': 'Navegación por semana' },
-            hijos: [
-              {
-                etiqueta: 'button',
-                clase: 'week-btn',
-                atributos: {
-                  type: 'button',
-                  'aria-label': 'Semana anterior',
-                  ...(anteriorDeshabilitado ? { disabled: '' } : {}),
-                },
-                accion: 'semana-anterior',
-                hijos: [
-                  { etiqueta: 'span', texto: '←', atributos: { 'aria-hidden': 'true' } },
-                  { etiqueta: 'span', texto: 'Semana anterior', clase: 'week-btn__text' },
-                ],
-              },
-              {
-                etiqueta: 'button',
-                clase: 'week-btn',
-                atributos: {
-                  type: 'button',
-                  'aria-label': 'Semana siguiente',
-                  ...(siguienteDeshabilitado ? { disabled: '' } : {}),
-                },
-                accion: 'semana-siguiente',
-                hijos: [
-                  { etiqueta: 'span', texto: 'Semana siguiente', clase: 'week-btn__text' },
-                  { etiqueta: 'span', texto: '→', atributos: { 'aria-hidden': 'true' } },
-                ],
-              },
-            ],
-          },
-          {
-            etiqueta: 'label',
-            clase: 'date-jump',
-            hijos: [
-              { etiqueta: 'span', texto: 'Ir a una fecha' },
-              {
-                etiqueta: 'input',
-                clase: 'input',
-                atributos: {
-                  type: 'date',
-                  id: 'salto-fecha',
-                  min: perfil.fechaMinima,
-                  max: perfil.fechaMaxima,
-                  value: estado.fecha ?? inicio,
-                },
-                accion: 'salto-fecha',
-              },
-            ],
-          },
-        ],
-      },
-      {
-        etiqueta: 'p',
-        texto: formatearRangoSemana(inicio),
-        clase: 'days-range',
-        atributos: { 'aria-live': 'polite' },
-      },
-      {
-        etiqueta: 'div',
-        clase: 'days-wrap',
-        hijos: [
-          {
-            etiqueta: 'div',
-            clase: 'days',
-            atributos: { role: 'group', 'aria-label': 'Elegí el día' },
-            hijos: dias.map((fecha): Descriptor => {
-              const fueraDeVentana = fecha < perfil.fechaMinima || fecha > perfil.fechaMaxima
-
-              return {
-                etiqueta: 'button' as const,
-                clase: 'day',
-                atributos: {
-                  type: 'button',
-                  'aria-pressed': String(fecha === estado.fecha),
-                  'aria-label': `${formatearFechaLarga(fecha)}${fueraDeVentana ? ', fuera de la ventana de reserva' : ''}`,
-                  ...(fueraDeVentana ? { disabled: '' } : {}),
-                },
-                accion: `dia:${fecha}`,
-                hijos: [
-                  { etiqueta: 'small', texto: formatearDiaCorto(fecha) },
-                  { etiqueta: 'strong', texto: numeroDia(fecha) },
-                ],
-              }
-            }),
-          },
-        ],
-      },
-      {
-        etiqueta: 'p',
-        texto: 'Deslizá para ver más días →',
-        clase: 'scroll-hint',
-      },
+      ...navegadorDias({
+        ventana: perfil,
+        inicioSemana: estado.inicioSemana ?? perfil.fechaMinima,
+        ...(estado.fecha === undefined ? {} : { seleccionada: estado.fecha }),
+      }),
     ],
   }
 }
@@ -1075,7 +901,7 @@ export function crearControlReserva(opciones: OpcionesControlReserva): ControlRe
     if (!esFechaValida(fecha) || fecha < perfil.fechaMinima || fecha > perfil.fechaMaxima) {
       return
     }
-    const pagina = paginaDe(perfil, fecha)
+    const pagina = semanaDe(perfil, fecha)
     if (estado.inicioSemana !== pagina) {
       cambiar(reducir(estado, { tipo: 'cambiar-semana', inicioSemana: pagina }))
     }
@@ -1087,9 +913,8 @@ export function crearControlReserva(opciones: OpcionesControlReserva): ControlRe
     if (perfil === undefined || !Number.isInteger(direccion)) {
       return
     }
-    const actual = estado.inicioSemana ?? perfil.fechaMinima
-    const destino = sumarDias(actual, direccion * 7)
-    if (destino < perfil.fechaMinima || destino > perfil.fechaMaxima) {
+    const destino = moverSemana(perfil, estado.inicioSemana ?? perfil.fechaMinima, direccion)
+    if (destino === undefined) {
       return
     }
     cambiar(reducir(estado, { tipo: 'cambiar-semana', inicioSemana: destino }))
@@ -1219,7 +1044,7 @@ export function crearControlReserva(opciones: OpcionesControlReserva): ControlRe
           return
         }
         if (disponibilidad.horarios.length > 0) {
-          const pagina = paginaDe(perfil, fecha)
+          const pagina = semanaDe(perfil, fecha)
           if (estado.inicioSemana !== pagina) {
             cambiar(reducir(estado, { tipo: 'cambiar-semana', inicioSemana: pagina }))
           }
@@ -1284,20 +1109,20 @@ export function crearControlReserva(opciones: OpcionesControlReserva): ControlRe
         }
       }
 
-      const inicio = estado.inicioSemana ?? perfil.fechaMinima
-      for (let indice = 0; indice < 7; indice += 1) {
-        const fecha = sumarDias(inicio, indice)
-        if (fecha >= perfil.fechaMinima && fecha <= perfil.fechaMaxima) {
-          resultado[`dia:${fecha}`] = () => {
+      Object.assign(
+        resultado,
+        manejadoresNavegadorDias(perfil, estado.inicioSemana ?? perfil.fechaMinima, {
+          elegirFecha: (fecha) => {
             void elegirFecha(fecha)
-          }
-        }
-      }
+          },
+          cambiarSemana,
+        }),
+      )
     }
 
-    resultado['semana-anterior'] = () => cambiarSemana(-1)
-    resultado['semana-siguiente'] = () => cambiarSemana(1)
-    resultado['salto-fecha'] = (nodo) => {
+    resultado['semana-anterior'] ??= () => cambiarSemana(-1)
+    resultado['semana-siguiente'] ??= () => cambiarSemana(1)
+    resultado['salto-fecha'] ??= (nodo) => {
       void elegirFecha(nodo.value ?? '')
     }
     resultado['proximo-dia'] = () => {

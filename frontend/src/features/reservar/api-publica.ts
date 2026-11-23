@@ -32,7 +32,7 @@ const RESPUESTA_INVALIDA: ErrorApi = {
   mensaje: 'No pudimos interpretar la respuesta del servidor.',
 }
 
-function esRegistro(valor: unknown): valor is Record<string, unknown> {
+export function esRegistro(valor: unknown): valor is Record<string, unknown> {
   return typeof valor === 'object' && valor !== null && !Array.isArray(valor)
 }
 
@@ -47,11 +47,11 @@ function esRespuesta(valor: unknown): valor is Response {
   )
 }
 
-function lanzar(error: ErrorApi): never {
+export function lanzar(error: ErrorApi): never {
   throw Object.assign(new Error(error.mensaje), error)
 }
 
-async function pedir(fetchReal: FetchLike, ruta: string, init?: RequestInit): Promise<unknown> {
+export async function pedir(fetchReal: FetchLike, ruta: string, init?: RequestInit): Promise<unknown> {
   let respuesta: unknown
   try {
     respuesta = await fetchReal(ruta, init)

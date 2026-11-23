@@ -3,6 +3,8 @@ import type { Descriptor } from './componentes'
 /** Parte del evento del DOM que necesita el adaptador; lo satisface un `Event` real. */
 export interface EventoUI {
   preventDefault(): void
+  /** Tecla de un `keydown`; ausente en los demás eventos. */
+  key?: string
 }
 
 /** Contrato mínimo que satisfacen tanto los nodos reales como los falsos de los tests. */
@@ -68,6 +70,17 @@ export function crearAdaptadorNodos(documento: DocumentoUI): AdaptadorNodos {
           manejador(nodo)
         })
       }
+    }
+    const teclas = descriptor.teclas
+    if (teclas !== undefined) {
+      nodo.addEventListener('keydown', (evento?: EventoUI) => {
+        const accion = evento?.key === undefined ? undefined : teclas[evento.key]
+        const manejador = accion === undefined ? undefined : manejadores?.[accion]
+        if (manejador !== undefined) {
+          evento?.preventDefault()
+          manejador(nodo)
+        }
+      })
     }
   }
 

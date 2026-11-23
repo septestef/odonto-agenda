@@ -1515,3 +1515,435 @@ html {
     animation: none;
   }
 }
+
+/* ---------- Gestión del turno (C-11) ----------
+   Pantalla /turno/{token}. La raíz lleva .reserva-publica (estilos públicos de
+   C-10) y .gestion-turno; las piezas nuevas usan el prefijo gestion- para no
+   chocar con las clases de la agenda del odontólogo. */
+
+.gestion-layout {
+  display: grid;
+  gap: var(--space-5);
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: var(--space-5) var(--space-4) var(--space-12);
+}
+
+.gestion-main {
+  min-width: 0;
+  width: 100%;
+  max-width: var(--container-narrow);
+}
+
+@media (min-width: 900px) {
+  .gestion-layout {
+    grid-template-columns: minmax(0, var(--container-narrow)) minmax(0, calc(var(--space-8) * 10));
+    justify-content: center;
+    align-items: start;
+    gap: var(--space-8);
+    padding-top: var(--space-10);
+  }
+}
+
+.gestion-saludo {
+  margin-bottom: var(--space-1);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+}
+
+.gestion-titulo {
+  margin-bottom: var(--space-5);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+}
+
+.gestion-titulo:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+@media (min-width: 900px) {
+  .gestion-titulo {
+    font-size: var(--text-2xl);
+  }
+}
+
+.gestion-volver {
+  margin-left: calc(var(--space-5) * -1);
+}
+
+.gestion-tarjeta {
+  margin-bottom: var(--space-5);
+  padding: var(--space-5);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.gestion-texto {
+  color: var(--color-text-muted);
+}
+
+.gestion-nota {
+  margin-top: var(--space-3);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.gestion-prestacion {
+  margin-top: 0;
+}
+
+/* Tarjeta del turno */
+.turno-hero {
+  position: relative;
+  margin-bottom: var(--space-4);
+  padding: var(--space-4) var(--space-4) var(--space-4) calc(var(--space-4) + var(--space-1));
+  background: var(--turno-reservado-bg);
+  border-radius: var(--radius-md);
+}
+
+.turno-hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: var(--space-1);
+  background: var(--turno-reservado-bar);
+  border-radius: var(--radius-md) 0 0 var(--radius-md);
+}
+
+.turno-hero--inactivo {
+  background: var(--turno-cancelado-bg);
+  color: var(--color-text-muted);
+}
+
+.turno-hero--inactivo::before {
+  background: var(--turno-cancelado-bar);
+}
+
+.turno-hero__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.turno-hero__fecha {
+  color: var(--color-text);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+}
+
+.turno-hero--inactivo .turno-hero__fecha {
+  color: var(--color-text-muted);
+}
+
+.turno-hero__hora {
+  margin-top: var(--space-1);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+.turno-hero--tachado .turno-hero__hora {
+  text-decoration: line-through;
+}
+
+.gestion-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(var(--space-1) * 1.5);
+  padding: calc(var(--space-1) / 2) var(--space-2);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+}
+
+.gestion-badge::before {
+  content: '';
+  width: calc(var(--space-1) * 1.5);
+  height: calc(var(--space-1) * 1.5);
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.gestion-badge--reservado {
+  background: var(--color-primary-100);
+  color: var(--color-primary-700);
+}
+
+.gestion-badge--cancelado,
+.gestion-badge--pasado {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+}
+
+.gestion-datos {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-2) var(--space-4);
+  margin: 0;
+}
+
+.gestion-datos dt {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.gestion-datos dd {
+  margin: 0;
+  font-weight: var(--weight-semibold);
+}
+
+.gestion-acciones {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+}
+
+@media (min-width: 560px) {
+  .gestion-acciones {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.gestion-acciones.gestion-acciones--una {
+  grid-template-columns: 1fr;
+}
+
+.gestion-turno .alert strong {
+  display: block;
+  font-size: var(--text-base);
+}
+
+.gestion-turno .alert p {
+  margin: 0;
+}
+
+.gestion-turno .link {
+  color: inherit;
+  font-weight: var(--weight-semibold);
+  text-underline-offset: calc(var(--space-1) - 1px);
+}
+
+/* Lateral (escritorio) o bloque inferior (celular) */
+.gestion-lateral {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.gestion-ayuda {
+  padding: var(--space-5);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.gestion-ayuda h2 {
+  margin-bottom: var(--space-2);
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+}
+
+.gestion-ayuda p,
+.gestion-ayuda li {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.gestion-ayuda ul {
+  display: grid;
+  gap: var(--space-1);
+  padding-left: var(--space-5);
+  list-style: disc;
+}
+
+.gestion-ayuda--aviso {
+  background: var(--color-warning-50);
+  border-color: var(--color-warning-600);
+}
+
+.gestion-ayuda--aviso h2 {
+  color: var(--color-warning-600);
+}
+
+/* Confirmación de cancelación: hoja inferior en celular, diálogo en escritorio */
+.gestion-velo {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  background: var(--color-text);
+  opacity: 0.45;
+}
+
+.gestion-dialogo {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 11;
+  width: 100%;
+  padding: var(--space-6) var(--space-5) var(--space-5);
+  background: var(--color-surface);
+  color: var(--color-text);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  box-shadow: var(--shadow-lg);
+}
+
+@media (min-width: 560px) {
+  .gestion-dialogo {
+    top: 50%;
+    right: auto;
+    bottom: auto;
+    left: 50%;
+    width: calc(100% - var(--space-8));
+    max-width: calc(var(--space-10) * 11);
+    border-radius: var(--radius-lg);
+    transform: translate(-50%, -50%);
+  }
+}
+
+.gestion-dialogo h2 {
+  margin-bottom: var(--space-3);
+  font-size: var(--text-xl);
+}
+
+.gestion-dialogo p {
+  margin-bottom: var(--space-4);
+  color: var(--color-text-muted);
+}
+
+.gestion-resumen {
+  margin-bottom: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface-alt);
+  border-radius: var(--radius-md);
+}
+
+.gestion-resumen strong {
+  display: block;
+}
+
+.gestion-resumen span {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.gestion-dialogo__acciones {
+  display: grid;
+  gap: var(--space-3);
+}
+
+@media (min-width: 560px) {
+  .gestion-dialogo__acciones {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .gestion-dialogo__acciones .btn--danger-solid {
+    order: 2;
+  }
+}
+
+.gestion-turno .btn--danger-solid {
+  background: var(--color-danger-600);
+  color: var(--color-text-inverse);
+}
+
+.gestion-turno .btn--danger-solid:hover {
+  background: var(--color-danger-700);
+}
+
+.gestion-turno .btn[aria-busy='true'] {
+  opacity: 1;
+}
+
+/* Reprogramación */
+.gestion-turno .day--actual {
+  position: relative;
+}
+
+.gestion-turno .day--actual::after {
+  content: '';
+  position: absolute;
+  bottom: var(--space-1);
+  left: 50%;
+  width: calc(var(--space-1) * 1.5);
+  height: calc(var(--space-1) * 1.5);
+  border-radius: 50%;
+  background: var(--color-warning-600);
+  transform: translateX(-50%);
+}
+
+.leyenda-dia {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+
+.gestion-turno .leyenda-dia + .step {
+  margin-top: var(--space-5);
+}
+
+.gestion-turno .btn--danger {
+  border-color: color-mix(in srgb, var(--color-danger-600) 35%, var(--color-surface));
+}
+
+.leyenda-dia__punto {
+  display: inline-block;
+  width: calc(var(--space-1) * 1.5);
+  height: calc(var(--space-1) * 1.5);
+  border-radius: 50%;
+  background: var(--color-warning-600);
+}
+
+.gestion-cambio {
+  margin-top: var(--space-5);
+  padding: var(--space-4);
+  background: var(--color-primary-50);
+  border: 1px solid var(--color-primary-200);
+  border-radius: var(--radius-md);
+}
+
+.gestion-cambio dl {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.gestion-cambio__fila {
+  display: grid;
+  grid-template-columns: calc(var(--space-4) * 5) 1fr;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+
+.gestion-cambio__fila dt {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.gestion-cambio__fila dd {
+  margin: 0;
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.gestion-cambio__fila--viejo dd {
+  color: var(--color-text-muted);
+  font-weight: var(--weight-regular);
+  text-decoration: line-through;
+}
+
+.gestion-esqueleto--alto {
+  height: calc(var(--space-12) + var(--space-8));
+  margin-bottom: var(--space-3);
+  border-radius: var(--radius-md);
+}

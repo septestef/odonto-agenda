@@ -14,6 +14,8 @@ import type { ControlConfig } from './features/config/config'
 import { crearControlLogin } from './features/auth/login'
 import { crearApiPublica } from './features/reservar/api-publica'
 import { crearControlReserva } from './features/reservar/pantalla-reserva'
+import { crearApiGestion } from './features/turno/api-gestion'
+import { crearControlTurno } from './features/turno/pantalla-turno'
 import { vistaMarcador } from './vistas/marcador'
 
 export interface OpcionesArranque {
@@ -172,8 +174,29 @@ export function arrancar(
       }
     }
     if (vista.tipo === 'ruta' && vista.nombre === 'turno') {
-      // El guard no adjunta odontólogo en rutas públicas; el marcador va igual.
-      return { descriptor: vistaMarcador(vista), manejadores: {} }
+      // Ruta pública: el token solo viaja a /api/public/turnos/ y no se guarda.
+      const control = crearControlTurno({
+        token: vista.parametros['token'] ?? '',
+        api: crearApiGestion({ fetch: opciones.fetch }),
+        apiPublica: crearApiPublica({ fetch: opciones.fetch }),
+        alCambiar: () => {
+          if (router.rutaActual() !== ruta) {
+            return
+          }
+          adaptador.montar(destino, control.descriptor(), {
+            ...control.manejadores(),
+            ...manejadoresComunes(),
+          })
+        },
+      })
+
+      return {
+        descriptor: control.descriptor(),
+        manejadores: control.manejadores(),
+        iniciar: () => {
+          void control.iniciar()
+        },
+      }
     }
     if (decision.odontologo === undefined) {
       return undefined

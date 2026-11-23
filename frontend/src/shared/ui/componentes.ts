@@ -1,6 +1,7 @@
 export type Etiqueta =
   | 'a'
   | 'article'
+  | 'aside'
   | 'button'
   | 'dd'
   | 'dialog'
@@ -26,6 +27,7 @@ export type Etiqueta =
   | 'small'
   | 'span'
   | 'strong'
+  | 'ul'
 
 export interface Descriptor {
   etiqueta: Etiqueta
@@ -35,6 +37,8 @@ export interface Descriptor {
   hijos?: readonly Descriptor[]
   accion?: string
   enfocar?: boolean
+  /** Teclas que disparan una acción con `keydown` en este nodo (por ejemplo `{ Escape: 'cerrar' }`). */
+  teclas?: Readonly<Record<string, string>>
 }
 
 export interface OpcionesBoton {
