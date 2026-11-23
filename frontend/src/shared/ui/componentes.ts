@@ -1,5 +1,6 @@
 export type Etiqueta =
   | 'a'
+  | 'article'
   | 'button'
   | 'dd'
   | 'dialog'
