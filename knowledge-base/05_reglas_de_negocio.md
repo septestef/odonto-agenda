@@ -30,7 +30,8 @@ Cada regla tiene un código único `RN-{DOMINIO}-{NN}`. El backend devuelve ese 
 - **RN-TU-08**: El odontólogo puede cargar un turno manual para cualquier horario futuro dentro de su agenda; para él no aplica la regla de 24 h. Sí aplica RN-TU-01.
 - **RN-TU-09**: El odontólogo puede cancelar cualquier turno futuro. El paciente recibe un email de aviso.
 - **RN-TU-10**: Solo un turno `RESERVADO` cuyo inicio ya pasó puede marcarse `ATENDIDO` o `AUSENTE`.
-- **RN-TU-11**: Se puede reservar hasta 60 días hacia adelante (valor por defecto, configurable por propiedad). Ver la pregunta abierta PA-01.
+- **RN-TU-11**: Se puede reservar hasta 60 días hacia adelante (valor por defecto, configurable por propiedad). Aplica también al alta manual y a la disponibilidad del odontólogo, porque es configuración de la agenda, no una regla anti-abuso del paciente. Ver la pregunta abierta PA-01.
+- **RN-TU-12**: El alta manual de un turno rechaza un `inicio` en el pasado o igual al ahora del servidor con 422. No aplica a gestiones de turnos ya existentes: esas siguen usando RN-TU-07 (409). El reloj del servidor es la única fuente de “ahora” (RN-GL-02).
 
 ## Dominio: Pacientes (RN-PA)
 

@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mockup C-15 · Agenda con “Nuevo turno” — OdontoAgenda</title>
+  <link rel="icon" href="../../../../design-system/assets/logo.png">
+  <link rel="stylesheet" href="../../../../design-system/tokens.css">
+  <link rel="stylesheet" href="mockup.css">
+</head>
+<body>
+  <div class="mockup-bar" role="note">
+    <span><b>C-15</b> Turno manual</span>
+    <span>Pantalla: agenda con la nueva acción</span>
+    <span>390&times;844 &middot; 1440&times;900</span>
+  </div>
+
+  <header class="appbar">
+    <div class="appbar__inner">
+      <div class="appbar__marca">
+        <img src="../../../../design-system/assets/logo.svg" alt="" width="135" height="44">
+        <span class="sr-only" data-brand-name>OdontoAgenda</span>
+      </div>
+      <nav class="nav" aria-label="Secciones de la aplicación">
+        <a class="nav__link" href="#" aria-current="page">Agenda</a>
+        <a class="nav__link" href="#">Configuración</a>
+      </nav>
+      <div class="appbar__espacio"></div>
+      <div class="appbar__sesion"><span>Dra. Ana Gómez</span><button class="btn btn--ghost btn--sm" type="button">Cerrar sesión</button></div>
+    </div>
+  </header>
+
+  <main id="contenido">
+    <div class="container">
+      <div class="agenda-head">
+        <div class="agenda-head__titulo">
+          <h1>Miércoles 25 de noviembre</h1>
+          <p>Hoy · horarios en hora de Argentina</p>
+        </div>
+        <div class="agenda-head__acciones">
+          <div class="seg" role="group" aria-label="Vista">
+            <button type="button" aria-pressed="true">Día</button>
+            <button type="button" aria-pressed="false">Semana</button>
+          </div>
+          <div class="navfecha">
+            <button class="btn btn--secondary btn--icono" type="button" aria-label="Día anterior">‹</button>
+            <button class="btn btn--secondary btn--sm" type="button" disabled>Hoy</button>
+            <button class="btn btn--secondary btn--icono" type="button" aria-label="Día siguiente">›</button>
+          </div>
+          <button class="btn btn--primary" type="button" aria-label="Cargar un turno manual">
+            <span aria-hidden="true">＋</span> Nuevo turno
+          </button>
+        </div>
+      </div>
+
+      <p class="resumen-dia"><span><strong>6</strong> turnos</span><span><strong>1</strong> cancelado</span><span><strong>1</strong> bloqueo con turnos adentro</span></p>
+
+      <div class="dia">
+        <div>
+          <section class="franja" aria-labelledby="f1">
+            <h2 id="f1" class="franja__titulo">Mañana <span>09:00 – 13:00</span></h2>
+
+            <article class="turno turno--reservado turno--pasado" tabindex="0">
+              <div class="turno__fila"><span class="turno__hora">09:00–09:30</span><span class="badge badge--reservado">Reservado</span><span class="badge badge--manual">Manual</span></div>
+              <div class="turno__quien">Jorge Ruiz</div>
+              <div class="turno__meta">Consulta</div>
+            </article>
+
+            <div class="ahora" role="note">Ahora · 10:10</div>
+
+            <div class="libre">10:15–10:30 · libre</div>
+
+            <article class="turno turno--reservado" tabindex="0">
+              <div class="turno__fila"><span class="turno__hora">10:30–11:00</span><span class="badge badge--reservado">Reservado</span><span class="badge badge--online">Online</span></div>
+              <div class="turno__quien">Ana Pérez</div>
+              <div class="turno__meta">Consulta</div>
+              <div class="turno__acciones">
+                <button class="btn btn--secondary btn--sm" type="button">Ver</button>
+                <button class="btn btn--danger btn--sm" type="button">Cancelar</button>
+              </div>
+            </article>
+
+            <div class="bloqueo">
+              <div class="bloqueo__fila"><span class="turno__hora">11:00–12:00</span><span class="badge badge--bloqueo">Bloqueo</span><span class="bloqueo__titulo">Trámite personal</span></div>
+            </div>
+
+            <div class="libre">12:00–13:00 · libre</div>
+          </section>
+
+          <section class="franja" aria-labelledby="f2">
+            <h2 id="f2" class="franja__titulo">Tarde <span>16:00 – 19:00</span></h2>
+            <article class="turno turno--reservado" tabindex="0">
+              <div class="turno__fila"><span class="turno__hora">16:30–17:15</span><span class="badge badge--reservado">Reservado</span><span class="badge badge--online">Online</span></div>
+              <div class="turno__quien">Pablo Vera</div>
+              <div class="turno__meta">Limpieza</div>
+              <div class="turno__acciones">
+                <button class="btn btn--secondary btn--sm" type="button">Ver</button>
+                <button class="btn btn--danger btn--sm" type="button">Cancelar</button>
+              </div>
+            </article>
+            <div class="libre">17:15–19:00 · libre</div>
+          </section>
+
+          <p class="nota-mockup">“Nuevo turno” abre el formulario sin recargar y conserva el rango visible. La disponibilidad del odontólogo incluye horarios de hoy: la reserva pública sigue exigiendo 24 h. El botón de WhatsApp (C-14) tiene su lugar reservado en el panel.</p>
+        </div>
+
+        <aside class="panel panel--fijo" aria-labelledby="p-titulo">
+          <div class="panel__cab">
+            <div>
+              <h2 id="p-titulo">Ana Pérez</h2>
+              <p>Miércoles 25/11 · 10:30 a 11:00</p>
+            </div>
+            <button class="btn btn--ghost btn--icono" type="button" aria-label="Cerrar el detalle">✕</button>
+          </div>
+          <div class="panel__badges"><span class="badge badge--reservado">Reservado</span><span class="badge badge--online">Online</span></div>
+          <dl class="datos">
+            <dt>Prestación</dt><dd>Consulta (30 min)</dd>
+            <dt>DNI</dt><dd>30.123.456</dd>
+            <dt>Teléfono</dt><dd>+54 9 351 123 4567</dd>
+            <dt>Email</dt><dd>ana.perez@ejemplo.com</dd>
+          </dl>
+          <div class="panel__acciones">
+            <div class="reservado-c14">Lugar del botón WhatsApp (C-14)</div>
+            <button class="btn btn--danger" type="button">Cancelar turno</button>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+  <script src="../../../../design-system/brand.js"></script>
+</body>
+</html>

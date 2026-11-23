@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mockup C-15 · Conflicto y éxito — OdontoAgenda</title>
+  <link rel="icon" href="../../../../design-system/assets/logo.png">
+  <link rel="stylesheet" href="../../../../design-system/tokens.css">
+  <link rel="stylesheet" href="mockup.css">
+</head>
+<body>
+  <div class="mockup-bar" role="note">
+    <span><b>C-15</b> Turno manual</span>
+    <span>Pantallas: conflicto, rechazos y alta exitosa</span>
+    <span>390&times;844 &middot; 1440&times;900</span>
+  </div>
+
+  <header class="appbar">
+    <div class="appbar__inner">
+      <div class="appbar__marca">
+        <img src="../../../../design-system/assets/logo.svg" alt="" width="135" height="44">
+        <span class="sr-only" data-brand-name>OdontoAgenda</span>
+      </div>
+      <div class="appbar__espacio"></div>
+      <div class="appbar__sesion"><span>Dra. Ana Gómez</span></div>
+    </div>
+  </header>
+
+  <main>
+    <section class="seccion" aria-labelledby="conflicto-titulo">
+      <h2 id="conflicto-titulo">1 · El horario se ocupó mientras se cargaba</h2>
+      <p>El formulario queda abajo, con los datos del paciente intactos y los horarios refrescados.</p>
+
+      <div class="flow" style="padding-top: 0">
+        <div class="modal" role="dialog" aria-labelledby="titulo-conflicto">
+          <div class="modal__cab">
+            <div>
+              <h2 id="titulo-conflicto">Elegí otro horario</h2>
+              <p>El turno no se creó. Ya actualizamos los horarios disponibles.</p>
+            </div>
+            <button class="btn btn--ghost btn--icono" type="button" aria-label="Cerrar el formulario">✕</button>
+          </div>
+
+          <div class="alert alert--error" role="alert">
+            <svg class="alert__icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 1.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zm.8 12.7H9.2v-1.6h1.6zm0-3.2H9.2V5.8h1.6z"/></svg>
+            <div><strong>Ese horario acaba de ser tomado, elegí otro</strong>Refrescamos la lista de horarios libres de este día.</div>
+          </div>
+
+          <div class="alert alert--info" role="status">
+            <svg class="alert__icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 1.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zm.8 13H9.2V9h1.6zm0-7H9.2V5.9h1.6z"/></svg>
+            <div><strong>Los datos siguen cargados</strong>DNI 30123456 · Luis Ramírez · luis@ejemplo.com. No hace falta volver a escribirlos.</div>
+          </div>
+
+          <div class="summary" aria-label="Resumen del turno elegido">
+            <dl>
+              <dt>Prestación</dt><dd>Consulta · 30 min</dd>
+              <dt>Día</dt><dd>Hoy, miércoles 25 de noviembre</dd>
+            </dl>
+          </div>
+
+          <p class="step">Horarios disponibles actualizados</p>
+          <div class="slots" role="group" aria-label="Elegí otro horario">
+            <button class="chip" type="button" aria-pressed="false">09:00</button>
+            <button class="chip" type="button" disabled title="Ese horario acaba de ser tomado">09:15</button>
+            <button class="chip" type="button" aria-pressed="true">09:30</button>
+            <button class="chip" type="button" aria-pressed="false">10:15</button>
+            <button class="chip" type="button" aria-pressed="false">12:00</button>
+          </div>
+
+          <div class="divider"></div>
+          <div class="btn-row">
+            <button class="btn btn--secondary btn--block" type="button">Volver a la agenda</button>
+            <button class="btn btn--primary btn--block" type="button">Continuar con mis datos</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="variants" style="padding-top: 0; margin-top: var(--space-4)">
+        <p>Otros rechazos que se muestran en el formulario, sin descartar los datos cargados.</p>
+        <div class="variant-grid">
+          <div class="variant" aria-label="Fuera de la agenda">
+            <h3>Fuera de la agenda</h3>
+            <p class="variant__note">Código <b>RN-AG-05</b>. El odontólogo elige otro día u horario.</p>
+            <div class="alert alert--warning" role="alert">
+              <svg class="alert__icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10.9 2.6a1 1 0 0 0-1.8 0L1.6 16a1 1 0 0 0 .9 1.5h15a1 1 0 0 0 .9-1.5zM10.8 15H9.2v-1.6h1.6zm0-3.2H9.2V7.4h1.6z"/></svg>
+              <div>Ese horario no está disponible en la agenda. Elegí otro.</div>
+            </div>
+          </div>
+          <div class="variant" aria-label="Fuera del horizonte">
+            <h3>Más allá del horizonte</h3>
+            <p class="variant__note">Código <b>RN-TU-11</b>. Vale también para el alta manual.</p>
+            <div class="alert alert--warning" role="alert">
+              <svg class="alert__icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10.9 2.6a1 1 0 0 0-1.8 0L1.6 16a1 1 0 0 0 .9 1.5h15a1 1 0 0 0 .9-1.5zM10.8 15H9.2v-1.6h1.6zm0-3.2H9.2V7.4h1.6z"/></svg>
+              <div>No se pueden cargar turnos después de los 60 días de horizonte.</div>
+            </div>
+          </div>
+          <div class="variant" aria-label="Sesión vencida o error de red">
+            <h3>Sesión vencida o sin conexión</h3>
+            <p class="variant__note">401 <b>NO_AUTENTICADO</b>, 403 <b>ACCESO_DENEGADO</b> o error de red.</p>
+            <div class="alert alert--error" role="alert">
+              <svg class="alert__icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 1.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zm.8 12.7H9.2v-1.6h1.6zm0-3.2H9.2V5.8h1.6z"/></svg>
+              <div><strong>No pudimos guardar el turno</strong>Revisá tu conexión o volvé a ingresar. Tus datos siguen cargados.</div>
+            </div>
+            <button class="btn btn--secondary" type="button">Reintentar</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="seccion" aria-labelledby="exito-titulo">
+      <h2 id="exito-titulo">2 · Alta exitosa: vuelta a la agenda</h2>
+      <p>Se cierra el formulario, se recarga el rango visible y el turno nuevo se ve con origen “Manual”.</p>
+
+      <div class="toast" role="status">
+        <svg class="alert__icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 1.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zm-.1 12.3-4-4 1.1-1.1 2.9 2.9 6-6 1.1 1.1z"/></svg>
+        <div><strong>Turno cargado</strong>Le enviamos el link de gestión a luis@ejemplo.com.</div>
+        <button class="btn btn--ghost btn--sm toast__cerrar" type="button" aria-label="Cerrar el aviso">✕</button>
+      </div>
+
+      <div class="franja" aria-labelledby="f-exito">
+        <h2 id="f-exito" class="franja__titulo">Mañana <span>09:00 – 13:00</span></h2>
+        <article class="turno turno--reservado turno--pasado" tabindex="0">
+          <div class="turno__fila"><span class="turno__hora">09:00–09:30</span><span class="badge badge--reservado">Reservado</span><span class="badge badge--manual">Manual</span></div>
+          <div class="turno__quien">Jorge Ruiz</div>
+          <div class="turno__meta">Consulta</div>
+        </article>
+        <article class="turno turno--reservado turno--nuevo" tabindex="0">
+          <div class="turno__fila"><span class="turno__hora">09:30–10:00</span><span class="badge badge--reservado">Reservado</span><span class="badge badge--manual">Manual</span></div>
+          <div class="turno__quien">Luis Ramírez</div>
+          <div class="turno__meta">Consulta · recién cargado</div>
+          <div class="turno__acciones">
+            <button class="btn btn--secondary btn--sm" type="button">Ver</button>
+            <button class="btn btn--danger btn--sm" type="button">Cancelar</button>
+          </div>
+        </article>
+        <div class="ahora" role="note">Ahora · 10:10</div>
+        <div class="libre">10:15–13:00 · libre</div>
+      </div>
+      <p class="nota-mockup">El alta manual no aplica la regla de 24 h: este turno es de hoy. El correo de confirmación incluye <code>/turno/{token}</code> igual que la reserva online.</p>
+    </section>
+  </main>
+  <script src="../../../../design-system/brand.js"></script>
+</body>
+</html>

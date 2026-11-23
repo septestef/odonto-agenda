@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mockup C-15 · Formulario de turno manual — OdontoAgenda</title>
+  <link rel="icon" href="../../../../design-system/assets/logo.png">
+  <link rel="stylesheet" href="../../../../design-system/tokens.css">
+  <link rel="stylesheet" href="mockup.css">
+</head>
+<body>
+  <div class="mockup-bar" role="note">
+    <span><b>C-15</b> Turno manual</span>
+    <span>Pantalla: datos del paciente</span>
+    <span>390&times;844 &middot; 1440&times;900</span>
+  </div>
+
+  <header class="appbar">
+    <div class="appbar__inner">
+      <div class="appbar__marca">
+        <img src="../../../../design-system/assets/logo.svg" alt="" width="135" height="44">
+        <span class="sr-only" data-brand-name>OdontoAgenda</span>
+      </div>
+      <div class="appbar__espacio"></div>
+      <div class="appbar__sesion"><span>Dra. Ana Gómez</span></div>
+    </div>
+  </header>
+
+  <main class="flow">
+    <div class="page-head">
+      <h1>Nuevo turno</h1>
+      <p>Se abre desde “Nuevo turno” en la agenda; no se recarga la página y se conserva el rango visible.</p>
+    </div>
+
+    <section class="modal" role="dialog" aria-labelledby="titulo-formulario">
+      <div class="modal__cab">
+        <div>
+          <h2 id="titulo-formulario">Cargar un turno</h2>
+          <p>Dra. Ana Gómez · Agenda del miércoles 25 de noviembre</p>
+        </div>
+        <button class="btn btn--ghost btn--icono" type="button" aria-label="Cerrar el formulario">✕</button>
+      </div>
+
+      <div class="progreso" aria-label="Pasos del formulario">
+        <span>1 Prestación</span><span>2 Día</span><span>3 Horario</span><span aria-current="step">4 Datos</span>
+      </div>
+
+      <div class="summary" aria-label="Resumen del turno elegido">
+        <dl>
+          <dt>Prestación</dt><dd>Consulta · 30 min</dd>
+          <dt>Día</dt><dd>Hoy, miércoles 25 de noviembre</dd>
+          <dt>Horario</dt><dd>09:15 – 09:45</dd>
+          <dt>Lugar</dt><dd>Av. Colón 1234, Córdoba</dd>
+        </dl>
+      </div>
+
+      <div class="alert alert--info" role="status">
+        <svg class="alert__icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 1.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zm.8 13H9.2V9h1.6zm0-7H9.2V5.9h1.6z"/></svg>
+        <div>El paciente recibe por email el link para consultar, cancelar o reprogramar el turno.</div>
+      </div>
+
+      <form novalidate>
+        <div class="field-row">
+          <div class="field">
+            <label for="dni">DNI</label>
+            <input class="input" id="dni" name="dni" inputmode="numeric" autocomplete="off" value="30123456" aria-describedby="dni-hint">
+            <span class="hint" id="dni-hint">Sin puntos, 7 u 8 dígitos.</span>
+          </div>
+          <div class="field">
+            <label for="telefono">Teléfono</label>
+            <input class="input" id="telefono" name="telefono" type="tel" inputmode="tel" autocomplete="tel" value="+5493511234567" aria-describedby="telefono-hint">
+            <span class="hint" id="telefono-hint">Con código de país, por ejemplo +5493511234567.</span>
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="nombre">Nombre</label>
+            <input class="input" id="nombre" name="nombre" autocomplete="given-name" value="Luis">
+          </div>
+          <div class="field">
+            <label for="apellido">Apellido</label>
+            <input class="input" id="apellido" name="apellido" autocomplete="family-name" value="Ramírez">
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="email">Email</label>
+          <input class="input" id="email" name="email" type="email" inputmode="email" autocomplete="email" value="luis@ejemplo.com" aria-describedby="email-hint">
+          <span class="hint" id="email-hint">Te mandamos ahí el link de gestión del turno.</span>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="btn-row">
+          <button class="btn btn--secondary btn--block" type="button">Volver al horario</button>
+          <button class="btn btn--primary btn--block" type="submit">Confirmar turno</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <section class="variants" aria-labelledby="estados-formulario-manual">
+    <h2 id="estados-formulario-manual">Estados del formulario</h2>
+    <p>Variantes que la implementación tiene que cubrir antes de enviar y durante el envío.</p>
+    <div class="variant-grid">
+      <div class="variant" aria-label="Día sin horarios libres">
+        <h3>Sin horarios libres</h3>
+        <p class="variant__note">El día no tiene franjas, está bloqueado o no quedan inicios futuros. No se puede confirmar.</p>
+        <div class="empty">
+          <h3>No hay horarios libres este día</h3>
+          <p>Elegí otra fecha o volvé a la agenda.</p>
+          <button class="btn btn--secondary" type="button">Ver la semana</button>
+        </div>
+      </div>
+
+      <div class="variant" aria-label="Validación local">
+        <h3>Datos inválidos antes de enviar</h3>
+        <p class="variant__note">Mensajes por campo, en voseo. No se hace la solicitud.</p>
+        <div class="field">
+          <label for="dni-invalido">DNI</label>
+          <input class="input" id="dni-invalido" value="12.345.678" aria-invalid="true" aria-describedby="dni-invalido-error">
+          <span class="error" id="dni-invalido-error">Ingresá el DNI sin puntos, 7 u 8 dígitos.</span>
+        </div>
+        <div class="field">
+          <label for="tel-invalido">Teléfono</label>
+          <input class="input" id="tel-invalido" value="3511234567" aria-invalid="true" aria-describedby="tel-invalido-error">
+          <span class="error" id="tel-invalido-error">Ingresá el teléfono con código de país, por ejemplo +5493511234567.</span>
+        </div>
+        <button class="btn btn--primary" type="button" disabled>Confirmar turno</button>
+      </div>
+
+      <div class="variant" aria-label="Envío en curso">
+        <h3>Confirmando el turno</h3>
+        <p class="variant__note">Una sola solicitud; el botón queda bloqueado mientras se envía.</p>
+        <button class="btn btn--primary btn--block" type="button" aria-busy="true" disabled>
+          <span class="spinner" aria-hidden="true"></span>Confirmando…
+        </button>
+      </div>
+
+      <div class="variant" aria-label="Errores de validación del servidor">
+        <h3>El servidor rechaza un campo</h3>
+        <p class="variant__note">Se muestran los detalles por campo de la respuesta 400 <b>VALIDACION</b> y se conservan los datos.</p>
+        <div class="alert alert--error" role="alert">
+          <svg class="alert__icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 1.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zm.8 12.7H9.2v-1.6h1.6zm0-3.2H9.2V5.8h1.6z"/></svg>
+          <div><strong>Revisá estos datos</strong>El email no tiene un formato válido.</div>
+        </div>
+        <div class="field">
+          <label for="email-server">Email</label>
+          <input class="input" id="email-server" type="email" value="luis@" aria-invalid="true" aria-describedby="email-server-error">
+          <span class="error" id="email-server-error">Ingresá un email válido.</span>
+        </div>
+      </div>
+    </div>
+    <p class="nota-mockup">Los textos de error y las etiquetas se muestran con <code>textContent</code>; ningún dato del paciente se interpreta como HTML.</p>
+  </section>
+  <script src="../../../../design-system/brand.js"></script>
+</body>
+</html>
