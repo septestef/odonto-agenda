@@ -299,7 +299,7 @@ Camino crítico post-demo: `C-16 → C-17 → C-18` (C-20 cierra el camino hacia
   - `knowledge-base/10_preguntas_abiertas.md` §IN-01
 
 ### [C-10] `reserva-publica-ui` **[UI]**
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` archivado (2026-11-22)
 - **Scope**:
   - `features/reservar`: página `/reservar/{slug}` con selección de prestación, calendario/fecha, lista de horarios libres, formulario (DNI, nombre, apellido, teléfono E.164, email) con validación, pantalla de éxito (US-005, US-006, US-007 lado UI).
   - Manejo del 409 `RN-TU-01`: mensaje "Ese horario acaba de ser tomado, elegí otro" y refresco de disponibilidad; mensaje claro por límite de 2 turnos y por fuera de ventana de 24 h/60 días.

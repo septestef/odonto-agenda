@@ -9,6 +9,8 @@ import { alerta, boton } from './shared/ui/componentes'
 import type { Descriptor } from './shared/ui/componentes'
 import { layout } from './shared/ui/layout'
 import { crearControlLogin } from './features/auth/login'
+import { crearApiPublica } from './features/reservar/api-publica'
+import { crearControlReserva } from './features/reservar/pantalla-reserva'
 import { vistaMarcador } from './vistas/marcador'
 
 export interface OpcionesArranque {
@@ -33,6 +35,7 @@ function descriptorError(): Descriptor {
 interface ControlVista {
   descriptor: Descriptor
   manejadores: ManejadoresUI
+  iniciar?: () => void
 }
 
 interface NodoConsultable extends NodoUI {
@@ -135,7 +138,36 @@ export function arrancar(
     if (vista.tipo === 'ruta' && vista.nombre === 'login') {
       return crearLogin(ruta)
     }
-    if (vista.tipo === 'ruta' && (vista.nombre === 'reservar' || vista.nombre === 'turno')) {
+    if (vista.tipo === 'ruta' && vista.nombre === 'reservar') {
+      const slug = vista.parametros['slug']
+      if (slug === undefined || slug === '') {
+        return { descriptor: vistaMarcador(vista), manejadores: {} }
+      }
+
+      const api = crearApiPublica({ fetch: opciones.fetch })
+      const control = crearControlReserva({
+        slug,
+        api,
+        alCambiar: () => {
+          if (router.rutaActual() !== ruta) {
+            return
+          }
+          adaptador.montar(destino, control.descriptor(), {
+            ...control.manejadores(),
+            ...manejadoresComunes(),
+          })
+        },
+      })
+
+      return {
+        descriptor: control.descriptor(),
+        manejadores: control.manejadores(),
+        iniciar: () => {
+          void control.iniciar()
+        },
+      }
+    }
+    if (vista.tipo === 'ruta' && vista.nombre === 'turno') {
       // El guard no adjunta odontólogo en rutas públicas; el marcador va igual.
       return { descriptor: vistaMarcador(vista), manejadores: {} }
     }
@@ -166,6 +198,7 @@ export function arrancar(
           return
         }
         adaptador.montar(destino, control.descriptor, { ...control.manejadores, ...manejadoresComunes() })
+        control.iniciar?.()
       })
       // El guard ya traduce las fallas de red a un estado visible; evitamos
       // que una promesa huérfana interrumpa la cadena de renderizados.

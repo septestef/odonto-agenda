@@ -8,9 +8,11 @@ export interface EventoUI {
 /** Contrato mínimo que satisfacen tanto los nodos reales como los falsos de los tests. */
 export interface NodoUI {
   textContent: string | null
+  value?: string
   append(...nodos: NodoUI[]): void
   setAttribute(nombre: string, valor: string): void
   addEventListener(tipo: string, callback: (evento?: EventoUI) => void): void
+  focus?(): void
 }
 
 export interface DocumentoUI {
@@ -48,11 +50,17 @@ export function crearAdaptadorNodos(documento: DocumentoUI): AdaptadorNodos {
     if (descriptor.texto !== undefined) {
       nodo.textContent = descriptor.texto
     }
+    if (descriptor.enfocar === true) {
+      queueMicrotask(() => {
+        nodo.focus?.()
+      })
+    }
     if (descriptor.accion !== undefined) {
       nodo.setAttribute('data-accion', descriptor.accion)
       const manejador = manejadores?.[descriptor.accion]
       if (manejador !== undefined) {
-        const tipo = descriptor.etiqueta === 'form' ? 'submit' : 'click'
+        const tipo =
+          descriptor.etiqueta === 'form' ? 'submit' : descriptor.etiqueta === 'input' ? 'change' : 'click'
         nodo.addEventListener(tipo, (evento?: EventoUI) => {
           if (tipo === 'submit') {
             evento?.preventDefault()

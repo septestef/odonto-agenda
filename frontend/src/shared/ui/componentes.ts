@@ -1,19 +1,28 @@
 export type Etiqueta =
   | 'a'
   | 'button'
+  | 'dd'
   | 'dialog'
   | 'div'
+  | 'dl'
+  | 'dt'
+  | 'fieldset'
   | 'form'
   | 'h1'
   | 'h2'
+  | 'h3'
   | 'header'
   | 'img'
   | 'input'
   | 'label'
+  | 'legend'
+  | 'li'
   | 'main'
   | 'nav'
+  | 'ol'
   | 'p'
   | 'section'
+  | 'small'
   | 'span'
   | 'strong'
 
@@ -24,6 +33,7 @@ export interface Descriptor {
   atributos?: Readonly<Record<string, string>>
   hijos?: readonly Descriptor[]
   accion?: string
+  enfocar?: boolean
 }
 
 export interface OpcionesBoton {
@@ -88,7 +98,7 @@ export function alerta(opciones: OpcionesAlerta): Descriptor {
 export interface OpcionesCampo {
   etiqueta: string
   nombre: string
-  tipo: 'email' | 'password' | 'text'
+  tipo: 'email' | 'password' | 'tel' | 'text'
   autocompletado?: string
   valor?: string
   error?: string
