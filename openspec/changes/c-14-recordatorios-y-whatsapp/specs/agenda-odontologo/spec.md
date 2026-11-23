@@ -20,7 +20,7 @@
 
 ### Requirement: US-015 — Elegibilidad y composición segura del mensaje manual
 
-Solo un turno propio `RESERVADO` con `inicio > ahora` del servidor, de cualquier origen, MUST habilitar la generación si el teléfono vigente del paciente es internacional E.164 válido con código de país explícito y la dirección vigente del consultorio está informada. El éxito MUST devolver 200 JSON `{ "url": "https://wa.me/{telefono}?text={mensaje}" }` con `Cache-Control: no-store`: host y esquema fijos, teléfono en dígitos ASCII sin `+`, texto codificado una vez en UTF-8. El mensaje MUST contener fecha y hora en `America/Argentina/Buenos_Aires`, prestación y dirección; MUST NOT incluir nombre del paciente, DNI, email, otros datos personales del paciente ni credenciales de gestión. El sistema MUST NOT adivinar país, normalizar un número nacional a internacional ni sustituir teléfono o dirección.
+Solo un turno propio `RESERVADO` con `inicio > ahora` del servidor, de cualquier origen, MUST habilitar la generación (RN-NO-06) si el teléfono vigente del paciente cumple el mismo formato E.164 que valida la reserva (`^\+[1-9][0-9]{7,14}$`) y la dirección vigente del consultorio está informada (RN-NO-07). El éxito MUST devolver 200 JSON `{ "url": "https://wa.me/{telefono}?text={mensaje}" }` con `Cache-Control: no-store`: host y esquema fijos, teléfono en dígitos ASCII sin `+`, texto codificado una vez en UTF-8. El mensaje MUST contener fecha y hora en `America/Argentina/Buenos_Aires`, prestación y dirección; MUST NOT incluir nombre del paciente, DNI, email, otros datos personales del paciente ni credenciales de gestión. El sistema MUST NOT adivinar país, normalizar un número nacional a internacional ni sustituir teléfono o dirección.
 
 #### Scenario: Texto con caracteres especiales y cambio de fecha
 - **WHEN** el turno inicia a `2026-11-27T01:30:00Z`, el teléfono internacional válido está informado y la prestación o la dirección contiene tildes, `&`, `+`, `#` o `%`
@@ -28,11 +28,11 @@ Solo un turno propio `RESERVADO` con `inicio > ahora` del servidor, de cualquier
 
 #### Scenario: Estado y comienzo del turno
 - **WHEN** el dueño consulta un turno cancelado, atendido, ausente o un reservado con `inicio <= ahora`, aunque tenga datos correctos
-- **THEN** se devuelve 409 `{ "codigo": "RN-NO-05", "mensaje": "Solo podés preparar un WhatsApp para un turno reservado que todavía no empezó." }` sin URL
+- **THEN** se devuelve 409 `{ "codigo": "RN-NO-06", "mensaje": "Solo podés preparar un WhatsApp para un turno reservado que todavía no empezó." }` sin URL
 
 #### Scenario: Contacto o dirección no utilizables
-- **WHEN** el turno propio reservado futuro tiene teléfono ausente, local o internacional inválido, o tiene teléfono válido pero dirección nula, vacía o en blanco
-- **THEN** se devuelve 422 `RN-NO-05`, sin URL, con `El paciente no tiene un teléfono internacional válido.` si falla el teléfono, o `Falta la dirección del consultorio.` si solo falta dirección; no se bloquea Cancelar por esos datos
+- **WHEN** el turno propio reservado futuro tiene teléfono ausente o que no cumple el formato E.164 de la reserva (por ejemplo `3511234567`), o tiene teléfono válido pero dirección nula, vacía o en blanco
+- **THEN** se devuelve 422 `RN-NO-07`, sin URL, con `El paciente no tiene un teléfono internacional válido.` si falla el teléfono, o `Falta la dirección del consultorio.` si solo falta dirección; no se bloquea Cancelar por esos datos
 
 ### Requirement: US-015 — Acción secundaria local al detalle de agenda
 
