@@ -15,7 +15,7 @@ CHANGES confirma C-06/C-11/C-13 completos, C-12 archivada, C-14 con WhatsApp y C
 
 ## Goals / Non-Goals
 
-**Objetivo:** secuencia reproducible y ensayo verificable entre Lauti y Jero, con evidencia vinculada a la revisión candidata.
+**Objetivo:** secuencia reproducible y ensayo verificable entre Estefi y Facu, con evidencia vinculada a la revisión candidata.
 
 **Fuera de alcance:** nuevas funcionalidades, producción, cambios visuales, reglas de reserva nuevas o infraestructura de navegador. Las diferencias visuales se reportan para revisión.
 
@@ -23,9 +23,9 @@ CHANGES confirma C-06/C-11/C-13 completos, C-12 archivada, C-14 con WhatsApp y C
 
 ### D1. Responsables y superficies de trabajo
 
-Lauti realiza A: `README.md`, `.env.example`, `backend/**` para seed/configuración y tests necesarios, sección A de `tasks.md` y `openspec/changes/c-16-cierre-demo-y-ensayo/evidencias/` para sus resultados. README contiene únicamente la sección `Correr la demo en la notebook` con pasos y checklist de arranque; los registros de ejecución van en evidencias, no en README.
+Estefi realiza A: `README.md`, `.env.example`, `backend/**` para seed/configuración y tests necesarios, sección A de `tasks.md` y `openspec/changes/c-16-cierre-demo-y-ensayo/evidencias/` para sus resultados. README contiene únicamente la sección `Correr la demo en la notebook` con pasos y checklist de arranque; los registros de ejecución van en evidencias, no en README.
 
-Jero crea su rama desde main actualizada después de integrar la propuesta. Realiza B: `guion-demo.md`, evidencia dentro del mismo directorio y sección B de `tasks.md`. Ensaya una revisión que incluya A. Separar las entregas por responsable evita conflictos; las correcciones fuera de las superficies autorizadas requieren decisión.
+Facu crea su rama desde main actualizada después de integrar la propuesta. Realiza B: `guion-demo.md`, evidencia dentro del mismo directorio y sección B de `tasks.md`. Ensaya una revisión que incluya A. Separar las entregas por responsable evita conflictos; las correcciones fuera de las superficies autorizadas requieren decisión.
 
 ### D2. Reset local sin automatismo de arranque
 
@@ -63,7 +63,7 @@ Los tokens del seed no son recuperables: obtener el enlace mediante una reserva 
 
 Decision: no (no UI)
 
-Jero compara escritorio y 360 px con mockups aprobados revisión 2 de C-04/C-06/C-10/C-11/C-13/C-14/C-15 archivados. Registrar pantalla/estado, mockup, viewport, revisión, resultado y diferencias; incluir el detalle conocido de botones de escritorio de C-15. Clasificar bloqueos funcionales, diferencias visuales y detalles conocidos para revisión humana, sin inventar tolerancias ni aprobar diferencias por cuenta propia.
+Facu compara escritorio y 360 px con mockups aprobados revisión 2 de C-04/C-06/C-10/C-11/C-13/C-14/C-15 archivados. Registrar pantalla/estado, mockup, viewport, revisión, resultado y diferencias; incluir el detalle conocido de botones de escritorio de C-15. Clasificar bloqueos funcionales, diferencias visuales y detalles conocidos para revisión humana, sin inventar tolerancias ni aprobar diferencias por cuenta propia.
 
 Sin navegador automatizable, declarar prueba manual y dejar pendiente lo no ejecutado. El guion recorre historias M implementadas, US-011 y US-015; excluye US-013, US-014/C-21 y funcionalidades post-demo.
 
@@ -78,8 +78,8 @@ Sin navegador automatizable, declarar prueba manual y dejar pendiente lo no ejec
 ## Migration Plan
 
 1. Aprobar e integrar la propuesta antes de iniciar las ramas de implementación.
-2. Lauti completa A, guarda evidencia y entrega la revisión candidata a Jero.
-3. Jero completa B sobre esa revisión y entrega guion, evidencia y diferencias para revisión final.
-4. Tras B y revisión aprobada, Lauti integra, marca C-16 `[x]` en CHANGES y ejecuta archive/sync mediante el flujo autorizado.
+2. Estefi completa A, guarda evidencia y entrega la revisión candidata a Facu.
+3. Facu completa B sobre esa revisión y entrega guion, evidencia y diferencias para revisión final.
+4. Tras B y revisión aprobada, Estefi integra, marca C-16 `[x]` en CHANGES y ejecuta archive/sync mediante el flujo autorizado.
 
 Rollback: si hay datos a preservar, no resetear. Una base descartada no tiene recuperación prometida; los errores de seed se corrigen con otra migración o reconstruyendo la misma base local verificada, nunca editando checksums.

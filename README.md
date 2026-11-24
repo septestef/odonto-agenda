@@ -50,6 +50,44 @@ En Windows, `psql` suele estar en `C:\Program Files\PostgreSQL\18\bin\psql.exe` 
    npm run dev
    ```
 
+## Correr la demo en la notebook
+
+Pasos para dejar la demo lista desde cero en Windows, en PowerShell. Requisitos: los de la tabla de arriba, las bases creadas (paso 1 de "Puesta en marcha") y un `.env` en la raíz con `DB_PASSWORD`, `DEMO_PASSWORD` y las variables `MAIL_*` de la cuenta Gmail de prueba (contraseña de aplicación). Los valores se cargan a mano: nunca se versionan ni se pegan en chats o tickets.
+
+1. **Cerrá la app** si estaba corriendo (Ctrl+C en su terminal).
+
+2. **Reiniciá la base de demo** (borra todo el esquema `public` de `turnotarde`; los tests usan otra base). Desde la raíz del repo:
+
+   ```powershell
+   & "C:\Program Files\PostgreSQL\18\bin\psql.exe" -h localhost -U turnotarde -d turnotarde -f backend/scripts/reiniciar-base-demo.sql
+   ```
+
+   Pide la contraseña del rol `turnotarde`, muestra base, usuario y servidor, y se niega a seguir si no es la base local `turnotarde`. Para borrar hay que escribir `BORRAR`.
+
+3. **Arrancá con el perfil demo** (compila el frontend, lo copia a `static` y Flyway reconstruye el esquema con los datos de ejemplo):
+
+   ```powershell
+   cd backend
+   $env:SPRING_PROFILES_ACTIVE = 'demo'; .\gradlew.bat bootRun
+   ```
+
+   Está lista cuando el log dice `Started TurnoTardeApplication` y `Contraseña de demo aplicada`. Flyway tiene que llegar a la versión `901`.
+
+4. **Abrí el navegador** en la notebook:
+   - Odontólogo: `http://localhost:8080/login` con `demo@example.com` y tu `DEMO_PASSWORD`.
+   - Paciente: `http://localhost:8080/reservar/demo`.
+
+**Datos de ejemplo**: el miércoles 25/11/2026 tiene 6 turnos activos (09:00, 09:30, 10:30, 12:00, 16:30 y 18:00) y uno cancelado (11:00); el jueves 26 tiene uno a las 17:00 y el viernes 27 está libre. La reserva online exige 24 h de anticipación: en vivo se reserva el 26 o el 27; el turno manual del odontólogo sí admite horarios futuros del mismo día. Los links de los turnos del seed no sirven: para mostrar la gestión, hacé una reserva nueva con un buzón propio.
+
+**Checklist del día**
+
+- [ ] PostgreSQL 18 corriendo (servicio `postgresql-x64-18`).
+- [ ] `.env` completo en la raíz (base, `DEMO_PASSWORD` y `MAIL_*`).
+- [ ] Base reiniciada y app arrancada con el perfil `demo` (versión `901` en el log).
+- [ ] Login del odontólogo y página de reserva abiertos en el navegador.
+- [ ] Internet disponible y buzón de prueba abierto (revisá también spam).
+- [ ] `localhost` solo funciona en la notebook: los links del correo se abren ahí, no en un celular.
+
 ## Tests y build
 
 Desde `backend/`:
