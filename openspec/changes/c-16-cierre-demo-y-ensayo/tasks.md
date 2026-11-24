@@ -27,13 +27,13 @@ Alcance: README, `.env.example`, `backend/**` (seed/configuración y tests neces
 
 Crear la rama desde main actualizada con la propuesta integrada; ensayar una revisión que incluya A. Entregables: `guion-demo.md`, `evidencias/` y esta sección. Ver design D7.
 
-- [ ] 2.1 Registrar la base integrada de la propuesta y confirmar que la revisión candidata del smoke incluye A y sus bloqueos resueltos o elevados.
-- [ ] 2.2 Crear `guion-demo.md` para el miércoles 2026-11-25 con login/logout, configuración, reserva, correo, gestión, agenda, WhatsApp y manual.
+- [x] 2.1 Registrar la base integrada de la propuesta y confirmar que la revisión candidata del smoke incluye A y sus bloqueos resueltos o elevados.
+- [x] 2.2 Crear `guion-demo.md` para el miércoles 2026-11-25 con login/logout, configuración, reserva, correo, gestión, agenda, WhatsApp y manual.
   Trazar historias M, US-011 y US-015; declarar fuera US-013, US-014/C-21 y funcionalidades post-demo.
 - [ ] 2.3 Ejecutar smoke del guion con fechas elegibles; guardar por paso revisión, contexto, esperado/observado y aprobado/fallo/bloqueado.
 - [ ] 2.4 Ensayar dos reservas simultáneas del mismo horario con DNIs distintos; verificar una ganadora, un conflicto RN-TU-01 y una reserva en agenda.
   Vincular el resultado con el test de A, distinguiendo smoke manual de prueba automatizada.
-- [ ] 2.5 Verificar escritorio y 360 px en navegador local; registrar herramienta, viewport y resultados. Sin automatización, declarar verificación manual.
+- [x] 2.5 Verificar escritorio y 360 px en navegador local; registrar herramienta, viewport y resultados. Sin automatización, declarar verificación manual.
 - [ ] 2.6 Comparar pantallas/estados con mockups revisión 2 de C-04/C-06/C-10/C-11/C-13/C-14/C-15 y entregar matriz de evidencia y diferencias.
   Incluir el detalle de botones de escritorio C-15 y someter las diferencias a revisión.
 - [ ] 2.7 Realizar ensayo final y consolidar evidencia A/B, alcance y pendientes; solicitar revisión final con suites en verde y cobertura real.
