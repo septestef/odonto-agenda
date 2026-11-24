@@ -2,28 +2,28 @@
 
 Aplican las reglas comunes de `design.md`. Guardá los resultados en `openspec/changes/c-16-cierre-demo-y-ensayo/evidencias/`; README contiene solo pasos y checklist de arranque.
 
-## A — Arranque, datos y tests (Lauti)
+## A — Arranque, datos y tests (Estefi)
 
 Alcance: README, `.env.example`, `backend/**` (seed/configuración y tests necesarios), esta sección y `evidencias/` del change. Ver design D1-D6.
 
-- [ ] 1.1 Ejecutar baseline pertinente antes de modificar comportamiento; registrar comandos, revisión, cantidades y resultados en `evidencias/`.
+- [x] 1.1 Ejecutar baseline pertinente antes de modificar comportamiento; registrar comandos, revisión, cantidades y resultados en `evidencias/`.
   Si falla, reportar el fallo preexistente y detener esa modificación para decidir cómo resolverlo.
-- [ ] 1.2 Completar `.env.example` con todas las variables enumeradas en design D3 y verificar la herencia de `TEST_DB_PASSWORD`.
-- [ ] 1.3 Ejecutar el reset local de `public` siguiendo design D2; comprobar que Flyway reconstruye el esquema y registrar el destino verificado.
-- [ ] 1.4 Agregar una nueva V9xx libre en `backend/src/main/resources/db/demo` con tres o cuatro turnos sintéticos adicionales el 25/11, de mañana y tarde.
+- [x] 1.2 Completar `.env.example` con todas las variables enumeradas en design D3 y verificar la herencia de `TEST_DB_PASSWORD`.
+- [x] 1.3 Ejecutar el reset local de `public` siguiendo design D2; comprobar que Flyway reconstruye el esquema y registrar el destino verificado.
+- [x] 1.4 Agregar una nueva V9xx libre en `backend/src/main/resources/db/demo` con tres o cuatro turnos sintéticos adicionales el 25/11, de mañana y tarde.
   Usar prestaciones distintas y al menos un `MANUAL`, sin solaparse entre sí ni con V900; conservar V900 inmutable y huecos libres el 26/27 para reservar en vivo.
   Validar carga limpia, turnos adicionales y huecos esperados mediante el IT de perfil demo con `Clock` fijo de design D4.
-- [ ] 1.5 Arrancar desde cero con perfil demo y frontend incluido; confirmar Flyway, SPA y login en `http://localhost:8080`.
-- [ ] 1.6 Ejecutar `./gradlew build` desde `backend/`; verificar unitarios, integración PostgreSQL real y frontend.
+- [x] 1.5 Arrancar desde cero con perfil demo y frontend incluido; confirmar Flyway, SPA y login en `http://localhost:8080`.
+- [x] 1.6 Ejecutar `./gradlew build` desde `backend/`; verificar unitarios, integración PostgreSQL real y frontend.
   Registrar comandos, revisión, cantidades y resultados en `evidencias/`, incluido `ReservasConcurrentesApiIT` con exactamente una ganadora.
-- [ ] 1.7 Ejecutar `npm run lint`, `npm test` y `npm run build` desde `frontend/`; guardar comandos, revisión, cantidades y resultados en `evidencias/`.
-- [ ] 1.8 Ensayar Gmail según design D6: verificar entrega/spam y enlace de gestión, cancelación y reprogramación con nuevo correo.
+- [x] 1.7 Ejecutar `npm run lint`, `npm test` y `npm run build` desde `frontend/`; guardar comandos, revisión, cantidades y resultados en `evidencias/`.
+- [x] 1.8 Ensayar Gmail según design D6: verificar entrega/spam y enlace de gestión, cancelación y reprogramación con nuevo correo.
   Registrar el resultado y comprobar persistencia del turno ante fallo de envío.
-- [ ] 1.9 Agregar `Correr la demo en la notebook` en README con pasos PowerShell exactos y checklist: PostgreSQL, entorno, reset y navegador.
+- [x] 1.9 Agregar `Correr la demo en la notebook` en README con pasos PowerShell exactos y checklist: PostgreSQL, entorno, reset y navegador.
   Verificar que la secuencia reproduzca el arranque ensayado, sin incorporar registros de resultados.
-- [ ] 1.10 Revisar el diff contra el alcance A y entregar a Jero revisión candidata, evidencia y bloqueos; marcar solo tareas verificadas de A.
+- [x] 1.10 Revisar el diff contra el alcance A y entregar a Facu revisión candidata, evidencia y bloqueos; marcar solo tareas verificadas de A.
 
-## B — Guion, smoke y verificación visual (Jero)
+## B — Guion, smoke y verificación visual (Facu)
 
 Crear la rama desde main actualizada con la propuesta integrada; ensayar una revisión que incluya A. Entregables: `guion-demo.md`, `evidencias/` y esta sección. Ver design D7.
 
@@ -37,4 +37,4 @@ Crear la rama desde main actualizada con la propuesta integrada; ensayar una rev
 - [ ] 2.6 Comparar pantallas/estados con mockups revisión 2 de C-04/C-06/C-10/C-11/C-13/C-14/C-15 y entregar matriz de evidencia y diferencias.
   Incluir el detalle de botones de escritorio C-15 y someter las diferencias a revisión.
 - [ ] 2.7 Realizar ensayo final y consolidar evidencia A/B, alcance y pendientes; solicitar revisión final con suites en verde y cobertura real.
-- [ ] 2.8 Entregar a Lauti revisión candidata, guion, evidencia, resultados y diferencias. Tras B y revisión aprobada, Lauti integra, marca CHANGES C-16 `[x]` y archiva.
+- [ ] 2.8 Entregar a Estefi revisión candidata, guion, evidencia, resultados y diferencias. Tras B y revisión aprobada, Estefi integra, marca CHANGES C-16 `[x]` y archiva.
