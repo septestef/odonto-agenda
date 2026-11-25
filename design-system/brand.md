@@ -25,4 +25,4 @@
 - **Dentally:** agenda y lista de espera.
 - **Doctoralia:** elección de horario por el paciente.
 
-Detalle en `discovery/research-report.md` §D.
+Detalle en `docs/discovery/informe-discovery.md` §D.

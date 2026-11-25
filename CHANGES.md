@@ -461,7 +461,7 @@ Camino crítico post-demo: `C-16 → C-17 → C-18` (C-20 cierra el camino hacia
   - `design-system/tokens.css`, `design-system/components.html` (revisión 2)
   - `knowledge-base/04_modelo_de_datos.md` §paciente
   - `knowledge-base/10_preguntas_abiertas.md` §IN-02
-  - `discovery/discovery.md` (historia clínica y odontograma como funcionalidad opcional)
+  - `docs/discovery/discovery.md` (historia clínica y odontograma como funcionalidad opcional)
 
 ### [C-19] `marcar-atendido-ausente` **[UI]**
 - **Estado**: `[ ]` pendiente

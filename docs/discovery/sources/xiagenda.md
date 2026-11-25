@@ -60,3 +60,7 @@ Leyenda: Comprobado / Afirmación comercial / No evidenciado.
 
 - https://www.comparasoftware.com/xiagenda — fecha de consulta 2026-11-17
 - https://www.xiagenda.com/ — fecha de consulta 2026-11-17 (DNS no resuelve)
+
+## Verificación del equipo (2026-11-20)
+
+La ficha describe señas con Mercado Pago, lista de espera e IA multicanal. El precio de USD 15 por miembro corresponde a México; el precio en ARS y las señas no se pueden comprobar sin comprometer datos personales. Resultado: **Parcial**.

@@ -1,6 +1,6 @@
 # turnotardeutn — Base de Conocimiento
 
-Base de conocimiento armada a partir de la fase de Discovery (`discovery/`) y de las decisiones de arquitectura tomadas con el usuario el 2026-11-17.
+Base de conocimiento armada a partir de la fase de Discovery (`docs/discovery/`) y de las decisiones de arquitectura tomadas con el usuario el 2026-11-17.
 
 ## Índice de archivos
 

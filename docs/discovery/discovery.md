@@ -1,7 +1,7 @@
 # Discovery — turnotardeutn
 
 **Fecha**: 2026-11-17
-**Fuentes investigadas**: 20 sistemas (ver `discovery/sources/`); informe de mercado completo en `discovery/research-report.md` (tabla comparativa, matriz de puntuación ponderada, análisis competitivo y recomendación).
+**Fuentes investigadas**: 20 sistemas (ver `docs/discovery/sources/`); informe de mercado completo en `docs/discovery/informe-discovery.md` (tabla comparativa, matriz de puntuación ponderada, análisis competitivo y recomendación).
 
 ## 1. Problema que resuelve
 
@@ -30,9 +30,10 @@ El odontólogo independiente en Argentina coordina sus turnos por WhatsApp, tel�
 | Dentalink | CL (módulo AR) | 3.95 | Muy completo, orientado a clínicas |
 | OdontoClinIA | AR | 3.90 | Sillón como recurso de agenda |
 | AgendaPro | AR (página dental) | 3.65 | Único que declara Ley 25.326 y 26.529 |
+| DentalCore | AR/LatAm | 3.40 | Recalculado el 2026-11-25 (antes 2.00): el sitio figuraba caído y la verificación del equipo lo encontró operativo. Declara periodontograma y OS + ARCA + MP |
 | DentalTec | AR | 3.25 | ARCA sin Mercado Pago |
 
-**Competidores prioritarios para ver en demo**: DentalSoft, AgendaPro, Dentalink, OdontoClinIA y DentalTec (Bilog como reserva).
+**Competidores prioritarios para ver en demo**: DentalSoft, AgendaPro, Dentalink, OdontoClinIA y DentalTec (Bilog como reserva). Desde el 2026-11-25 se suma DentalCore como sexto candidato (ver `docs/discovery/informe-discovery.md`, D.1).
 **Referentes de UX**: Dentally (lista de espera), Turnito (reserva por link sin registro), Doctoralia (búsqueda y reserva del paciente).
 
 **Notas**: el puntaje mide evidencia pública, no calidad real; casi toda la evidencia es afirmación comercial del proveedor. La reserva sin cuenta es el estándar del mercado y por eso se adoptó. Vacíos detectados en el mercado argentino: ningún sistema muestra lista de espera ni relleno automático de horarios liberados, casi no hay controles periódicos ligados a tratamientos, nadie declara la Ley 27.706 y la mitad oculta sus precios.

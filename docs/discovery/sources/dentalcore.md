@@ -60,3 +60,9 @@ Leyenda: Comprobado / Afirmación comercial / No evidenciado.
 
 - https://dentalcore.app/ — fecha de consulta 2026-11-17 (conexión rechazada; datos de fragmento de buscador)
 - https://www.capterra.ca/software/1102553/Dentalcore — fecha de consulta 2026-11-17 (HTTP 403; datos de fragmento de buscador)
+
+## Verificación del equipo (2026-11-19)
+
+El sitio **no estaba caído**: https://dentalcore.app/ funcionaba. Publica un precio mínimo de alrededor de $80.000 más $15.000 por cada odontólogo extra. Declara HC con odontograma y periodontograma, módulos por especialidad, apoyo a la decisión clínica, recetas y consentimientos; agenda con recordatorios por WhatsApp, e-mail o SMS; factura electrónica en 8 países (ARCA incluida), obras sociales y prepagas, cobros con Mercado Pago; exportación en HL7 FHIR, base aislada por clínica y roles por persona. Todo es **afirmación comercial**: no se puede comprobar sin pagar el sistema. Resultado: **No respaldado** (el informe lo daba por caído). Ver `docs/discovery/informe-discovery.md`, "Verificación de fuentes" #7.
+
+**Puntaje recalculado (2026-11-25)**: T3 · C4 · I4 · A4 · P2 · S3 · $3 = **3,40** (antes 2,00). Pasa del puesto 18 al 5 de la matriz.

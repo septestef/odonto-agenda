@@ -44,7 +44,7 @@ La fuente de verdad del dominio vive en `knowledge-base/`. **Leé el archivo rel
 
 > ⚠️ No hay preguntas de prioridad **Alta** abiertas. Antes de los changes que las tocan, revisá IN-01 (cancelación en cualquier momento; 24 h solo para reservar) y PA-02/PA-03 (turno manual y pasos de 15 minutos).
 
-Contexto de mercado: [discovery/discovery.md](discovery/discovery.md) y [discovery/research-report.md](discovery/research-report.md).
+Contexto de mercado: [docs/discovery/discovery.md](docs/discovery/discovery.md) y [docs/discovery/informe-discovery.md](docs/discovery/informe-discovery.md) (también en PDF).
 
 ### Design system (política `system-and-mockups`, revisión 2 aprobada)
 
@@ -65,7 +65,7 @@ Todo cambio visual necesita un **mockup HTML aprobado** en `openspec/changes/<na
 
 Cargá la skill que corresponde al contexto ANTES de escribir código.
 
-> Los compact rules de cada skill los resuelve el orquestador desde `.atl/skill-registry.md` (generado por `skill-registry`; no versionado — no está en el repo).
+> Los compact rules de cada skill los resuelve el orquestador desde `.atl/skill-registry.md` (generado por `skill-registry` y versionado).
 
 ---
 

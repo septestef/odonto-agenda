@@ -69,3 +69,7 @@ Leyenda: **Comprobado** = visible en documentación, centro de ayuda, captura, v
 - https://dentalsoft.com.ar/ — fecha de consulta 2026-11-17
 - https://www.dentalsoft.com.ar/blog/como-elegir-software-gestion-consultorio-odontologico — fecha de consulta 2026-11-17 (solo fragmento de buscador)
 - https://www.getapp.com/all-software/a/dentalsoft/ — fecha de consulta 2026-11-17 (HTTP 403; solo fragmento de buscador)
+
+## Verificación del equipo (2026-11-19)
+
+Con la prueba web se confirmaron los avisos por WhatsApp y e-mail y la reserva en 4 pasos. La detección de solapamiento no se pudo comprobar con la prueba web: queda como afirmación comercial. Resultado: **Parcial**.
