@@ -407,7 +407,7 @@ Camino crítico post-demo: `C-16 → C-17 → C-18` (C-20 cierra el camino hacia
 ## FASE 6 — Cierre de la demo
 
 ### [C-16] `cierre-demo-y-ensayo`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado (archivado 2026-11-25 como `2026-11-25-c-16-cierre-demo-y-ensayo`). Frente A (PR #28): script de reset con controles, V901 con la agenda del 25/11, README «Correr la demo en la notebook» y suites en verde (321 unitarios, 461 de integración contra PostgreSQL real y 678 de Vitest). Frente B (PR #29): guion, smoke con márgenes medidos en el servidor, concurrencia con POST superpuestos (un 201, un 409 RN-TU-01, una fila), cotejo a 1440 y 360 px contra los mockups de C-04/06/10/11/13/14/15 y ensayo final de 11 min 31 s en la notebook de demo. Spec vigente nueva: `preparacion-demo`. Pendientes visuales para después de la demo (aceptados por Estefi): cabecera y login de C-04, columnas de C-06, tipografía y botones de la agenda Día, avisos de C-13/C-15, botones de C-15 y el botón de confirmar de C-10 habilitado con el formulario vacío. Detalle en `evidencias/B-visual.md` del archivo. El GATE 7 se cierra con la demo realizada.
 - **Scope**:
   - Verificar el arranque completo en localhost: `bootRun` con perfil `demo`, build del frontend copiado a `static`, PostgreSQL local, seed con turnos de ejemplo, variables `.env` completas.
   - README de arranque (pasos exactos para correr la demo en la notebook) y guion de demo que recorre: login, configuración, reserva online, email, cancelación y reprogramación desde el link, agenda diaria/semanal y, si entraron, recordatorio y WhatsApp.
