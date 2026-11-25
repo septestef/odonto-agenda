@@ -60,3 +60,7 @@ Leyenda: Comprobado / Afirmación comercial / No evidenciado.
 ## Fuentes
 
 - https://www.turnito.app/ — fecha de consulta 2026-11-17
+
+## Verificación del equipo (2026-11-19)
+
+Los planes van de ARS 0 a **36.800** + IVA (el relevamiento decía 34.800). Se comprobó que no hace falta cuenta para reservar. El bloqueo del horario con seña de Mercado Pago no se pudo comprobar sin hacer una reserva: queda como afirmación comercial. Resultado: **Parcial**.

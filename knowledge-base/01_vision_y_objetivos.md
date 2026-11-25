@@ -4,7 +4,7 @@
 
 **turnotardeutn permite que un odontólogo independiente publique su agenda y que sus pacientes reserven, cancelen o reprogramen turnos online sin crear una cuenta y sin que existan superposiciones.**
 
-Hoy el odontólogo independiente en Argentina coordina sus turnos por WhatsApp, teléfono o papel. Eso le genera superposiciones, ausencias y tiempo perdido respondiendo mensajes. Las soluciones del mercado (ver `discovery/research-report.md`) suelen ser caras, ocultan el precio o están pensadas para clínicas con varios profesionales. turnotardeutn apunta al profesional que trabaja solo, con una suscripción mensual fija y precio público.
+Hoy el odontólogo independiente en Argentina coordina sus turnos por WhatsApp, teléfono o papel. Eso le genera superposiciones, ausencias y tiempo perdido respondiendo mensajes. Las soluciones del mercado (ver `docs/discovery/informe-discovery.md`) suelen ser caras, ocultan el precio o están pensadas para clínicas con varios profesionales. turnotardeutn apunta al profesional que trabaja solo, con una suscripción mensual fija y precio público.
 
 ## Objetivos por actor
 

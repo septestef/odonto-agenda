@@ -33,7 +33,7 @@ Esta carpeta es la base visual única del producto. Las pantallas reales y los m
 - Nombre y logo: provistos por el usuario el 2026-11-17.
 - Tono "clínico y calmo": elegido por el usuario el 2026-11-17. El verde azulado del logo coincide con `--color-primary-600`.
 - Actores, pantallas y reglas: `knowledge-base/01`, `03`, `05` y `06`.
-- Referencias de UX: `discovery/research-report.md` §D.
+- Referencias de UX: `docs/discovery/informe-discovery.md` §D.
 
 ## Decisiones abiertas
 

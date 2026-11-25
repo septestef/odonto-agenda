@@ -5,88 +5,88 @@
   "discovery": {
     "created_by": "discovery-research",
     "sources_fetched_at": "2026-11-17",
-    "report_file": "discovery/research-report.md",
+    "report_file": "docs/discovery/informe-discovery.md",
     "sources": [],
     "competitors": [
       {
         "name": "DentalSoft",
-        "notes_file": "discovery/sources/dentalsoft.md"
+        "notes_file": "docs/discovery/sources/dentalsoft.md"
       },
       {
         "name": "Dentalink",
-        "notes_file": "discovery/sources/dentalink.md"
+        "notes_file": "docs/discovery/sources/dentalink.md"
       },
       {
         "name": "OdontoClinIA",
-        "notes_file": "discovery/sources/clinia.md"
+        "notes_file": "docs/discovery/sources/clinia.md"
       },
       {
         "name": "AgendaPro",
-        "notes_file": "discovery/sources/agendapro.md"
+        "notes_file": "docs/discovery/sources/agendapro.md"
       },
       {
         "name": "DentalTec",
-        "notes_file": "discovery/sources/dentaltec.md"
+        "notes_file": "docs/discovery/sources/dentaltec.md"
       },
       {
         "name": "Bilog",
-        "notes_file": "discovery/sources/bilog.md"
+        "notes_file": "docs/discovery/sources/bilog.md"
       },
       {
         "name": "DentiClick",
-        "notes_file": "discovery/sources/denticlick.md"
+        "notes_file": "docs/discovery/sources/denticlick.md"
       },
       {
         "name": "Calu",
-        "notes_file": "discovery/sources/calu.md"
+        "notes_file": "docs/discovery/sources/calu.md"
       },
       {
         "name": "Doctoralia",
-        "notes_file": "discovery/sources/doctoralia.md"
+        "notes_file": "docs/discovery/sources/doctoralia.md"
       },
       {
         "name": "Turnito",
-        "notes_file": "discovery/sources/turnito.md"
+        "notes_file": "docs/discovery/sources/turnito.md"
       },
       {
         "name": "DentalCore",
-        "notes_file": "discovery/sources/dentalcore.md"
+        "notes_file": "docs/discovery/sources/dentalcore.md"
       },
       {
         "name": "XIAgenda",
-        "notes_file": "discovery/sources/xiagenda.md"
+        "notes_file": "docs/discovery/sources/xiagenda.md"
       },
       {
         "name": "Dentidesk",
-        "notes_file": "discovery/sources/dentidesk.md"
+        "notes_file": "docs/discovery/sources/dentidesk.md"
       },
       {
         "name": "Bewe",
-        "notes_file": "discovery/sources/bewe.md"
+        "notes_file": "docs/discovery/sources/bewe.md"
       },
       {
         "name": "Clinic Cloud",
-        "notes_file": "discovery/sources/clinic-cloud.md"
+        "notes_file": "docs/discovery/sources/clinic-cloud.md"
       },
       {
         "name": "Gesden",
-        "notes_file": "discovery/sources/gesden.md"
+        "notes_file": "docs/discovery/sources/gesden.md"
       },
       {
         "name": "Open Dental",
-        "notes_file": "discovery/sources/open-dental.md"
+        "notes_file": "docs/discovery/sources/open-dental.md"
       },
       {
         "name": "Curve Dental",
-        "notes_file": "discovery/sources/curve-dental.md"
+        "notes_file": "docs/discovery/sources/curve-dental.md"
       },
       {
         "name": "Dentally",
-        "notes_file": "discovery/sources/dentally.md"
+        "notes_file": "docs/discovery/sources/dentally.md"
       },
       {
         "name": "Dentrix",
-        "notes_file": "discovery/sources/dentrix.md"
+        "notes_file": "docs/discovery/sources/dentrix.md"
       }
     ],
     "problema": "El odontólogo independiente en Argentina coordina turnos por WhatsApp, teléfono o papel, con superposiciones, ausencias y tiempo perdido; las soluciones existentes son caras, ocultan precio o están sobredimensionadas para un profesional solo.",

@@ -1,5 +1,11 @@
 # Proposal
 
+## Por qué este es el change que presentamos
+
+> Agregado el 2026-11-25 para la entrega del Trabajo Global; el resto del proposal queda como se aprobó el 2026-11-21.
+
+Elegimos C-07 porque es el núcleo del MVP imprescindible que recomendó el Discovery (sección D.3: prevención de solapamiento y reserva online con DNI) y coincide con el ejemplo de la consigna: crear un turno sin solapamientos. Tiene reglas de negocio verificables (RN-TU-01, RN-TU-03, RN-PA-03) con escenarios felices, de error y de borde, incluidos los turnos contiguos y dos reservas simultáneas del mismo horario, donde exactamente una gana. Además, es una sola funcionalidad (la API de disponibilidad y reserva), no un módulo.
+
 ## Why
 
 El paciente todavía no puede ver horarios libres ni reservar: C-02 dejó el esquema y la garantía anti-solapamiento en la base, pero nada la expone por HTTP. C-07 es el núcleo del camino crítico (`C-01 → C-02 → C-07 → C-08 → C-09 → C-11 → C-16`) y la demo es el miércoles 2026-11-25. Además, C-08 (emails), C-09 (gestión por token), C-10 (UI de reserva) y C-15 (turno manual) dependen de los contratos que define este change: endpoints, códigos de error y eventos de dominio.

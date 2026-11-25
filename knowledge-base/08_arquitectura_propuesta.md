@@ -53,7 +53,7 @@ turnotardeutn/
 │           ├── reservar/    (página pública)
 │           └── turno/       (gestión por token)
 ├── knowledge-base/
-├── discovery/
+├── docs/discovery/ (informe de Discovery en md y PDF)
 └── openspec/
 ```
 
