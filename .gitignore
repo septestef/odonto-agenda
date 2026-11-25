@@ -28,5 +28,5 @@ logs/
 Thumbs.db
 
 # Herramientas locales (no se versionan)
-.atl/
+# .atl/skill-registry.md SÍ se versiona: la consigna del Trabajo Global lo exige.
 .playwright-mcp/
