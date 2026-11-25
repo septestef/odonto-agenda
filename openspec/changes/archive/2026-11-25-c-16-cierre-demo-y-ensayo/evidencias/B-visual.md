@@ -69,6 +69,7 @@ Sobre `ff603a3`, en navegador local, el operador confirmó mediante **DevTools m
 - **Revisora:** Estefi, el 25/11/2026, sobre la revisión `b248226` más la evidencia de esta retoma.
 - **Decisión sobre las diferencias de esta matriz:** **aceptadas para la demo** y **pendientes visuales después de la demo**, sin corrección dentro de C-16. Incluye el detalle de los botones de C-15 que pedía D7 y la interacción del botón de confirmar de C-10.
 - **Decisión sobre el éxito de C-10:** se pidió capturarlo antes de cerrar, y quedó cotejado.
+- **Integración:** Estefi mergeó el PR #29 en `main` el 25/11 (`055164e`, con `d211b72`) y autorizó archivar C-16.
 - **Decisión sobre el ensayo de 2.7 con desvíos:** aceptado (ver [B-smoke](B-smoke.md#27--ensayo-final-cronometrado--2511)).
 
 ## Matriz parcial de Facu (antecedente)

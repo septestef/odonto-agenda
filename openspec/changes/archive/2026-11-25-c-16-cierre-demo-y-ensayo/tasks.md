@@ -37,4 +37,4 @@ Crear la rama desde main actualizada con la propuesta integrada; ensayar una rev
 - [x] 2.6 Comparar pantallas/estados con mockups revisión 2 de C-04/C-06/C-10/C-11/C-13/C-14/C-15 y entregar matriz de evidencia y diferencias.
   Incluir el detalle de botones de escritorio C-15 y someter las diferencias a revisión.
 - [x] 2.7 Realizar ensayo final y consolidar evidencia A/B, alcance y pendientes; solicitar revisión final con suites en verde y cobertura real.
-- [ ] 2.8 Entregar a Estefi revisión candidata, guion, evidencia, resultados y diferencias. Tras B y revisión aprobada, Estefi integra, marca CHANGES C-16 `[x]` y archiva.
+- [x] 2.8 Entregar a Estefi revisión candidata, guion, evidencia, resultados y diferencias. Tras B y revisión aprobada, Estefi integra, marca CHANGES C-16 `[x]` y archiva.
