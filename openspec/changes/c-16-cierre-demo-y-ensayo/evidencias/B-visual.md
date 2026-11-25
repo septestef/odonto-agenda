@@ -1,6 +1,6 @@
 # Frente B — Verificación de navegador y comparación visual parcial
 
-**Estado: 2.5 verificada con observación directa parcial y recorrido manual asistido. 2.6 pendiente: solo se compararon estados de C-04/C-10; lo que falta comparar queda para después de la demo.** Referencias: [diseño D7](../design.md), [tareas 2.5/2.6](../tasks.md), [guion](../guion-demo.md), [pendientes](B-pendientes.md).
+**Estado (actualizado 25/11): 2.5 verificada. 2.6 cotejada en la notebook de demo para todas las pantallas y estados del guion; solo el retorno tras el logout no se capturó (su destino es el login, ya cotejado). No hay bloqueos funcionales. Revisión humana: Estefi aceptó las diferencias para la demo y las dejó como pendientes visuales para después. Ver [matriz completa](#matriz-completa-2411--26) y [revisión](#revisión-humana-28).** La matriz de Facu queda abajo como antecedente. Referencias: [diseño D7](../design.md), [tareas 2.5/2.6](../tasks.md), [guion](../guion-demo.md), [pendientes](B-pendientes.md).
 
 - **Revisión candidata:** `ff603a30bf822851e55d75d7c1b98c2359f0604d`, que incluye [A](A-arranque-datos-tests.md). Observado por B tras la recuperación del [arranque local](B-smoke.md#arranque-local--fallo-inicial-y-recuperación), sobre `http://localhost:8080`, perfil de app `demo` y base local con V900/V901. No se registró una hora exacta de la comparación visual.
 - **Navegador y método directo de B:** Edge 158 mediante Chrome DevTools Protocol (CDP), perfil limpio, viewports CSS de **escritorio (E) 1440 × 900** y **móvil (M) 360 × 800**. B no autenticó ni envió el formulario. Las mediciones de B no se atribuyen al recorrido manual asistido.
@@ -27,7 +27,51 @@ Sobre `ff603a3`, en navegador local, el operador confirmó mediante **DevTools m
 | Acción de WhatsApp en la app y «Nuevo turno» | Confirmados |
 | Confirmación de reserva pública, selector de reprogramación, confirmación de alta manual y retorno al login | Confirmados por separado |
 
-## Matriz de comparación (2.6)
+## Matriz completa 24/11 · 2.6
+
+**Método.** Revisión `b248226`, que incluye A y no cambia código. App en `http://localhost:8080`, perfil `demo`, en la notebook de demo. Playwright con Chromium y viewports de **E 1440 × 900** y **M 360 × 800**. Las capturas son de página completa (JPEG). Los mockups de revisión 2 archivados se sirvieron **sin editar** desde loopback (`127.0.0.1:8099`), con un servidor de rutas permitidas que corrige solo dos rutas rotas por el archivado: `/openspec/design-system/` pasa a `design-system/`, y `archive/archive/` pasa a `archive/`, que es el CSS de C-13 que usa C-14. Todos los recursos cargaron sin errores 404. Claude comparó cada par de capturas mirándolas. No hay comparación píxel a píxel ni tolerancias definidas.
+
+**Capturas.** Están en [`visual/mockups/`](visual/mockups/) y [`visual/app/`](visual/app/). Los nombres siguen el patrón `c-NN-pantalla-E|M.jpg` y solo tienen datos del seed o ficticios. Se descartó una captura que mostraba el email de la operadora.
+
+**Global.** No hay desplazamiento horizontal de la página en ninguna pantalla capturada, ni en E ni en M. La consola no mostró errores en las pantallas públicas.
+
+| Change · pantalla o estado | Mockup | Captura de la app | Resultado | Clasificación y diferencia (revisión humana pendiente) |
+| --- | --- | --- | --- | --- |
+| C-04 · Login | `c-04-login-escritorio-E`, `c-04-login-movil-M` | `c-04-login-E/M` | Diferencia | **Visual.** En E falta el panel de marca. En E y M faltan el logo, el enlace «link público» al pie y el título dentro de la tarjeta, y «Ingresar» no ocupa todo el ancho (mide 101 px). Confirma y amplía lo que había visto Facu. |
+| C-04 · Cabecera autenticada | `c-04-layout-base-E/M` | `c-04-c-15-shell-agenda-E/M` y todas las autenticadas | Diferencia | **Visual.** Aparece el texto «OdontoAgenda» repetido junto al logo. El nombre y «Cerrar sesión» no están alineados a la derecha. En M, la navegación ocupa tres filas: logo, pestañas y usuario. |
+| C-04 · Vuelta tras el logout | — | — | No cotejado | El logout funcional se aprobó en el smoke de Facu. No se capturó la pantalla para no cerrar la sesión de verificación. La pantalla de destino es el login, ya cotejado. |
+| C-06 · Horarios | `c-06-horarios-escritorio-E`, `-movil-M` | `c-06-horarios-E/M` | Coincide con diferencias | **Detalle conocido.** Cada franja se edita con campos de hora y «Quitar franja», en lugar de una etiqueta fija. Viene del arreglo posterior `fix/c-06-franjas-horario`. |
+| C-06 · Prestaciones | `c-06-prestaciones-escritorio-E`, `-movil-M` | `c-06-prestaciones-E/M` | Diferencia | **Visual.** En E hay una sola columna en lugar de dos tarjetas. El botón «Guardar prestación» queda pegado al título «Tus prestaciones». «Activa» aparece como texto, sin etiqueta. El campo «Duración» queda desalineado del campo «Nombre». Falta el ícono del aviso informativo. |
+| C-06 · Bloqueos | `c-06-bloqueos-escritorio-E`, `-movil-M` | `c-06-bloqueos-E/M` | Diferencia | **Visual.** Mismo patrón que Prestaciones: una sola columna y «Agregar bloqueo» pegado al título «Tus bloqueos». Falta el ícono del aviso. |
+| C-10 · Selección | `c-10-reserva-seleccion-E/M` | `c-10-seleccion-E/M` | Coincide | Sin diferencias relevantes. En la app la semana empieza en la fecha mínima reservable y el mockup muestra la semana calendario. |
+| C-10 · Día bloqueado o sin horarios | `c-10-reserva-seleccion` (variante «Día sin horarios») | `c-10-bloqueo-sabado-E/M` | Coincide con diferencias | **Visual menor.** Aparecen el texto y «Ver el próximo día disponible», pero el título no va en negrita y la sugerencia y el botón quedan fuera de la tarjeta. |
+| C-10 · Formulario | `c-10-reserva-formulario-E/M` | `c-10-formulario-E/M`, `c-10-formulario-vacio-click-E/M` | Coincide con diferencias | **Interacción.** «Confirmar reserva» está habilitado con el formulario vacío (171 px). Al pulsarlo marca los 5 campos con error y muestra «Corregí los datos marcados…» **sin enviar ningún pedido**: es validación local en `confirmar()`. El mockup lo muestra deshabilitado. **Visual:** falta el ícono del aviso. |
+| C-10 · Éxito | `c-10-reserva-exito-E/M` | `c-10-exito-E/M`, capturada el 25/11 con el email tapado en el DOM antes de la captura | Coincide con diferencias | **Visual menor.** El aviso «Te enviamos un email» sale en azul informativo y sin ícono, y el mockup lo muestra verde de éxito. El ícono de confirmación es un «✓» fino y no el círculo relleno. La estructura, el resumen, el aviso de spam y «Reservar otro turno» coinciden. |
+| C-10 · Conflicto | `c-10-reserva-conflicto` | — | Corresponde a 2.4 | Se vieron el aviso y el refresco de horarios. Ver [B-smoke](B-smoke.md#24--concurrencia-manual-con-solapamiento-medido). |
+| C-11 · Turno activo | `c-11-turno-activo-E/M` | `c-11-turno-activo-E/M` (M, 25/11 11:00) | Coincide | — |
+| C-11 · Diálogo de cancelación | `c-11-cancelar-confirmacion-E/M` | `c-11-cancelar-confirmacion-E/M` | Coincide | Se abrió y se cerró con «No, volver», sin confirmar. |
+| C-11 · Reprogramar | `c-11-reprogramar-E/M` | `c-11-reprogramar-E/M` | Coincide | Se abrió sin confirmar el cambio y el turno siguió activo. |
+| C-11 · Solo lectura | `c-11-solo-lectura-E/M` | `c-11-solo-lectura-E/M` (P-C y P-R original) | Coincide | El aviso «Cancelaste tu turno» aparece solo justo después de cancelar, no al volver a abrir el enlace, igual que en el mockup. |
+| C-13 · Día | `c-13-agenda-dia-E/M` | `c-13-c-15-dia-25-E/M` | Diferencia | **Visual.** Los horarios aparecen en tipografía monoespaciada. «Ver» y «Cancelar» van debajo del turno y más chicos, no a la derecha. Falta el contador («6 turnos · 1 cancelado»). El estado aparece sin etiqueta con punto. El contenido funcional es el esperado: 6 turnos activos más M y el cancelado de las 11:00. |
+| C-13 · Semana | `c-13-agenda-semana-E/M` | `c-13-semana-E/M` | Coincide | Grilla, cancelados tachados, bloqueo rayado y leyenda. No hubo banner de turnos dentro de bloqueos porque no aplicaba. |
+| C-13 · Detalle | `c-13-turno-detalle-E/M` | `c-13-c-14-detalle-E/M` | Coincide con diferencias | **Visual menor.** El panel se alinea con el turno elegido y no con la parte superior, y los valores no van en negrita. |
+| C-13 · Diálogo de cancelación | `c-13-cancelar-confirmacion-E/M` | `c-13-cancelar-confirmacion-E/M` | Coincide | **Texto:** dice «Le avisamos por email a la paciente» aunque el turno sea de un paciente varón. |
+| C-13 · Aviso de turno cancelado | `c-13-estados-E/M` (estado 5) | `c-13-aviso-cancelacion-E` | Diferencia | **Visual.** El aviso es una etiqueta verde oscura con «Turno cancelado» solo. El mockup muestra una tarjeta blanca con ícono, «Le avisamos a … por email» y «Cerrar». |
+| C-14 · WhatsApp en el detalle | `c-14-detalle-whatsapp-E/M` | `c-13-c-14-detalle-E/M` (Día); botón confirmado también en Semana | Coincide | El botón está entre los datos y «Cancelar turno». No se pulsó en la captura. |
+| C-15 · «Nuevo turno» (Día y Semana) | `c-15-agenda-con-nuevo-turno-E/M` | `c-04-c-15-shell-agenda-E/M`, `c-13-semana-E` | **Diferencia: detalle de botones de D7** | **Visual.** En E, «Nuevo turno» es un botón secundario de 94 × 32 px, sin «+», a la **izquierda** de Día/Semana. El mockup lo muestra principal, con «+», 44 px de alto y a la **derecha** de la navegación. Aparece igual en Semana, que no tiene mockup propio. |
+| C-15 · Formulario | `c-15-formulario-turno-manual-E/M` | `c-15-formulario-inicial/horarios/datos-E/M` | Diferencia | **Visual, botones de D7.** «Volver al horario» (138 × 44) y «Confirmar turno» (136 × 44) van **uno al lado del otro con ancho automático**. En el mockup van **apilados y a lo ancho**. También faltan «· Agenda del…», la fila «Lugar» y el ícono del aviso. |
+| C-15 · Alta exitosa | `c-15-conflicto-y-exito-E/M` (sección 2) | `c-15-exito-E/M` | Diferencia | **Visual.** Mismo patrón que en C-13: etiqueta «Turno cargado» sin el texto «Le enviamos el link…», sin cerrar y sin el resaltado de «recién cargado». El turno aparece en la grilla. |
+
+**Bloqueos funcionales: ninguno.** Las diferencias son visuales o de interacción. Ninguna se corrigió dentro de C-16, que no incluye cambios visuales (design, fuera de alcance).
+
+### Revisión humana (2.8)
+
+- **Revisora:** Estefi, el 25/11/2026, sobre la revisión `b248226` más la evidencia de esta retoma.
+- **Decisión sobre las diferencias de esta matriz:** **aceptadas para la demo** y **pendientes visuales después de la demo**, sin corrección dentro de C-16. Incluye el detalle de los botones de C-15 que pedía D7 y la interacción del botón de confirmar de C-10.
+- **Decisión sobre el éxito de C-10:** se pidió capturarlo antes de cerrar, y quedó cotejado.
+- **Decisión sobre el ensayo de 2.7 con desvíos:** aceptado (ver [B-smoke](B-smoke.md#27--ensayo-final-cronometrado--2511)).
+
+## Matriz parcial de Facu (antecedente)
 
 E y M conservan los tamaños del método directo de B, no los del recorrido asistido. En esta matriz, «Pendiente» en una pantalla del guion significa **comparación pendiente post-demo**, aunque se haya recorrido la pantalla en la app. No se hicieron nuevas comparaciones.
 

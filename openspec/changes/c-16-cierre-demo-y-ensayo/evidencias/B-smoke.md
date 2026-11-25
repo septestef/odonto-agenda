@@ -1,6 +1,6 @@
 # Frente B — Evidencia parcial de smoke
 
-**Estado: arranque recuperado; smoke y ensayo final reportados por el operador, con evidencia incompleta. Limpieza final reportada; app detenida.** No se da por cerrado el frente B. Referencias: [guion](../guion-demo.md), [diseño D4/D6/D7](../design.md), [tareas B](../tasks.md), [pendientes](B-pendientes.md).
+**Estado (actualizado 25/11 01:00): 2.3 completo; la reapertura del enlace nuevo quedó acreditada en el ensayo final. 2.4 acreditado con el solapamiento medido. 2.7: ensayo de 11 min 31 s con desvíos declarados. Ver [retoma en la notebook de demo](#retoma-en-la-notebook-de-demo--2411) y [ensayo final](#27--ensayo-final-cronometrado--2511). Pendiente: revisión humana (2.8).** Las secciones siguientes, hasta la retoma, son la evidencia histórica de Facu en su notebook. Referencias: [guion](../guion-demo.md), [diseño D4/D6/D7](../design.md), [tareas B](../tasks.md), [pendientes](B-pendientes.md).
 
 - **Revisión candidata exacta (2.1):** `ff603a30bf822851e55d75d7c1b98c2359f0604d`, HEAD de `chore/c-16-guion-y-verificacion` al preparar esta evidencia; verificada por coordinación. El operador reportó el recorrido sobre el arranque local recuperado descrito abajo.
 - **Fecha/hora y zona:** preflight y primer arranque documentados el 24/11/2026. Horas de turnos en ART (`America/Argentina/Buenos_Aires`); no se informó la hora efectiva del servidor durante el smoke manual ni el margen medido al confirmar las altas online o destino de reprogramación. La medición de navegador de B no sustituye ese dato.
@@ -72,3 +72,86 @@
 - **Ensayo final (reportado):** tras recibir instrucciones para reset limpio, reconstrucción, preparación de P-R, O-C y W, y cronometraje, el operador reportó que completó el ensayo sobre `ff603a3`, separado del smoke. Luego explicitó que no tenía duración exacta, detalles ni evidencia. No se confirma a partir de esas instrucciones un reset intermedio ni resultados por paso. Los **13 min 30 s** del guion son teóricos, no una duración observada.
 - **Detención:** el operador reportó que detuvo `bootRun` con `Ctrl+C`. Coordinación confirmó que no había listener en TCP 8080 y que `pg_isready` en `localhost:5432` aceptaba conexiones. Esto no verifica el contenido del esquema.
 - **Reset final (reportado):** con el script del README y la ruta local de `psql` 19, el operador verificó la base `turnotarde`, el usuario `turnotarde`, loopback local, puerto `5432` y esquema `public`, comprobó el mensaje de éxito y confirmó «Esquema vacío confirmado». B no hizo una consulta SQL directa ni accedió a credenciales. No se volvió a arrancar la app.
+
+## Retoma en la notebook de demo — 24/11
+
+Estefi retomó B en **la notebook donde corre la demo**, con asistencia de Claude Code. Revisión `b248226` de `chore/c-16-guion-y-verificacion`: solo agrega documentación sobre `ff603a3`, que es ancestro, y el diff no toca código ni configuración. Horas en ART (`America/Argentina/Buenos_Aires`). El estado de la notebook de Facu no se trasladó: acá se hizo un reset propio.
+
+**Fuentes.** «Directo» indica que Claude lo observó en HTTP, en Playwright o en el log de la app. «Operador» indica que Estefi lo informó. «Servidor» indica que sale de una consulta SQL de solo lectura que ejecutó Estefi sobre `turno` y `notificacion`, sin columnas de datos personales. No se guardaron nombres reales, emails, teléfonos, tokens ni enlaces de gestión.
+
+### Preparación
+
+| Paso | Observado | Fuente |
+| --- | --- | --- |
+| Destino y app | PostgreSQL 18 aceptaba conexiones en `localhost:5432`, el puerto 8080 estaba libre y no había ningún proceso `java`. | Directo |
+| Reset | `backend/scripts/reiniciar-base-demo.sql`, con la base `turnotarde`, el usuario `turnotarde`, un servidor local y la confirmación `BORRAR`. Resultado: «Reset OK». | Operador |
+| Arranque | 16:43, `SPRING_PROFILES_ACTIVE=demo`, `gradlew bootRun`. Flyway aplicó V2, V3, V9, V900 y V901 («now at version v901»). `Started TurnoTardeApplication` en 6,3 s y «Contraseña de demo aplicada». `/login`, `/reservar/demo` y `/api/public/demo` respondieron 200. | Directo |
+| Línea base pública | Antes de cualquier alta, se guardó una foto de la disponibilidad de las 4 prestaciones del 25 al 27/11. | Directo |
+
+### Márgenes medidos por el servidor (`inicio − creado_en`)
+
+| Ref. | Turno | Inicio | Origen | Margen | Estado final | Resultado |
+| --- | --- | --- | --- | --- | --- | --- |
+| P-C | 12 | 26/11 18:00 Consulta | ONLINE | 49,23 h | CANCELADO por el paciente | Aprobado (> 24 h) |
+| P-R | 13 | 26/11 18:30 Consulta | ONLINE | 49,71 h | CANCELADO por el paciente (reprogramado) | Aprobado |
+| P-R2 | 14, desde el 13 | 27/11 16:00 Consulta | ONLINE | 71,21 h | Después lo canceló la odontóloga en la verificación visual | Aprobado |
+| O-C | 15 | 26/11 19:00 Consulta | ONLINE | 50,19 h | CANCELADO por la odontóloga | Aprobado |
+| W | 16 | 26/11 19:30 Consulta | ONLINE | 50,68 h | RESERVADO | Aprobado |
+| Manual adicional | 17 | 27/11 09:15 Arreglo de caries | MANUAL | 64,33 h | RESERVADO | Alta manual; no acredita la excepción de 24 h |
+| **M** | 18 | **25/11 11:00 Extracción** (11:00–12:00, pegado a la Limpieza manual de las 12:00) | **MANUAL** | **18,00 h** | RESERVADO | **Aprobado: 0 < margen < 24 h** |
+
+Todos los inicios caen en la grilla de 15 min, dentro de la franja, sin solaparse con otros turnos ni con bloqueos. Si no fuera así, la constraint y las reglas habrían rechazado el alta.
+
+### Cierre de los huecos que dejó Facu
+
+| Hueco | Observado | Fuente | Resultado |
+| --- | --- | --- | --- |
+| Franjas originales intactas tras agregar la del sábado | Configuración muestra lunes a viernes 09:00–13:00 y 16:00–20:00, sábado 10:00–11:00 y domingo sin atención. La disponibilidad pública del 25 al 27 solo cambió en los huecos que ocuparon las altas. | Directo | Aprobado |
+| Catálogo original intacto y alta de una prestación de 15 min | Las 4 prestaciones originales no cambiaron. En el recorrido del operador la prestación nueva no llegó a guardarse. Claude la creó desde la sesión local: `POST /api/prestaciones` devolvió 201 y «Control rápido · 15 min · Activa» apareció en la lista y en el perfil público. | Directo y servidor | Aprobado; el alta no la hizo el operador |
+| Bloqueo del sábado 28 | Bloqueo del 28/11 10:00 al 29/11 00:00, sin turnos afectados. La reserva pública del 28 muestra «No hay horarios libres este día». | Directo | Aprobado |
+| Vista pública sin datos de otros pacientes | La selección pública muestra solo prestación, día, horarios, odontóloga y dirección. | Directo | Aprobado |
+| Navegación anterior/siguiente en Semana | La operadora la recorrió («funciona»). Claude también vio la vista Semana y su navegación. | Operador y directo | Aprobado |
+| Cancelación de P-C por enlace | Turno 12 `CANCELADO/PACIENTE` y `CANCELACION ENVIADO` a las 17:02. El 26/11 18:00 volvió a ofrecerse en la reserva pública. La vista de solo lectura de P-C se capturó en C-11. | Servidor y directo | Aprobado |
+| Correo nuevo de P-R2 | `REPROGRAMACION ENVIADO` para el turno 14 y la operadora informó que llegó. La **reapertura del enlace nuevo** no quedó detallada. | Servidor y operador | Recepción aprobada; reapertura pendiente para el ensayo final |
+| Correo y enlace de M | `CONFIRMACION ENVIADO` para el turno 18 a las 17:00. Su enlace abrió la gestión en localhost con «Reservado», «Cambiar horario» y «Cancelar turno». | Servidor y directo | Aprobado |
+| Bandeja o spam | La operadora confirmó, el 25/11, que todos los correos llegaron a la **bandeja de entrada**. | Operador | Aprobado |
+| WhatsApp de W | Se abrió con el texto cargado. **Desvío del guion:** la operadora envió el mensaje a su propio teléfono de prueba. El guion pide no enviarlo en la demo. El botón está en el detalle de Día y de Semana. | Operador y directo | Apertura aprobada; desvío registrado |
+| Fallo de SMTP | No ocurrió: las 15 notificaciones del recorrido quedaron `ENVIADO`. La persistencia ante un fallo de envío sigue cubierta por los IT de A. | Servidor | Sin fallos |
+
+### 2.4 · Concurrencia manual con solapamiento medido
+
+Se hizo aparte del guion, en un hueco que no usa ningún paso: Consulta del 27/11 a las 10:30, con unas 65 h de anticipación. Los dos formularios estaban en **dos contextos de navegador aislados** de Playwright (Chromium), sin sesión ni cookies compartidas, con DNIs ficticios distintos (40990033 y 40990044). El teléfono y el email los cargó la operadora: su propio buzón y un teléfono de prueba. Cada página programó el clic de «Confirmar reserva» para el mismo instante (20:13:47.910 UTC). Los tiempos salen de la Resource Timing API, referidos al primer envío.
+
+| Contexto | Envío del POST | Fin | HTTP | Interfaz |
+| --- | --- | --- | --- | --- |
+| 1 | 0,0 ms | 77,8 ms | **201** | «¡Turno reservado!» |
+| 2 | 0,2 ms | 100,8 ms | **409** | «Ese horario acaba de ser tomado, elegí otro» y «Ya actualizamos los horarios disponibles» |
+
+- **Solapamiento acreditado:** el segundo pedido empezó a los 0,2 ms y el primero terminó a los 77,8 ms, así que estuvieron pendientes al mismo tiempo.
+- **Una sola fila:** en el servidor existe una sola fila con inicio el 27/11 a las 10:30 (turno 20, que se canceló después en la verificación visual). El 10:30 desapareció de la disponibilidad pública. Entre el turno 20 y el turno 22 falta el id 21. Esto es compatible con un INSERT rechazado por la constraint, pero es una inferencia y no se verificó.
+- **Intento descartado:** el primer intento, a las 10:00 (turno 19), devolvió 201 y 409, pero los pedidos no se superpusieron: el segundo salió a los 60 ms, cuando el primero ya había terminado a los 50 ms. No cuenta como prueba de concurrencia.
+- **Prueba automatizada:** [`ReservasConcurrentesApiIT` 10/10 de A](A-arranque-datos-tests.md#suite-final) es la evidencia automatizada y no se volvió a ejecutar. Esta prueba manual no la reemplaza.
+
+## 2.7 · Ensayo final cronometrado — 25/11
+
+Se hizo en la notebook de demo, sobre la revisión `b248226`, después de un reset propio el 24/11 a las 18:02 (Flyway v901; el operador confirmó el reset). Los turnos de preparación (P-R, O-C y W, ids 12 a 14) se cargaron fuera del cronómetro, el 24/11 entre las 18:08 y las 18:10. La notebook se suspendió y la app se cayó; Claude la volvió a levantar el 25/11 a las 00:34 sin reset, y los datos de preparación se conservaron. El ensayo transcurrió entre las 00:46 y las 00:58 ART.
+
+- **Duración informada por el operador: 11 min 31 s**, del login al logout con la redirección. Está **dentro del rango de 10 a 15 minutos**. Los 13 min 30 s del guion son teóricos.
+- **Desvío declarado por el operador:** se confundió entre P-C y P-R. Reprogramó primero la reserva en vivo, la canceló y repitió el flujo con altas nuevas. El turno de preparación P-R (id 12, 26/11 18:30) quedó sin usar. La duración incluye esos reintentos, así que **no es un recorrido limpio del guion**. Sí recorre todos sus pasos.
+
+| Paso | Evidencia (servidor salvo que se indique otra fuente) | Resultado |
+| --- | --- | --- |
+| 1 · Login | El operador inició el cronómetro al iniciar sesión. | Aprobado (reportado) |
+| 2 · Configuración | Franja del sábado de 10:00 a 11:00 agregada, y las de lunes a viernes sin cambios. Prestación «Control Rápido» de 15 min creada y visible en el perfil público. Bloqueo del 28/11 de 10:00 a 12:00; el 28 no ofrece horarios. | Aprobado |
+| 3 · Reserva online | Id 15: 26/11 18:00, `ONLINE`, margen de 41,18 h. Id 17: 26/11 18:00, Control Rápido, 41,12 h. Id 18: 26/11 18:00, 41,09 h. | Aprobado (> 24 h) |
+| 4 · Correo | `CONFIRMACION ENVIADO` para los ids 15, 17 y 18. El operador confirmó que llegaron a la **bandeja de entrada**. | Aprobado |
+| 5 · Gestión | Cancelación por el paciente: ids 17 y 15, este último cancelado al reprogramarse. Reprogramaciones: del 15 al 16 y del 18 al 19 (27/11 16:00, margen de 63 h), ambas con `REPROGRAMACION ENVIADO`. **El id 16 lo canceló el PACIENTE**, lo que solo es posible con el **enlace nuevo del sucesor**: queda acreditada la reapertura del enlace reprogramado, que era el hueco pendiente de 2.3. | Aprobado |
+| 6 · Agenda | El operador la recorrió. Las vistas Día y Semana se cotejaron en 2.6. | Aprobado (reportado) |
+| 7 · Cancelación por la odontóloga | Id 13 (O-C, 26/11 19:00) en `CANCELADO/ODONTOLOGO` y `CANCELACION ENVIADO` a las 00:55. | Aprobado |
+| 8 · WhatsApp | W (id 14, 26/11 19:30) sigue `RESERVADO`. El operador informó que «funciona», sin más detalle. | Aprobado (reportado) |
+| 9 · Turno manual | Id 20: **25/11 16:00, `MANUAL`, margen de 15,05 h**, con `CONFIRMACION ENVIADO`. | Aprobado (0 < margen < 24 h) |
+| 10 · Logout | El operador paró el cronómetro con la redirección al login. | Aprobado (reportado) |
+
+- **Correo:** las 12 notificaciones del ensayo quedaron `ENVIADO`, sin errores de SMTP.
+- **Log de la app:** solo hay 2 `ClientAbortException`, que son conexiones cortadas por el navegador y no fallos de la app.
+- **Limpieza:** antes de la demo hace falta un reset y volver a preparar P-R, O-C y W, porque el estado actual tiene turnos del ensayo.

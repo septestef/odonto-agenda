@@ -1,6 +1,8 @@
 # Frente B — Traspaso y criterios de cierre
 
-**Estado: OpenSpec 13/18 (`spec-driven`).** En [tareas B](../tasks.md#b--guion-smoke-y-verificación-visual-facu) solo están completas **2.1, 2.2 y 2.5**. Este traspaso de trabajo no es la entrega para aceptación final.
+> **Superado el 25/11:** Estefi retomó B en la notebook de demo y cerró estos pendientes. Ver la [retoma y el ensayo final](B-smoke.md#retoma-en-la-notebook-de-demo--2411) y la [matriz completa](B-visual.md#matriz-completa-2411--26). Este archivo queda como registro del traspaso.
+
+**Estado al traspaso: OpenSpec 13/18 (`spec-driven`).** En [tareas B](../tasks.md#b--guion-smoke-y-verificación-visual-facu) solo están completas **2.1, 2.2 y 2.5**. Este traspaso de trabajo no es la entrega para aceptación final.
 
 ## Revisión y fuentes de evidencia
 
